@@ -1,0 +1,2716 @@
+// *-*- c -*-******************************************************************
+// *
+// *  Copyright Freescale 2013, All rights reserved.
+// *  Copyright NXP 2017, All rights reserved.
+// * 
+// *  SPDX-License-Identifier: BSD-3-Clause
+// *
+// ****************************************************************************
+// ** \addtogroup IPUS_Matrix
+// *  @{
+// ****************************************************************************
+// ** 
+// *  
+// *  \file      IPUS_Accelerators.adl
+// *  \author    Stephan Herrmann
+// *  \date      \$Date: 2006/09/15 10:50:49 $
+// *
+// *  \internal
+// *   language  ADL
+// *   $Id: fsl_header.el,v 1.1 2006/09/15 10:50:49 norberts Exp $
+// ****************************************************************************
+
+#include "IPUS_Defines.h"
+
+define (arch = IPUS_Accelerators) {
+
+  // ***********************************************************************
+  // acceleratore recomputation functions
+  // ***********************************************************************
+#ifndef MAKEDOC
+#ifndef ACC_UPDATED_ON_READ
+  void tree_recompute() { // according to CONFADDT
+    int addt;
+    int saddt;
+    int sthres;
+    int scale;
+    int shift;
+    int product;
+    int clipped;
+
+    //if (I_DELAY_UPDATE == 1) {
+    //  I_DELAY_UPDATE=0;
+    //  return;
+    //}
+
+    if (I_ACC_CHANGED == 0) {
+      return;
+    }
+
+#ifdef LOG_MORE
+    info(1,"I_ACC_CHANGED = ",I_ACC_CHANGED);
+    info(1,"I_ADDT_SENSE = ",I_ADDT_SENSE);
+    info(1,"ADDT Valid = ",(I_ACC_CHANGED & I_ADDT_SENSE));
+    info(1,"I_SORT_SENSE = ",I_SORT_SENSE);
+    info(1,"SORT Valid = ",(I_ACC_CHANGED & I_SORT_SENSE));
+#endif
+    if (((I_ACC_CHANGED  & I_ADDT_SENSE) == 0) &&
+        ((I_ACC_CHANGED  & I_SORT_SENSE) == 0)) {
+      I_ACC_CHANGED=0;
+      return;
+    }
+
+#ifdef ACC_READ_ONLY
+    I_ALLOW_UPDATE=1;
+#endif
+
+    if ((I_ADDT_EN.uint32() && I_ADDT_SENSE.uint32())!=0) {
+
+
+      // *************************
+      // Adder Tree
+      addt=I_ADDT.int32();
+      // sum
+      SUM=addt& 0xffff;
+
+      // clipped sum
+      if (CONFADDT.SGN==1) { // signed
+        if (addt > SMAX16) {   // positive overflow
+          clipped=SMAX16;
+        }
+        else if (addt<SMIN16) {// negativeoverflow
+          clipped=SMIN16;
+        }
+        else { // no overflow
+          clipped=addt;
+        }
+      }
+      else { // unsigned
+        if (addt > UMAX16) {   // positive overflow
+          clipped=UMAX16;
+        }
+        else if (addt<UMIN16) {// negative overflow
+          clipped=UMIN16;
+        }
+        else { // no overflow
+          clipped=addt;
+        }
+      }
+
+      // thresholded sum
+      if (CONFADDT.SGN==1) { // signed
+        sthres = CONFTHRES.int32();
+        saddt  = clipped;
+      }
+      else {
+        sthres = CONFTHRES.uint32();
+        saddt  = clipped;
+      }
+      if ((sthres > saddt) && CONFADDT.THR == 1) { //kill lower value
+        THRESHOLD = sthres;
+      }
+      else if ((sthres < saddt) && CONFADDT.THR == 0) {
+        THRESHOLD = sthres;
+      }
+      else {
+        THRESHOLD = saddt;
+      }
+    
+      // scaled sum
+      scale = CONFADDT.SCALE.uint32();
+      shift = CONFADDT.SHR.uint32();
+      shift = shift + 6;
+      product = addt * scale;
+
+      CLIPPED = clipped ;
+#ifdef LOG_MORE
+      info(1,"PRODUCT = ",product);
+#endif
+      SCALED= (product >> shift);
+    }
+
+
+    // *************************
+    // Sorting Tree
+
+    if ((I_SORT_EN.uint32() && I_SORT_SENSE.uint32())!=0) {
+
+      bits <16> val;
+      int sval;
+      int min,max,median;
+      int argmin,argmax;
+      int cnt;
+      int s[10];         // 17(32) bit signed values
+      int i,j,k,l;
+      int sequence[9]={4,3,5,1,7,0,2,6,8};
+
+      s[0]=s[1]=s[2]=s[3]=s[4]=s[5]=s[6]=s[7]=s[8]=0xFFFE8000;
+      cnt = 0;
+      if (CONFSORT.SGN==1) { // signed
+        median=0xFFFE8000;  // minimum signed value
+        min=0x00017FFF;     // maximum signed value
+        max=0XFFFE8000;     // minimum signed value
+      }
+      else {
+        median=0x0000;      // minimum unsigned value
+        min=0x0001FFFF;     // maximum unsigned value
+        max=0xFFFE0000;     // minimum unsigned value
+      }
+      argmin=argmax=0xFFFF;
+
+      for (j=0; j<9; j++) {
+        i=sequence[j];
+        //i=j;
+        if ((MASK(i) | CONFSORT(2)) == 1) { // use value
+          switch (CONFSORT(1,0).uint32()) {
+          case 1:
+            val=INA(i); break;
+          case 2:
+            val=WW(i); break;
+          case 3:
+#ifdef HASINB
+            val=INB(i);
+#else
+            val=0;
+#endif
+            break;
+          default:
+            val=W(i); break;
+          }
+
+          if (CONFSORT(3)==1) { // signed
+            sval=val.int32();
+          }
+          else {
+            sval=val.uint32();
+          }
+
+          cnt=cnt+1;
+          l=j;
+          s[9]=sval;
+
+          // find position in the list
+          for (k=0; k<j; k++) {
+            if (s[k]<s[9]) {
+              l=k;
+              break;
+            }
+          }
+
+          // move existing values in the list
+          for (k=j-1; k>=l; k--) {
+            s[k+1]=s[k];
+          }
+          //add current value into free slot
+          s[l]=s[9];
+
+          // find minimum
+          if (min>s[9]) {
+            min=s[9];
+            argmin=i;
+          }
+
+          // find maximum
+          if (max<s[9]) {
+            max=s[9];
+            argmax=i;
+          }
+        }
+      }
+      switch (cnt) {
+      case 0: median = 0; break;
+      case 1: median = s[0]; break;
+      case 2: median = (s[0]+s[1]+1)>>1; break;  // mean value
+      case 3: median = s[1]; break;
+      case 4: median = (s[1]+s[2]+1)>>1; break;
+      case 5: median = s[2]; break;
+      case 6: median = (s[2]+s[3]+1)>>1; break;
+      case 7: median = s[3]; break;
+      case 8: median = (s[3]+s[4]+1)>>1; break;
+      default: median = s[4]; break;
+      }
+      //return s[4];
+      SORTMEDIAN=median;
+      SORTMIN=min;
+      ARGMIN=argmin;
+      SORTMAX=max;
+      ARGMAX=argmax;
+    }
+
+    // clear signals
+    I_ACC_CHANGED=0;
+#ifdef ACC_READ_ONLY
+    I_ALLOW_UPDATE=0;
+#endif
+  }
+#endif
+#endif // MAKEDOC
+
+
+  // ***********************************************************************
+  // Registers
+  // ***********************************************************************
+
+#ifndef MAKEDOC
+#ifndef ACC_UPDATED_ON_READ
+  define (reg=I_ACC_CHANGED) {
+    """
+    Internal registers:
+    Indicating which input has changed so that ADDT / SORTTREE
+    need recomputation
+
+    + bit 0: W
+
+    + bit 1: INA
+
+    + bit 2: WW
+
+    + bit 3: INB
+
+    + bit 4: MASK
+
+    + bit 5: CONFADDT
+
+    + bit 6: CONFSORT
+    """;
+    width=7;
+    reset=0;
+  }
+
+  define (reg=I_ADDT_SENSE) {
+    """
+    Internal registers:
+    Mask indicating which input will trigger ADDT/SORT recomputation
+
+    + bit 0: W
+
+    + bit 1: INA
+
+    + bit 2: WW
+
+    + bit 3: INB
+
+    + bit 4: MASK
+
+    + bit 5: CONFADDT
+    """;
+    width=7;
+    reset=0x31;
+  }
+
+  define (reg=I_SORT_SENSE) {
+    """
+    Internal registers:
+    Mask indicating which input will trigger ADDT/SORT recomputation
+
+    + bit 0: W
+
+    + bit 1: INA
+
+    + bit 2: WW
+
+    + bit 3: INB
+
+    + bit 4: MASK
+
+    + bit 6: CONFSORT
+    """;
+    width=7;
+    reset=0x51;
+  }
+
+
+  define (reg=I_DELAY_UPDATE) {
+    """
+    Internal registers:
+    Show a delayed input update in case of mult result causing an
+    AdderTree/SortingTree recompute and no other stall condition
+
+    + bit 0: no delayed AdderTree/SortingTree update
+
+    + bit 1: delayed AdderTree/SortingTree update after mult
+    """;
+    width=1;
+    reset=0x0;
+  }  
+
+  define (reg=I_DELAY_UPDATE_1) {
+    """
+    Internal registers:
+    Show a delayed input update in case of mult result causing an
+    AdderTree/SortingTree recompute and no other stall condition
+
+    + bit 0: no delayed AdderTree/SortingTree update
+
+    + bit 1: delayed AdderTree/SortingTree update after mult
+    """;
+    width=1;
+    reset=0x0;
+    define (read) {
+      action = { return I_DELAY_UPDATE_1;};
+    }
+  }
+
+#ifdef ACC_READ_ONLY
+  define (reg=I_ALLOW_UPDATE) {
+    """
+    Internal signal:
+    allow HW accelerator read only registers to be written by recompute
+
+    + bit 0: W
+
+
+    """;
+    width  = 1;
+    reset  = 0;
+    //pseudo = true;
+  }
+#endif
+#endif
+#endif // MAKEDOC
+
+  // ***********************************************************************
+  // Matrix ALU  ***********************************************************
+  //define (reg=CONFMXALU) {
+  //  """
+  //  Core register:
+  //  Configuration selecting input to MX ALU
+  //  """;
+  //  width=2;
+  //}
+
+  // ***********************************************************************
+  // Adder Tree  ***********************************************************
+  define (reg=CONFADDT) {
+    """
+    Core register:
+    Configuration selecting input to Adder Tree
+    """;
+    width=16;
+    define (field=SEL) {
+      """
+      Input selection:
+
+      + 0: W
+      + 1: INA
+      + 2: WW
+      + 3: INB
+      """;
+      bits = (1,0);
+    }
+    define (field=IGNRMASK) {
+      """
+      Ignore Mask:
+
+      + 0: apply mask
+      + 1: ignore mask
+      """;
+      bits = (2,2);
+    }
+    define (field=SGN) {
+      """
+      Signed/unsigned mode selection:
+
+      + 0: unsigned
+      + 1: signed
+      """;
+      bits = (3,3);
+    }
+    define (field=THR) {
+      """
+      Select threshold mode:
+
+      + 0: keep lower
+      + 1: keep higher
+      """;
+      bits = (4,4);
+    }
+    define (field=SHR) {
+      """
+      Shift right bits [8:5] after scaling:
+
+      + right shift result by (SHR+6) positions
+      """;
+      bits = (8,5);
+    }
+    define (field=SCALE) {
+      """
+      Scale (multiply) Adder Tree result with SCALE:
+
+      + res = SUM(20:0) * CONFADDT.SCALE) >> CONFADDT.SHR
+      + CONFADDT.SHR = 0 and CONFADDT.SCALE = 0x40 is no scaling
+      """;
+      bits = (15,9);
+    }
+#ifndef MAKEDOC
+#ifndef ACC_UPDATED_ON_READ
+    define (write) {
+      action = func (bits<16> val) {
+        bits<7> sense;
+        CONFADDT=val;
+        
+#ifndef MAKEDOC
+        I_ADDT_EN=1;               // enable adder tree
+#endif
+
+        sense(3,0)=(((int)1)<<(val(1,0).uint32()));    // input select
+        sense(4,4)=~(val(2));       // not ignore mask
+        sense(5,5)=1;               // conf is always on 
+
+        I_ADDT_SENSE=sense;
+
+        I_ACC_CHANGED(5,5)=1;      // conf has changed
+#ifdef LOG_MORE
+        switch (val(1,0).uint32()) {
+        case 0: info(1,"input is W"); break;
+        case 1: info(1,"input is INA"); break;
+        case 2: info(1,"input is WW"); break;
+        default: info(1,"input is INB"); break;
+        }
+
+        if (val(2) == 1) {info(1,"ignore mask");} else {info(1,"apply mask");};
+        if (val(3) == 1) {info(1,"signed");} else {info(1,"unsigned");};
+        if (val(4) == 1) {info(1,"keep higher");} else {info(1,"keep lower");};
+        info(1,"shift right scaled value by bits = 6+ ",val(8,5));
+        info(1,"multiply sum by = ",val(15,9));
+#endif
+#endif
+      };
+    }
+#endif // MAKEDOC
+  }
+
+  define (reg=CONFTHRES) {
+    """
+    Core register:
+    Configuration selecting threshold value for Adder Tree threshold output.
+    The threshold will be done according to CONFADDT.THR
+    """;
+    width=16;
+#ifndef MAKEDOC
+#ifndef ACC_UPDATED_ON_READ
+    define (write) {
+      action = func (bits<16> val) {
+        CONFTHRES=val;
+        
+        I_ACC_CHANGED(5,5)=1;      // conf has changed
+        
+      };
+    }
+#endif
+#endif // MAKEDOC
+  }
+
+#ifndef MAKEDOC
+  define (reg=I_ADDT_EN) {
+    """
+    Internal Core register:
+    Indicates if ADDT is active
+    """;
+    width=1;
+#ifdef POWERSAVE_TREE
+    reset=0;
+#else
+    reset=1;
+#endif
+  }
+#endif // MAKEDOC
+
+  define (reg=I_ADDT) {
+    """
+    Internal Signal:
+    Adder Tree SUM full resolution
+    """;
+    width=21;
+
+#ifndef MAKEDOC
+    define (read) {
+      action = {
+        bits<16> val;
+        int sval;
+
+        int i,sum;
+        sum=0;
+        for (i=0; i<9; i++) {
+          if ((MASK(i) | CONFADDT.IGNRMASK) == 1) { // use value
+            switch (CONFADDT.SEL.uint32()) {
+            case 1:
+              val=INA(i); break;
+            case 2:
+              val=WW(i); break;
+            case 3:
+#ifdef HASINB
+              val=INB(i);
+#else
+              val=0;
+#endif
+              break;
+            default:
+              val=W(i); break;
+            }
+            if (CONFADDT.SGN==1) {
+              sval=val.int32();
+            }
+            else {
+              sval=val.uint32();
+            }
+            sum = sum + sval;
+          }
+        }
+#ifdef LOG_MORE
+        //if(I_DELAY_UPDATE==0)
+        I_ADDT=sum;  // only for displaying in trace
+#endif
+        //if(I_DELAY_UPDATE==0)
+        return sum;
+        //else {
+        // return I_ADDT;
+        //}
+
+      };
+    }
+    define (write) {
+      action = func (bits<21> val) { return; };  // read only combinatorial
+    }
+#endif // MAKEDOC
+  }
+
+  define (reg=SUM) {
+    """
+    Core Register (read only):
+    Adder Tree SUM
+    """;
+    width=16;
+#ifndef MAKEDOC
+#ifdef ACC_UPDATED_ON_READ
+    define (read) {
+      action = {
+        //bits<6>  shift;
+        //shift = CONFADDT(8,5);
+
+#ifdef TESTBENCH
+        I_TB_SUM_FLAG = 1;
+#endif
+        return I_ADDT(15,0);
+        //return I_ADDT.int32() >> shift.uint32();
+      };
+    }
+#endif
+#ifdef ACC_READ_ONLY
+#ifdef TESTBENCH
+    define (read)  {
+      action = { 
+        I_TB_SUM_FLAG = 1;
+        return SUM;
+      };
+    }
+#endif
+    define (write) {
+      action = func (bits<16> val) {
+        if(I_ALLOW_UPDATE==1) {  // allow update from internal recompute
+          SUM=val;
+        }
+      };
+    }
+#endif
+#endif // MAKEDOC
+  }
+
+#ifdef TESTBENCH
+  define (reg=I_TB_SUM_FLAG) {
+    """
+    Internal registers:
+    Used for TB , to flag read action performed by current command
+
+    + bit 0: no read performed 
+
+    + bit 1: read performed 
+    """;
+    width=1;
+    reset=0x0;
+    define (read) {
+      action = {
+        bits<1> flag_return;
+
+        flag_return = I_TB_SUM_FLAG;
+
+        //auto clear the flag to zero 
+        I_TB_SUM_FLAG = 0; 
+
+        return flag_return;
+      };
+    }
+    define (write) {
+      action = func( bits<1> val) {
+        I_TB_SUM_FLAG = val;
+      };
+    }
+  }
+#endif
+
+  define (reg=CLIPPED) {
+    """
+    Core Register (read only):
+    Adder Tree SUM clipped according to signed or unsigned mode
+    """;
+    width=16;
+
+#ifndef MAKEDOC
+#ifdef ACC_UPDATED_ON_READ
+    define (read) {
+      action = {
+        int addt;
+
+        addt=I_ADDT.int32();
+
+        I_TB_CLIPPED_FLAG = 1; // For TB purpose only
+
+        if (CONFADDT.SGN==1) { // signed
+          if (addt > SMAX16) {   // positive overflow
+            return SMAX16;
+          }
+          else if (addt<SMIN16) {// negativeoverflow
+            return SMIN16;
+          }
+        }
+        else { // unsigned
+          if (addt > UMAX16) {   // positive overflow
+            return UMAX16;
+          }
+          else if (addt<UMIN16) {// negativeoverflow
+            return UMIN16;
+          }
+        }
+        // no overflow 
+        return addt & 0xffff;
+      };
+    }
+#endif
+#ifdef ACC_READ_ONLY
+#ifdef TESTBENCH
+    define (read)  {
+      action = { 
+        I_TB_CLIPPED_FLAG = 1;
+        return CLIPPED;
+      };
+    }
+#endif
+    define (write) {
+      action = func (bits<16> val) {
+        if(I_ALLOW_UPDATE==1) {  // allow update from internal recompute
+          CLIPPED=val;
+        }
+      };
+    }
+#endif
+#endif // MAKEDOC
+  }
+
+
+#ifdef TESTBENCH
+  define (reg=I_TB_CLIPPED_FLAG) {
+    """
+    Internal registers:
+    Used for TB , to flag read action performed by current command
+
+    + bit 0: no read performed 
+
+    + bit 1: read performed 
+    """;
+    width=1;
+    reset=0x0;
+    define (read) {
+      action = {
+        bits<1> flag_return;
+
+        flag_return = I_TB_CLIPPED_FLAG;
+
+        //auto clear the flag to zero 
+        I_TB_CLIPPED_FLAG = 0; 
+
+        return flag_return;
+      };
+    }
+    define (write) {
+      action = func( bits<1> val) {
+        I_TB_CLIPPED_FLAG = val;
+      };
+    }
+  }
+#endif
+
+  define (reg=THRESHOLD) {
+    """
+    Core Register (read only):
+    Adder Tree SUM thresholded according to CONFTHRES,
+    CONFADDT.SGN and CONFADDT.THR
+    """;
+    width=16;
+
+#ifndef MAKEDOC
+#ifdef ACC_UPDATED_ON_READ
+    define (read) {
+      action = {
+        int saddt;
+        int sthres;
+
+#ifdef TESTBENCH
+        I_TB_THRESHOLD_FLAG = 1; // FOR TB PURPOSE ONLY
+#endif
+
+        if (CONFADDT.SGN==1) { // signed
+          sthres = CONFTHRES.int32();
+          saddt  = CLIPPED.int32();
+        }
+        else {
+          sthres = CONFTHRES.uint32();
+          saddt  = CLIPPED.uint32();
+        }
+        if ((sthres > saddt) && CONFADDT.THR == 1) { //kill lower value
+          return sthres;
+        }
+        else if ((sthres < saddt) && CONFADDT.THR == 0) {
+          return sthres;
+        }
+        else {
+          return saddt & 0xffff;
+        }
+      };
+    }
+#endif
+#ifdef ACC_READ_ONLY
+#ifdef TESTBENCH
+    define (read)  {
+      action = { 
+        I_TB_THRESHOLD_FLAG = 1;
+        return THRESHOLD;
+      };
+    }
+#endif
+    define (write) {
+      action = func (bits<16> val) {
+        if(I_ALLOW_UPDATE==1) {  // allow update from internal recompute
+          THRESHOLD=val;
+        }
+      };  // read only combinatorial
+    }
+#endif
+#endif // MAKEDOC
+  }
+
+
+#ifdef TESTBENCH
+  define (reg=I_TB_THRESHOLD_FLAG) {
+    """
+    Internal registers:
+    Used for TB , to flag read action performed by current command
+
+    + bit 0: no read performed 
+
+    + bit 1: read performed 
+    """;
+    width=1;
+    reset=0x0;
+    define (read) {
+      action = {
+        bits<1> flag_return;
+
+        flag_return = I_TB_THRESHOLD_FLAG;
+
+        //auto clear the flag to zero 
+        I_TB_THRESHOLD_FLAG = 0; 
+
+        return flag_return;
+      };
+    }
+    define (write) {
+      action = func( bits<1> val) {
+        I_TB_THRESHOLD_FLAG = val;
+      };
+    }
+  }
+#endif
+
+  define (reg=SCALED) {
+    """
+    Core Register (read only):
+    Adder Tree SUM scaled according to configured scale and scale-shift
+    """;
+    width=16;
+
+#ifndef MAKEDOC
+#ifdef ACC_UPDATED_ON_READ
+    define (read) {
+      action = {
+        int addt;
+        int scale;
+        int shift;
+        int product;
+
+        addt  = I_ADDT.int32();
+        scale = CONFADDT.SCALE.uint32();
+        shift = CONFADDT.SHR.uint32();
+        shift = shift + 6;
+        product = addt * scale;
+
+#ifdef LOG_MORE
+        info(1,"PRODUCT = ",product);
+#endif
+#ifdef TESTBENCH
+        I_TB_SCALED_FLAG = 1;
+#endif
+        return (product >> shift) & 0xffff;
+      };
+    }
+#endif
+#ifdef ACC_READ_ONLY
+#ifdef TESTBENCH
+    define (read)  {
+      action = { 
+        I_TB_SCALED_FLAG = 1;
+        return SCALED;
+      };
+    }
+#endif
+    define (write) {
+      action = func (bits<16> val) { 
+        if(I_ALLOW_UPDATE==1) {  // allow update from internal recompute
+          SCALED=val;
+        }
+      };  // read only combinatorial
+    }
+#endif
+#endif // MAKEDOC
+  }
+
+#ifdef TESTBENCH
+  define (reg=I_TB_SCALED_FLAG) {
+    """
+    Internal registers:
+    Used for TB , to flag read action performed by current command
+
+    + bit 0: no read performed 
+
+    + bit 1: read performed 
+    """;
+    width=1;
+    reset=0x0;
+    define (read) {
+      action = {
+        bits<1> flag_return;
+
+        flag_return = I_TB_SCALED_FLAG;
+
+        //auto clear the flag to zero 
+        I_TB_SCALED_FLAG = 0; 
+
+        return flag_return;
+      };
+    }
+    define (write) {
+      action = func( bits<1> val) {
+        I_TB_SCALED_FLAG = val;
+      };
+    }
+  }
+#endif
+
+  // ***********************************************************************
+  // Sorting Tree  *********************************************************
+  define (reg=CONFSORT) {
+    """
+    Core register:
+    Configuration selecting input to Sorting Tree
+    """;
+    width=4;
+    define (field=SEL) {
+      """
+      Input selection:
+
+      + 0: W
+      + 1: INA
+      + 2: WW
+      + 3: INB
+      """;
+      bits = (1,0);
+    }
+    define (field=IGNRMASK) {
+      """
+      Ignore Mask:
+
+      + 0: apply mask
+      + 1: ignore mask
+      """;
+      bits = (2,2);
+    }
+    define (field=SGN) {
+      """
+      Signed/unsigned mode selection:
+
+      + 0: unsigned
+      + 1: signed
+      """;
+      bits = (3,3);
+    }
+#ifndef MAKEDOC
+#ifndef ACC_UPDATED_ON_READ
+    define (write) {
+      action = func (bits<4> val) {
+        bits<7> sense;
+        CONFSORT=val;
+        
+#ifndef MAKEDOC
+        I_SORT_EN=1;               // enable sorting tree
+#endif
+
+        sense(3,0)=(((int)1)<<(val(1,0).uint32()));    // input select
+        sense(4,4)=~(val(2));       // not ignore mask
+        sense(6,6)=1;               // conf is always on 
+
+        I_SORT_SENSE=sense;
+
+        I_ACC_CHANGED(6,6)=1;      // conf has changed
+
+#ifdef LOG_MORE
+        switch (val(1,0).uint32()) {
+        case 0: info(1,"input is W"); break;
+        case 1: info(1,"input is INA"); break;
+        case 2: info(1,"input is WW"); break;
+        default: info(1,"input is INB"); break;
+        }
+        if (val(2) == 1) {
+          info(1,"ignore mask");
+        } else info(1,"apply mask");
+        if (val(3) == 1) {
+          info(1,"signed");
+        } else info(1,"unsigned");
+#endif
+        
+      };
+    }
+#endif
+#endif // MAKEDOC
+  }
+
+#ifndef MAKEDOC
+  define (reg=I_SORT_EN) {
+    """
+    Internal Core register:
+    Indicates if SORT is active
+    """;
+    width=1;
+#ifdef POWERSAVE_TREE
+    reset=0;
+#else
+    reset=1;
+#endif
+  }
+#endif // MAKEDOC
+
+  define (reg=SORTMIN) {
+    """
+    Core register:
+    Minimum value of adder tree applying MASK according to CONFSORT.IGNRMASK
+    """;
+    width = 16;
+    //pseudo=true;
+#ifndef MAKEDOC
+#ifdef ACC_UPDATED_ON_READ
+    define (read) {
+      action = {
+        bits <16> val;
+        bits <17> sval;
+        bits <17> retval;
+        int i;
+
+        if (CONFSORT(3)==1) {
+          retval=0x7FFF;  // maximum signed value
+        }
+        else {
+          retval=0xFFFF;  // maximum unsigned value
+        }
+        for (i=0; i<9; i++) {
+          if ((MASK(i) | CONFSORT.IGNRMASK) == 1) { // use value
+            switch (CONFSORT.SEL.uint32()) {
+            case 1:
+              val=INA(i); break;
+            case 2:
+              val=WW(i); break;
+            case 3:
+#ifdef HASINB
+              val=INB(i);
+#else
+              val=0;
+#endif
+              break;
+            default:
+              val=W(i); break;
+            }
+            if (CONFSORT.SGN==1) {
+              sval=signExtend(val,17);
+            }
+            else {
+              sval=zeroExtend(val,17);
+            }
+            if (retval.int32() > sval.int32()) retval=sval;
+            // get arg
+          }
+        }
+#ifdef TESTBENCH
+        I_TB_SORTMIN_FLAG = 1;
+#endif
+
+        //if((MASK(0)==0) & (MASK(1)==0) & (MASK(2)==0) & (MASK(3)==0) & (MASK(4)==0) & (MASK(5)==0) & (MASK(6)==0) & (MASK(7)==0)  & (MASK(8)==0)  )
+        //return SORTMIN(15,0);
+        //else
+        return retval(15,0);
+      };
+    }
+#endif
+#ifdef ACC_READ_ONLY
+#ifdef TESTBENCH
+    define (read)  {
+      action = { 
+        I_TB_SORTMIN_FLAG = 1; // TB purpose only
+        return SORTMIN;
+      };
+    }
+#endif
+
+    define (write) {
+      action = func (bits<16> val) { 
+        if(I_ALLOW_UPDATE==1) {  // allow update from internal recompute
+          SORTMIN=val;
+        }
+      };  // read only combinatorial
+    }
+#endif
+#endif // MAKEDOC
+  }
+
+#ifdef TESTBENCH
+  define (reg=I_TB_SORTMIN_FLAG) {
+    """
+    Internal registers:
+    Used for TB , to flag read action performed by current command
+
+    + bit 0: no read performed 
+
+    + bit 1: read performed 
+    """;
+    width=1;
+    reset=0x0;
+    define (read) {
+      action = {
+        bits<1> flag_return;
+
+        flag_return = I_TB_SORTMIN_FLAG;
+
+        //auto clear the flag to zero 
+        I_TB_SORTMIN_FLAG = 0; 
+
+        return flag_return;
+      };
+    }
+    define (write) {
+      action = func( bits<1> val) {
+        I_TB_SORTMIN_FLAG = val;
+      };
+    }
+  }
+#endif
+
+  define (reg=SORTMAX) {
+    """
+    Core register:
+    Maximum value of sorting tree applying MASK according to CONFSORT.IGNRMASK
+    """;
+    width = 16;
+    //pseudo=true;
+#ifndef MAKEDOC
+#ifdef ACC_UPDATED_ON_READ
+    define (read) {
+      action = {
+        bits <16> val;
+        bits <17> sval;
+        bits <17> retval;
+        int i;
+
+#ifdef TESTBENCH
+        I_TB_SORTMAX_FLAG = 1;
+#endif
+        if (CONFSORT.SGN==1) {
+          retval=0x18000;  // minimum signed value
+        }
+        else {
+          retval=0x0000;  // minimum unsigned value
+        }
+        for (i=0; i<9; i++) {
+          if ((MASK(i) | CONFSORT.IGNRMASK) == 1) { // use value
+            switch (CONFSORT.SEL.uint32()) {
+            case 1:
+              val=INA(i); break;
+            case 2:
+              val=WW(i); break;
+            case 3:
+#ifdef HASINB
+              val=INB(i);
+#else
+              val=0;
+#endif
+              break;
+            default:
+              val=W(i); break;
+            }
+            if (CONFSORT.SGN==1) {
+              sval=signExtend(val,17);
+            }
+            else {
+              sval=zeroExtend(val,17);
+            }
+            if (retval.int32() < sval.int32()) retval=sval;
+            // get arg
+          }
+        }
+        return retval(15,0);
+      };
+    }
+#endif
+#ifdef ACC_READ_ONLY
+#ifdef TESTBENCH
+    define (read)  {
+      action = { 
+        I_TB_SORTMAX_FLAG = 1;
+        return SORTMAX;
+      };
+    }
+#endif
+
+    define (write) {
+      action = func (bits<16> val) { 
+        if(I_ALLOW_UPDATE==1) {  // allow update from internal recompute
+          SORTMAX=val;
+        }
+      };  // read only combinatorial
+    }
+#endif
+#endif // MAKEDOC
+  }
+
+#ifdef TESTBENCH
+  define (reg=I_TB_SORTMAX_FLAG) {
+    """
+    Internal registers:
+    Used for TB , to flag read action performed by current command
+
+    + bit 0: no read performed 
+
+    + bit 1: read performed 
+    """;
+    width=1;
+    reset=0x0;
+    define (read) {
+      action = {
+        bits<1> flag_return;
+
+        flag_return = I_TB_SORTMAX_FLAG;
+
+        //auto clear the flag to zero 
+        I_TB_SORTMAX_FLAG = 0; 
+
+        return flag_return;
+      };
+    }
+    define (write) {
+      action = func( bits<1> val) {
+        I_TB_SORTMAX_FLAG = val;
+      };
+    }
+  }
+#endif
+
+  define (reg=SORTMEDIAN) {
+    """
+    Core register:
+    Median value of sorting tree applying MASK according to CONFSORT.IGNRMASK
+    """;
+    width = 16;
+    //pseudo=true;
+#ifndef MAKEDOC
+#ifdef ACC_UPDATED_ON_READ
+    define (read) {
+      action = {
+        bits <16> val;
+        int sval;
+        int median;
+        int cnt;
+        int s[10];         // 17(32) bit signed values
+        int i,j,k;
+
+        s[0]=s[1]=s[2]=s[3]=s[4]=s[5]=s[6]=s[7]=s[8]=-1;
+        cnt = 0;
+        if (CONFSORT.SGN==1) {
+          median=0xFFFF8000;  // minimum signed value
+        }
+        else {
+          median=0x0000;  // minimum unsigned value
+        }
+        for (i=0; i<9; i++) {
+          if ((MASK(i) | CONFSORT.IGNRMASK) == 1) { // use value
+            switch (CONFSORT.SEL.uint32()) {
+            case 1:
+              val=INA(i); break;
+            case 2:
+              val=WW(i); break;
+            case 3:
+#ifdef HASINB
+              val=INB(i);
+#else
+              val=0;
+#endif
+              break;
+            default:
+              val=W(i); break;
+            }
+            if (CONFSORT.SGN==1) {
+              sval=val.int32();
+            }
+            else {
+              sval=val.uint32();
+            }
+            cnt=cnt+1;
+            k=i;
+            s[9]=sval;
+
+            // find position in the list
+            for (j=0; j<i; j++) {
+              if (s[j]<s[9]) {
+                k=j;
+                break;
+              }
+            }
+            // move existing values in the list
+            for (j=i-1; j>=k; j--) {
+              s[j+1]=s[j];
+            }
+            //add current value into free slot
+            s[k]=s[9];
+          }
+        }
+        switch (cnt) {
+          case 0: median = 0; break;
+          case 1: median = s[0]; break;
+          case 2: median = (s[0]+s[1]+1)>>1; break;  // mean value
+          case 3: median = s[1]; break;
+          case 4: median = (s[1]+s[2]+1)>>1; break;
+          case 5: median = s[2]; break;
+          case 6: median = (s[2]+s[3]+1)>>1; break;
+          case 7: median = s[3]; break;
+          case 8: median = (s[3]+s[4]+1)>>1; break;
+          default: median = s[4]; break;
+        }
+        //return s[4];
+#ifdef TESTBENCH
+        I_TB_SORTMEDIAN_FLAG = 1;
+#endif
+        return median;
+      };
+    }
+#endif
+#ifdef ACC_READ_ONLY
+#ifdef TESTBENCH
+    define (read)  {
+      action = { 
+        I_TB_SORTMEDIAN_FLAG = 1;
+        return SORTMEDIAN;
+      };
+    }
+#endif
+    define (write) {
+      action = func (bits<16> val) { 
+        if(I_ALLOW_UPDATE==1) {  // allow update from internal recompute
+          SORTMEDIAN=val;
+        }
+      };  // read only combinatorial
+    }
+#endif
+#endif // MAKEDOC
+  }
+
+#ifdef TESTBENCH
+  define (reg=I_TB_SORTMEDIAN_FLAG) {
+    """
+    Internal registers:
+    Used for TB , to flag read action performed by current command
+
+    + bit 0: no read performed 
+
+    + bit 1: read performed 
+    """;
+    width=1;
+    reset=0x0;
+    define (read) {
+      action = {
+        bits<1> flag_return;
+
+        flag_return = I_TB_SORTMEDIAN_FLAG;
+
+        //auto clear the flag to zero 
+        I_TB_SORTMEDIAN_FLAG = 0; 
+
+        return flag_return;
+      };
+    }
+    define (write) {
+      action = func( bits<1> val) {
+        I_TB_SORTMEDIAN_FLAG = val;
+      };
+    }
+  }
+#endif
+
+  define (reg=ARGMIN) {
+    """
+    Core register:
+    Position of minimum value of sorting tree, 
+    applying MASK according to CONFSORT.IGNRMASK
+    """;
+    width = 16;
+    reset = 0xFFFF;
+    //pseudo=true;
+#ifndef MAKEDOC
+#ifdef ACC_UPDATED_ON_READ
+    define (read) {
+      action = {
+        bits <16> argmin;
+        bits <16> val;
+        bits <17> sval;
+        bits <17> retval;
+        int i,j;
+        int sequence[9]={4,3,5,1,7,0,2,6,8};
+
+        if (CONFSORT.SGN==1) {
+          retval=0x7FFF;  // maximum signed value
+        }
+        else {
+          retval=0xFFFF;  // maximum unsigned value
+        }
+        argmin=0XFFFF;
+        for (j=0; j<9; j++) {
+          i=sequence[j];
+          if ((MASK(i) | CONFSORT.IGNRMASK) == 1) { // use value
+            switch (CONFSORT.SEL.uint32()) {
+            case 1:
+              val=INA(i); break;
+            case 2:
+              val=WW(i); break;
+            case 3:
+#ifdef HASINB
+              val=INB(i);
+#else
+              val=0;
+#endif
+              break;
+            default:
+              val=W(i); break;
+            }
+            if (CONFSORT.SGN==1) {
+              sval=signExtend(val,17);
+            }
+            else {
+              sval=zeroExtend(val,17);
+            }
+            if (retval.int32() > sval.int32()) {
+              retval=sval;
+              argmin=i;
+            }
+          }
+        }
+#ifdef TESTBENCH
+        I_TB_ARGMIN_FLAG = 1;
+#endif
+        return argmin;
+      };
+    }
+#endif
+#ifdef ACC_READ_ONLY
+#ifdef TESTBENCH
+    define (read)  {
+      action = { 
+        I_TB_ARGMIN_FLAG = 1;
+        return ARGMIN;
+      };
+    }
+#endif
+    define (write) {
+      action = func (bits<16> val) { 
+        if(I_ALLOW_UPDATE==1) {  // allow update from internal recompute
+          ARGMIN=val;
+        }
+      };  // read only combinatorial
+    }
+#endif
+#endif // MAKEDOC
+  }
+
+#ifdef TESTBENCH
+  define (reg=I_TB_ARGMIN_FLAG) {
+    """
+    Internal registers:
+    Used for TB , to flag read action performed by current command
+
+    + bit 0: no read performed 
+
+    + bit 1: read performed 
+    """;
+    width=1;
+    reset=0x0;
+    define (read) {
+      action = {
+        bits<1> flag_return;
+
+        flag_return = I_TB_ARGMIN_FLAG;
+
+        //auto clear the flag to zero 
+        I_TB_ARGMIN_FLAG = 0; 
+
+        return flag_return;
+      };
+    }
+    define (write) {
+      action = func( bits<1> val) {
+        I_TB_ARGMIN_FLAG = val;
+      };
+    }
+  }
+#endif
+
+  define (reg=ARGMAX) {
+    """
+    Core register:
+    position of maximum value of sorting tree,
+    applyind MASK according to CONFSORT.IGNRMASK
+    """;
+    width = 16;
+    reset = 0xFFFF;
+    //pseudo=true;
+#ifndef MAKEDOC
+#ifdef ACC_UPDATED_ON_READ
+    define (read) {
+      action = {
+        bits <16> argmax;
+        bits <16> val;
+        bits <17> sval;
+        bits <17> retval;
+        int i,j;
+        int sequence[9]={4,3,5,1,7,0,2,6,8};
+
+        if (CONFSORT.SGN==1) {
+          retval=0x18000;  // minimum signed value
+        }
+        else {
+          retval=0x0000;  // minimum unsigned value
+        }
+        argmax=0XFFFF;
+        for (i=0; i<9; i++) {
+          i=sequence[j];
+          if ((MASK(i) | CONFSORT.IGNRMASK) == 1) { // use value
+            switch (CONFSORT.SEL.uint32()) {
+            case 1:
+              val=INA(i); break;
+            case 2:
+              val=WW(i); break;
+            case 3:
+#ifdef HASINB
+              val=INB(i);
+#else
+              val=0;
+#endif
+              break;
+            default:
+              val=W(i); break;
+            }
+            if (CONFSORT.SGN==1) {
+              sval=signExtend(val,17);
+            }
+            else {
+              sval=zeroExtend(val,17);
+            }
+            if (retval.int32() <= sval.int32()) {
+              retval=sval;
+              argmax=i;
+            }
+          }
+        }
+#ifdef TESTBENCH
+        I_TB_ARGMAX_FLAG = 1;
+#endif
+        return argmax;
+      };
+    }
+#endif
+#ifdef ACC_READ_ONLY
+#ifdef TESTBENCH
+    define (read)  {
+      action = { 
+        I_TB_ARGMAX_FLAG = 1;
+        return ARGMAX;
+      };
+    }
+#endif
+    define (write) {
+      action = func (bits<16> val) { 
+        if(I_ALLOW_UPDATE==1) {  // allow update from internal recompute
+          ARGMAX=val;
+        }
+      };  // read only combinatorial
+    }
+#endif
+#endif // MAKEDOC
+  }
+
+#ifdef TESTBENCH
+  define (reg=I_TB_ARGMAX_FLAG) {
+    """
+    Internal registers:
+    Used for TB , to flag read action performed by current command
+
+    + bit 0: no read performed 
+
+    + bit 1: read performed 
+    """;
+    width=1;
+    reset=0x0;
+    define (read) {
+      action = {
+        bits<1> flag_return;
+
+        flag_return = I_TB_ARGMAX_FLAG;
+
+        //auto clear the flag to zero 
+        I_TB_ARGMAX_FLAG = 0; 
+
+        return flag_return;
+      };
+    }
+    define (write) {
+      action = func( bits<1> val) {
+        I_TB_ARGMAX_FLAG = val;
+      };
+    }
+  }
+#endif
+
+  // ***********************************************************************
+  // Sorting Accelerator (best 5 of n)  ************************************
+#ifdef HASBEST5OFN
+  define (reg=CONFBEST) {
+    """
+    Core register:
+    Configuration Register for best 5 of N accelerator.
+    The configuration should be set only at the beginning of the line
+    before any value was added into the best 5 of N
+    """;
+    width = 2;
+    reset = 0;
+    define (field=MIN) {
+      """
+      Min or max is best:
+
+      + 0: max
+      + 1: min
+      """;
+      bits = (0,0);
+    }
+    define (field=SGN) {
+      """
+      Signed/unsigned mode selection:
+
+      + 0: unsigned
+      + 1: signed
+      """;
+      bits = (1,1);
+    }
+#ifdef LOG_MORE
+    define (write) {
+      action = func (bits<2> val) {
+        CONFBEST=val;
+        if (val(0) == 1) {info(1,"keep max");} else {info(1,"keep min");};
+        if (val(1) == 1) {info(1,"signed");} else {info(1,"unsigned");};
+      };
+    }
+#endif
+  }
+
+  define (reg=SOIN) {
+    """
+    Core register:
+    Sorter Input (best 5 of N) Maximum value of sorting tree
+    """;
+    width = 16;
+    //pseudo=true;
+#ifndef MAKEDOC
+    define (read) {
+      action = {
+        return SOIN;
+      };
+    }
+    define (write) {
+      action = func (bits<16> in) {
+        int i,j,k;
+        int    sin;
+        bits <17> so;
+        int    sval;
+        bits <1>  clear;
+
+        I_ALLOW_UPDATE=1;
+        SOIN=in;
+        if (CONFBEST.SGN==1) {    // signed unsigned
+          sin=in.int32();
+        }
+        else {
+          sin=in.uint32();
+        }
+        
+        k=5;
+        for (i=0; i<5; i++) {
+          so=SO(i);
+          clear=so(16);
+          if (clear==1) {
+            k=i;
+            break;
+          }
+          if (CONFBEST.SGN==1) {
+            sval=so(15,0).int32();
+          }
+          else {
+            sval=so(15,0).uint32();
+          }
+          if (CONFBEST.MIN==1) { //min
+            if (sval > sin) {
+              k=i;
+              break;
+            }
+          }
+          else {
+            if (sval < sin) {
+              k=i;
+              break;
+            }
+          }
+        }
+
+        // if sorting in move the next best down by one position
+        for (j=5-2; j>=k; j--) {
+          SO(j+1)=SO(j);
+          SOA(j+1)=SOA(j);
+        }
+
+        // sort in this instance if one of the best 5
+        if (k<5) {
+          SO(k)=zeroExtend(in,17); // also clear the clear bit
+          SOA(k)=SCNT;
+        }
+#ifdef LOG_MORE
+        for (k--; k>=0; k--) {
+          SO(k)=SO(k);
+          SOA(k)=SOA(k);
+        }
+#endif
+        SCNT=SCNT+1;
+        I_ALLOW_UPDATE=0;
+
+        return;
+      };
+    }
+#endif // MAKEDOC
+  }
+
+  define (reg=SCNT) {
+    """
+    Internal register:
+    Count inputs to the Sort engine (best 5 of N).
+    This counter value is stored with the value in the SOA registers
+    """;
+    width = 16;
+    //pseudo=true;
+  }
+
+  define (reg=SOCLEAR) {
+    """
+    Core register:
+    Initialize/Reset the Sort engine (best 5 of N).
+    """;
+    width = 1;
+    //pseudo=true;
+#ifndef MAKEDOC
+    define (read) {
+      action = { return 0; };
+    }
+    define (write) {
+      action = func (bits<1> clear) {
+        bits<17> val;
+
+        I_ALLOW_UPDATE=1;
+        /*if (clear == 1)*/ {
+          switch (CONFBEST.uint32() & 0x3) {
+          case 0:  // max unsigned
+            val=0x10000;
+            break;
+          case 1:  // min unsigned
+            val=0x1FFFF;
+            break;
+          case 2: // max signed
+            val=0x18000;
+            break;
+          default: //min signed
+            val=0x17FFF;
+            break;
+          }
+          SO(0)=val;
+          SO(1)=val;
+          SO(2)=val;
+          SO(3)=val;
+          SO(4)=val;
+          SOA(0)=0xFFFF;
+          SOA(1)=0xFFFF;
+          SOA(2)=0xFFFF;
+          SOA(3)=0xFFFF;
+          SOA(4)=0xFFFF;
+          SCNT=0;
+        }
+        I_ALLOW_UPDATE=0;
+        return;
+      };
+    }
+#endif // MAKEDOC
+  }
+
+  define (regfile=SO) {
+    """
+    Core register:
+    Best values accoriung to CONFBEST.
+    These values are read only
+    """;
+    width = 17;  // bit 17 shows initialization status
+    size  = 5;
+    reset = 0x10000;
+#ifndef MAKEDOC
+#ifdef ACC_READ_ONLY
+#ifdef TESTBENCH
+    define (read)  {
+      action = func(unsigned ix){ 
+        I_TB_SO_FLAG(ix) = 1;
+        return SO(ix);
+      };
+    }
+#endif
+    define (write) {
+      action = func (unsigned index, bits<17> val) {
+        if(I_ALLOW_UPDATE==1) {  // allow update from internal recompute
+          SO(index)=val;
+        }
+      };
+    }
+#endif
+#endif // MAKEDOC
+  }
+
+#ifdef TESTBENCH
+  define (regfile=I_TB_SO_FLAG) {
+    """
+    Internal registers:
+    Used for TB , to flag read action performed by current command
+
+    + bit 0: no read performed 
+
+    + bit 1: read performed 
+    """;
+    width=1;
+    reset=0x0;
+    size  = 5;
+    define (read) {
+      action = func(unsigned ix) {
+        bits<1> flag_return;
+
+        flag_return = I_TB_SO_FLAG(ix);
+
+        //auto clear the flag to zero 
+        I_TB_SO_FLAG(ix) = 0; 
+
+        return flag_return;
+      };
+    }
+    define (write) {
+      action = func(unsigned ix, bits<1> val) {
+        I_TB_SO_FLAG(ix) = val;
+      };
+    }
+  }
+#endif
+
+  define (regfile=SOA) {
+    """
+    Core register:
+    Corrsponding arguments (SCNT) of the best values (SO).
+    These values are read only
+    """;
+    width = 16;
+    size  = 5;
+    reset = 0xFFFF;
+#ifndef MAKEDOC
+#ifdef ACC_READ_ONLY
+#ifdef TESTBENCH
+    define (read)  {
+      action = func(unsigned ix){ 
+        I_TB_SOA_FLAG(ix) = 1;
+        return SOA(ix);
+      };
+    }
+#endif
+    define (write) {
+      action = func (unsigned index, bits<16> val) {
+        if(I_ALLOW_UPDATE==1) {  // allow update from internal recompute
+          SOA(index)=val;
+        }
+      };
+    }
+#endif
+#endif // MAKEDOC
+  }
+#endif
+#ifdef TESTBENCH
+  define (regfile=I_TB_SOA_FLAG) {
+    """
+    Internal registers:
+    Used for TB , to flag read action performed by current command
+
+    + bit 0: no read performed 
+
+    + bit 1: read performed 
+    """;
+    width=1;
+    reset=0x0;
+    size  = 5;
+    define (read) {
+      action = func(unsigned ix) {
+        bits<1> flag_return;
+
+        flag_return = I_TB_SOA_FLAG(ix);
+
+        //auto clear the flag to zero 
+        I_TB_SOA_FLAG(ix) = 0; 
+
+        return flag_return;
+      };
+    }
+    define (write) {
+      action = func(unsigned ix, bits<1> val) {
+        I_TB_SOA_FLAG(ix) = val;
+      };
+    }
+  }
+#endif
+
+
+  // ***********************************************************************
+  // Histogram  ************************************************************
+#ifdef HASHIST
+  define (reg=CONFHIST) {
+    """
+    Core Register:
+    Configuration for HBININCH function
+
+    + HBININCL = (HBININCH>>SHR) + OFFSET
+    """;
+    width = 12;
+    define (field=OFFSET) {
+      """
+      Offset being added to bin value
+      """;
+      bits = (7,0);
+    }
+    define (field=SHR) {
+      """
+      Shift right written value by  by SHR bits before
+      applying OFFSET and selecting bin to be incremented
+      """;
+      bits = (11,8);
+    }
+#ifdef LOG_MORE
+    define (write) {
+      action = func (bits<12> val) {
+        CONFHIST=val;
+        info(1,"offset from value to bin (=startbin) = ",val(7,0));
+        info(1,"shift down value to bin offset from startbin by = ",
+             val(11,8)," bits");
+      };
+    }
+#endif
+
+  }
+
+  define (reg=HBINA) {
+    """
+    Core register:
+    Histogram bin being processed
+    """;
+    width=8;
+  }
+
+  define (reg=HBINADD) {
+    """
+    Core Register:
+    Write: value that is added to the Histogram bin HISTA is pointing to
+    """;
+    width = 16;
+#ifndef MAKEDOC
+    define(read) {
+      action = {
+        return 0;    // STH: keep this as read only?? has a cycle delaywhen reading HIST mem!!
+      };
+    }
+    define(write) {
+      action = func (bits<16> val) {
+        bits<33> binval;
+        if (I_HCL(HBINA) == 1) {
+          binval=val;
+          I_HCL(HBINA,HBINA)=0;
+        }
+        else {
+          binval =
+          concat((bits<1>) 0,
+                 ((Mem(HIST_OFFSET + HBINA.uint32() * 4,4)) & 0xffffffff) ) +
+          concat((bits<17>) 0, val);
+          //binval=Mem(HIST_OFFSET + HBINA.uint32() * 4,4)+val.uint32();
+          // wrong/no overflow when arith is in 32 bits
+        }
+        if (binval(32)==1) {  // clip to max
+          binval=0xffffffff;
+        }
+        if ((binval > H_HISTPEAK) | (I_HCL(256)==1)) {
+          H_HISTPEAK=binval;
+          H_HISTAMAX=HBINA;
+          I_HCL(256,256)=0;
+        }
+        Mem(HIST_OFFSET + HBINA.uint32() * 4,4)=binval(31,0);
+        //HBINA = HIST_OFFSET+HBINA*4;
+      };
+    }
+#endif // MAKEDOC
+  }
+                
+  define (reg=HBININCL) {
+    """
+    Core Register:
+    Increment histogram bin that has the written value
+    """;
+    width = 8;
+    //readable = true;
+    //writable = false; 
+#ifndef MAKEDOC
+    define (read) {
+      action = { return 0;};
+    }
+    define(write) {
+      action = func (bits<8> bin) {
+        bits<33> binval;
+        //bin(15,8) = 0;
+        //HBINA = bin;
+        if (I_HCL(bin) == 1) {
+          binval=1;
+          I_HCL(bin,bin)=0;
+        }
+        else {
+          binval=
+          concat((bits<1>) 0,
+                 ((Mem(HIST_OFFSET + bin.uint32() * 4,4)) & 0xffffffff) ) + 
+          concat((bits<32>) 0,(bits<1>) 1);
+          //binval=Mem(HIST_OFFSET + bin.uint32() * 4,4)+1;
+          // wrong/no overflow when arith is in 32 bits!!
+        }
+        if (binval(32)==1) {  // clip to max
+          binval=0xffffffff;
+        }
+        if (binval > H_HISTPEAK) {
+          H_HISTPEAK=binval;
+          H_HISTAMAX=bin;
+        }
+        if (I_HCL(256)==1) I_HCL(256,256)=0;
+
+        Mem(HIST_OFFSET + bin.uint32() * 4,4)=binval(31,0);
+        //HBINA = HIST_OFFSET+bin*4;
+      };
+    }
+#endif // MAKEDOC
+  }
+
+  define (reg=HBININCH) {
+    """
+    Core Register:
+
+    Shift and offset the written value (by CONFHIST) and
+    increment histogram bin that has the resulting value
+    """;
+    width = 16;
+    //readable = true;
+    //writable = false; 
+#ifndef MAKEDOC
+    define (read) {
+      action = { return 0;};
+    }
+    define(write) {
+      action = func (bits<16> bin) {
+        //bin=bin.uint32() >> 8;//confhist(11,8);
+        //bin = bin & 0xff;   // confhist (7,0);
+        HBININCL=(bin>>CONFHIST.SHR.uint32()) + CONFHIST.OFFSET.uint32();
+        //bin(15,8) = 0;
+        ////HBINA = bin(7,0);
+        //if (I_HCL(bin) == 1) {
+        //  binval=1;
+        //  I_HCL(bin,bin)=0;
+        //}
+        //else {
+        //  binval=Mem(HIST_OFFSET+bin*4,4)+1;
+        //}
+        //if (binval(32)==1) {  // clip to max
+        //  binval=0xffffffff;
+        //}
+        //if (binval > H_HISTPEAK) {
+        //  H_HISTPEAK=binval;
+        //  H_HISTAMAX=bin;
+        //}
+        //Mem(HIST_OFFSET+bin*4,4)=binval;
+      };
+    }
+#endif // MAKEDOC
+  }
+#endif
+
+  // ***********************************************************************
+  // Statistic Engine*******************************************************
+#ifdef HASSTAT
+  define (reg=CONFSTAT) {
+    """
+    Core Register:
+    Configuration for STATISTIC'S engine
+    """;
+    width = 8;
+    define (field=MODE_FIELD0) {
+      """
+      Field 0 accumulation mode model:
+
+      + 0 : maximum
+      + 1 : minimum
+      + 2 : unsigned accumulate
+      + 3 : signed accumulate
+      """;
+      bits = (1,0);
+    }
+    define (field=MODE_FIELD1) {
+      """
+      Field 1 accumulation mode model:
+
+      + 0 : maximum
+      + 1 : minimum
+      + 2 : unsigned accumulate
+      + 3 : signed accumulate
+      """;
+      bits = (3,2);
+    }
+    define (field=MODE_FIELD2) {
+      """
+      Field 2 accumulation mode model:
+
+      + 0 : maximum
+      + 1 : minimum
+      + 2 : unsigned accumulate
+      + 3 : signed accumulate
+      """;
+      bits = (5,4);
+    }
+    define (field=MODE_FIELD3) {
+      """
+      Field 3 accumulation mode model:
+
+      + 0 : maximum
+      + 1 : minimum
+      + 2 : unsigned accumulate
+      + 3 : signed accumulate
+      """;
+      bits = (7,6);
+    }
+#ifdef LOG_MORE
+    define (write) {
+      action = func (bits<8> val) {
+        CONFSTAT=val;
+        switch (val(1,0).uint32()) {
+        case 0: info(1,"field0 collects min"); break;
+        case 1: info(1,"field0 collects max"); break;
+        case 2: info(1,"field0 adds unsigned"); break;
+        default: info(1,"field0 adds signed"); break;
+        }
+        switch (val(3,2).uint32()) {
+        case 0: info(1,"field1 collects min"); break;
+        case 1: info(1,"field1 collects max"); break;
+        case 2: info(1,"field1 adds unsigned"); break;
+        default: info(1,"field1 adds signed"); break;
+        }
+        switch (val(5,4).uint32()) {
+        case 0: info(1,"field2 collects min"); break;
+        case 1: info(1,"field2 collects max"); break;
+        case 2: info(1,"field2 adds unsigned"); break;
+        default: info(1,"field2 adds signed"); break;
+        }
+        switch (val(7,6).uint32()) {
+        case 0: info(1,"field3 collects min"); break;
+        case 1: info(1,"field3 collects max"); break;
+        case 2: info(1,"field3 adds unsigned"); break;
+        default: info(1,"fiel32 adds signed"); break;
+        }
+      };
+    }
+#endif
+  }
+
+  define (reg=SREC) {
+    """
+    Core register:
+    Statistics record being processed
+    """;
+    width=8;
+
+#ifndef MAKEDOC
+    //define(read) {
+    //  action = { return SREC; };
+    //}
+    define(write) {
+      action = func (bits<8> val) {
+
+        bits<32> memval;
+
+
+        //if ((val == SREC) && (I_STAT_NEW_LINE == 0)) {
+        //  return;  // do nothing if the record number did not change
+        //}
+
+        if (I_STAT_DIRTY == 1) {  // write back is needed
+          Mem(STAT_OFFSET + SREC.uint32() * 16    ,4)=I_SF(0);
+          Mem(STAT_OFFSET + SREC.uint32() * 16 + 4,4)=I_SF(1);
+          Mem(STAT_OFFSET + SREC.uint32() * 16 + 8,4)=I_SF(2);
+          Mem(STAT_OFFSET + SREC.uint32() * 16 +12,4)=I_SF(3);
+          I_STAT_DIRTY=0;
+          // done at the end
+          if (I_SCL(SREC) == 1) I_SCL(SREC,SREC)=0;
+          if (I_STAT_NEW_LINE == 1) I_STAT_NEW_LINE=0;
+        };
+
+        if (I_SCL(val)==1) {
+          // STAT_DIRTY is not set so data is not written back automatically
+          //I_STAT_DIRTY=1;
+          
+          // mark record as valid
+          //I_SCL(SREC,SREC)=0;
+          // if not initialized reset to default
+          if (CONFSTAT(1,0) == STAT_OP_MAX) {
+            I_SF(0)=0x80000000;
+            //SFH(0)=0x8000;
+            //SFL(0)=0x0000;
+          }
+          else if (CONFSTAT(1,0) == STAT_OP_MIN) {
+            I_SF(0)=0x7fffffff;
+            //SFH(0)=0x7fff;
+            //SFL(0)=0x7fff;
+          }
+          else {
+            I_SF(0)=0;
+            //SFH(0)=0;
+            //SFL(0)=0;
+          }
+          if (CONFSTAT(3,2) == STAT_OP_MAX) {
+            I_SF(1)=0x80000000;
+            //SFH(1)=0x8000;
+            //SFL(1)=0x0000;
+          }
+          else if (CONFSTAT(3,2) == STAT_OP_MIN) {
+            I_SF(1)=0x7fffffff;
+            //SFH(1)=0x7fff;
+            //SFL(1)=0x7fff;
+          }
+          else {
+            I_SF(1)=0;
+            //SFH(1)=0;
+            //SFL(1)=0;
+          }
+          if (CONFSTAT(5,4) == STAT_OP_MAX) {
+            I_SF(2)=0x80000000;
+            //SFH(2)=0x8000;
+            //SFL(2)=0x0000;
+          }
+          else if (CONFSTAT(5,4) == STAT_OP_MIN) {
+            I_SF(2)=0x7fffffff;
+            //SFH(2)=0x7fff;
+            //SFL(2)=0x7fff;
+          }
+          else {
+            I_SF(2)=0;
+            //SFH(2)=0;
+            //SFL(2)=0;
+          }
+          if (CONFSTAT(7,6) == STAT_OP_MAX) {
+            I_SF(3)=0x80000000;
+            //SFH(3)=0x8000;
+            //SFL(3)=0x0000;
+          }
+          else if (CONFSTAT(7,6) == STAT_OP_MIN) {
+            I_SF(3)=0x7fffffff;
+            //SFH(3)=0x7fff;
+            //SFL(3)=0x7fff;
+          }
+          else {
+            I_SF(3)=0;
+            //SFH(3)=0;
+            //SFL(3)=0;
+          }
+        }
+        // do nothing if the record number did not change
+        else if ((val != SREC) || (I_STAT_NEW_LINE == 1)) {
+          // read record from memory
+          I_SF(0)=Mem(STAT_OFFSET + val.uint32() * 16    ,4);
+          //SFL(0)=val(15,0);
+          //SFH(0)=val(31,16);
+          I_SF(1)=Mem(STAT_OFFSET + val.uint32() * 16 + 4,4);
+          //SFL(1)=val(15,0);
+          //SFH(1)=val(31,16);
+          I_SF(2)=Mem(STAT_OFFSET + val.uint32() * 16 + 8,4);
+          //SFL(2)=val(15,0);
+          //SFH(2)=val(31,16);
+          I_SF(3)=Mem(STAT_OFFSET + val.uint32() * 16 +12,4);
+          //SFL(3)=val(15,0);
+          //SFH(3)=val(31,16);
+        }
+        SREC=val;  // update to new location RTL: if needed in next cycle
+        //if (I_STAT_DIRTY==1) I_STAT_DIRTY=0;
+        if (I_STAT_NEW_LINE == 1) I_STAT_NEW_LINE=0;
+      };
+    }
+#endif // MAKEDOC
+  }
+
+  //define (reg=I_STATA_SET) {
+  //  """
+  //  Internal Signal:
+  //  STAT value is written by updating STATA, don't assert dirty bit
+  //  """;
+  //  width=1;
+  //  reset=0;
+  //}
+
+  define (reg=I_STAT_NEW_LINE) {
+    """
+    Internal Signal:
+    STAT value has not been read in that line,
+    so do a read even if the STATA is the same
+    """;
+    width=1;
+    reset=1;
+  }
+
+  define (reg=I_STAT_DIRTY) {
+    """
+    Internal Register:
+    Statistics fields have been modified since read and need write back
+    """;
+    width=1;
+    reset=0;
+  }
+
+  define (regfile=I_SF) {
+    """
+    Internal Core Register:
+    Statitics field: 32 bit value of concatenating SFH(i) and SFL(i)
+    """;
+    size = 4;
+    width = 32;
+  }
+
+  define (regfile=SFH) {
+    """
+    Core Register:
+    Statitics field: upper 16 bits (read only)
+    """;
+    size = 4;
+    width = 16;
+#ifndef MAKEDOC
+    define(read) {
+      action = func (unsigned field) {
+        return (I_SF(field).uint32() >> 16);
+      };
+    }
+    //define(write) { // sth todo: make writable
+    //  action = func (unsigned field, bits<16> val) { return; };
+    //}
+#endif // MAKEDOC
+  }
+
+  define (regfile=SFL) {
+    """
+    Core Register:
+    Statitics field: lower 16 bit,
+    Writing to the the register will execute the action as specified in CONFSTAT on the
+    high and low word of the field (sfhX,sflX with X = field number)
+    """;
+    size = 4;
+    width = 16;
+#ifndef MAKEDOC
+    pseudo = true;
+    define(read) {
+      action = func (unsigned field){
+        return I_SF(field).uint32() & 0xFFFF;
+      };
+    }
+    define(write) {
+      action = func (unsigned field, bits<16> val) {
+        bits<32> fieldval;
+        bits<32> result;
+        bits<32> op;
+
+        // mark record to be modified and it needs write back
+        if (I_STAT_DIRTY==0) I_STAT_DIRTY=1;
+
+        // get operation type from CONFSTAT and Field value
+        switch (field) {
+        case 0:
+          op=CONFSTAT.MODE_FIELD0;
+          fieldval=I_SF(0);
+          //fieldval=concat(SFH(0),SFL(0));
+          break;
+        case 1:
+          op=CONFSTAT.MODE_FIELD1;
+          fieldval=I_SF(1);
+          //fieldval=concat(SFH(1),SFL(1));
+          break;
+        case 2:
+          op=CONFSTAT.MODE_FIELD2;
+          fieldval=I_SF(2);
+          //fieldval=concat(SFH(2),SFL(2));
+          break;
+        default:
+          op=CONFSTAT.MODE_FIELD3;
+          fieldval=I_SF(3);
+          //fieldval=concat(SFH(3),SFL(3));
+          break;
+        };
+#ifdef LOG_MORE
+        info(1,"SF(",field,") = ",fieldval);
+#endif
+        // execute operation
+        switch ((stat_op_t)op.uint32()) {  // RTL: maybe add pieline stage and
+          // stall condition if next operation is SREC update
+        case STAT_OP_MAX:
+#ifdef LOG_MORE
+          info(1,"OP = MAX");
+#endif
+          result=(fieldval.int32() > val.int32())? fieldval : val.int32();
+          break;
+        case STAT_OP_MIN:
+#ifdef LOG_MORE
+          info(1,"OP = MIN");
+#endif
+          result=(fieldval.int32() < val.int32())? fieldval : val.int32();
+          break;
+        case STAT_OP_UACC:
+#ifdef LOG_MORE
+          info(1,"OP = unsigned accumulate");
+#endif
+          result=fieldval.uint32() + val.uint32();
+          if ((result.int32() >= 0) &&
+              (fieldval.int32() < 0)) result=0xffffffff;  // overflow
+          break;
+        case STAT_OP_SACC:
+#ifdef LOG_MORE
+          info(1,"OP = unsigned accumulate");
+#endif
+          result=fieldval.int32() + val.int32();
+          if ((result.int32() < 0) &&
+              (fieldval.int32() > 0) &&
+              (val.int32() > 0)) result=0x7fffffff;  // positive overflow
+          else if ((result.int32() >= 0) &&
+                   (fieldval.int32() < 0) &&
+                   (val.int32() < 0)) result=0x80000000;  // negative overflow
+          break;
+        };
+
+        // write back result
+        switch (field) {
+        case 0:
+          I_SF(0)= result;
+          //SFL(0)= result(15,0);
+          //SFH(0)= result(31,16);
+          break;
+        case 1:
+          I_SF(1)= result;
+          //SFL(1)= result(15,0);
+          //SFH(1)= result(31,16);
+          break;
+        case 2:
+          I_SF(2)= result;
+          //SFL(2)= result(15,0);
+          //SFH(2)= result(31,16);
+          break;
+        default:
+          I_SF(3)= result;
+          //SFL(3)= result(15,0);
+          //SFH(3)= result(31,16);
+          break;
+        };
+      };
+    }
+#endif // MAKEDOC
+  }
+#endif
+                
+  // ***********************************************************************
+  // LUT  ******************************************************************
+#ifdef HASLUT
+  define (reg=LUTA) {
+    """
+    Core register:
+    Address into Look Up Table
+    """;
+#ifdef LUT4K
+    width = 12;
+#else
+    width = 10;
+#endif
+    reset = 0;
+#ifndef MAKEDOC
+    define (write) {
+      action = func (
+#ifdef LUT4K
+                     bits<12>
+#else
+                     bits<10>
+#endif
+                     val){
+
+        //if ((val == LUTA) && (I_LUT_CLEAR == 0)) {
+        //  return;  // do nothing if the record number did not change
+        //}
+
+        if (I_LUT_DIRTY == 1) {
+          Mem(LUT_OFFSET+LUTA*2,2)=LUT;
+          I_LUT_DIRTY=0;
+          if (I_LUT_CLEAR == 1) I_LUT_CLEAR=0;
+        }
+        if ((val != LUTA) || (I_LUT_CLEAR == 1)) {
+          LUTA=val;
+          //I_ALLOW_UPDATE=1;
+          I_LUTA_SET=1;
+          LUT=Mem(LUT_OFFSET+LUTA*2,2);
+          //I_ALLOW_U_DATE=0;
+          I_LUTA_SET=0;
+          if (I_LUT_CLEAR == 1) I_LUT_CLEAR=0;
+        }
+      };
+    }
+#ifdef TESTBENCH
+    define (read)  {
+      action = { 
+        I_TB_LUTA_FLAG = 1;
+        return LUTA;
+      };
+    }
+#endif
+#endif // MAKEDOC
+  }
+
+#ifdef TESTBENCH
+  define (reg=I_TB_LUTA_FLAG) {
+    """
+    Internal registers:
+    Used for TB , to flag read action performed by current command
+
+    + bit 0: no read performed 
+
+    + bit 1: read performed 
+    """;
+    width=1;
+    reset=0x0;
+    define (read) {
+      action = {
+        bits<1> flag_return;
+
+        flag_return = I_TB_LUTA_FLAG;
+
+        //auto clear the flag to zero 
+        I_TB_LUTA_FLAG = 0; 
+
+        return flag_return;
+      };
+    }
+    define (write) {
+      action = func( bits<1> val) {
+        I_TB_LUTA_FLAG = val;
+      };
+    }
+  }
+#endif
+
+#ifndef MAKEDOC
+  define (reg=I_LUTA_SET) {
+    """
+    Internal Signal:
+    LUT value is written by updating LUTA, don't assert dirty bit
+    """;
+    width=1;
+    reset=0;
+  }
+
+  define (reg=I_LUT_CLEAR) {
+    """
+    Internal Signal:
+    LUT value has not been read, so do a read even if the LUTA is the same
+    """;
+    width=1;
+    reset=1;
+  }
+
+  define (reg=I_LUT_DIRTY) {
+    """
+    Internal Signal:
+    LUT value has been modified since read and needs write back
+    """;
+    width=1;
+    reset=0;
+  }
+#endif // MAKEDOC
+
+  define (reg=LUT) {
+    """
+    Core register:
+    LUT (Look Up Table) entry being accessed at entry LUTA
+
+    + read: LUT = LookUpTable[LUTA]
+
+    + write: LookUpTable[LUTA] = LUT
+    """;
+    width=16;
+#ifndef MAKEDOC
+    //define (read) {
+    //  action = {
+    //    return Mem(LUT_OFFSET+LUTA*2,2);
+    //  };
+    //}
+
+#ifdef TESTBENCH
+    define (read) {
+      action = {
+        I_TB_LUT_FLAG = 1; 
+        return LUT;
+      };
+    }
+#endif
+
+    define (write) {
+      action = func (bits<16> val) {
+        LUT=val;
+        if ((I_LUTA_SET == 0) && (I_LUT_DIRTY == 0)) I_LUT_DIRTY=1;
+        if (I_LUT_CLEAR == 1) I_LUT_CLEAR=0;
+      };  // read only from core
+    }
+#endif // MAKEDOC
+  }
+#endif
+
+#ifdef TESTBENCH
+  define (reg=I_TB_LUT_FLAG) {
+    """
+    Internal registers:
+    Used for TB , to flag read action performed by current command
+
+    + bit 0: no read performed 
+
+    + bit 1: read performed 
+    """;
+    width=1;
+    reset=0x0;
+    define (read) {
+      action = {
+        bits<1> flag_return;
+
+        flag_return = I_TB_LUT_FLAG;
+
+        //auto clear the flag to zero 
+        I_TB_LUT_FLAG = 0; 
+
+        return flag_return;
+      };
+    }
+    define (write) {
+      action = func( bits<1> val) {
+        I_TB_LUT_FLAG = val;
+      };
+    }
+  }
+#endif
+
+  // scalar registers ****************************
+  defmod (regfile=R) {
+    //size  = 256;
+    //width = 16;
+
+    define (entry= 0x08)   { reg = CONFADDT; };
+    define (entry= 0x09)   { reg = CONFTHRES; };
+    define (entry= 0x0a)   { reg = CONFSORT; };
+#ifdef HASBEST5OFN
+    define (entry= 0x0b)   { reg = CONFBEST; };
+#endif
+#ifdef HASHIST
+    define (entry= 0x0c)   { reg = CONFHIST; };
+#endif
+#ifdef HASSTAT
+    define (entry= 0x0d)   { reg = CONFSTAT; };
+#endif
+    //define (entry= 0x94)   { reg = CMP; }
+    //define (entry= 0x96)   { reg = CMPL; }
+    //define (entry= 0x97)   { reg = CMPBE; }
+    define (entry= 0xa0)   { reg = SUM; };
+    define (entry= 0xa1)   { reg = CLIPPED; };
+    define (entry= 0xa2)   { reg = THRESHOLD; };
+    define (entry= 0xa3)   { reg = SCALED; };
+    define (entry= 0xa4)   { reg = SORTMAX; };
+    define (entry= 0xa5)   { reg = SORTMIN; };
+    define (entry= 0xa6)   { reg = SORTMEDIAN; };
+    define (entry= 0xa7)   { reg = ARGMIN; };
+    define (entry= 0xa8)   { reg = ARGMAX; };
+#ifdef HASLUT
+    define (entry= 0xd0)   { reg = LUTA; };
+    define (entry= 0xd1)   { reg = LUT; };
+#endif
+#ifdef HASHIST
+    define (entry= 0xd4)   { reg = HBINA; };
+    define (entry= 0xd5)   { reg = HBINADD; };
+    define (entry= 0xd6)   { reg = HBININCL; };
+    define (entry= 0xd7)   { reg = HBININCH; };
+#endif
+#ifdef HASSTAT
+    define (entry= 0xd8)   { reg = SFL(0); };
+    define (entry= 0xd9)   { reg = SFH(0); };
+    define (entry= 0xda)   { reg = SFL(1); };
+    define (entry= 0xdb)   { reg = SFH(1); };
+    define (entry= 0xdc)   { reg = SFL(2); };
+    define (entry= 0xdd)   { reg = SFH(2); };
+    define (entry= 0xde)   { reg = SFL(3); };
+    define (entry= 0xdf)   { reg = SFH(3); };
+    define (entry= 0xe0)   { reg = SREC; };
+#endif
+#ifdef HASBEST5OFN
+    define (entry= 0xf0)   { reg = SOIN; };
+    define (entry= 0xf1)   { reg = SOCLEAR; };
+    define (entry= 0xf2)   { reg = SO; };
+    define (entry= 0xf7)   { reg = SOA; };
+#endif
+    //define (entry= 0xfa)   { reg = S0A(4); };
+  }
+}

@@ -1,0 +1,2695 @@
+#
+# Options:
+#   ../IPUV -o trace.dat -mic=0 --cli 
+#
+
+TEST id=0
+INIT
+
+CORE n=IPUV
+
+RD n=CC_ZNCO d=0x0
+RD n=CONFALU d=0x002
+RD n=CSE_SET_LOCK d=0x0
+RD n=HD_BREAKENABLE d=0x00
+RD n=H_CURRPOS d=0x00000000
+RD n=H_CURRXCFG d=0x04000001
+RD n=H_DREGA d=0x00
+RD n=H_DREGD d=0x0000
+RD n=H_IMEMA d=0x0
+RD n=H_IMEMD d=0x00000000
+RD n=H_INCFG d=0x00010001
+RD n=H_OUTCFG d=0x00000000
+RD n=H_POS d=0x00000000
+RD n=H_START d=0x00000000
+RD n=H_STATUS d=0x00000000
+RD n=H_XCFG d=0x04000001
+RD n=I_BUFFERED d=0x0
+RD n=I_DEBUGMODE d=0x0
+RD n=I_DREGDACCESS d=0x0
+RD n=I_EVENTS d=0x0
+RD n=I_INCFG d=0x00010001
+RD n=I_OPIXA_INC d=0x0
+RD n=I_OUTCFG d=0x00000000
+RD n=I_RUN d=0x0
+RD n=I_SHIFT_X d=0x1
+RD n=I_START d=0x00000000
+RD n=I_VFLAG_C d=0x0
+RD n=I_VFLAG_L d=0x0
+RD n=I_VFLAG_N d=0x0
+RD n=I_VFLAG_O d=0x0
+RD n=I_VFLAG_U d=0x0
+RD n=I_VFLAG_Z d=0x0
+RD n=I_XSIZE d=0x0400
+RD n=LOCK d=0xffff
+RD n=LOOPCNT d=0x0000
+RD n=MASKV d=0xf
+RD n=MASKVQ d=0x0
+RD n=NIA d=0x00
+RD n=ONE d=0xffff
+RD n=OP1 d=0x0000
+RD n=OP2 d=0x0000
+RD n=OPIX d=0x0000
+RD n=OPIXA d=0x00
+RD n=RES d=0x0000
+RD n=RES32 d=0x0000000000000000
+RD n=SAT d=0x0000
+RD n=SIG_LINE_DONE d=0x0
+RD n=SRES d=0x00000
+RD n=SSAT d=0x0000
+RD n=S_EMUMEM d=0x0
+RD n=VFLAG_C d=0x0
+RD n=VFLAG_N d=0x0
+RD n=VFLAG_O d=0x0
+RD n=VFLAG_Z d=0x0
+RD n=VONE d=0xffffffffffffffff
+RD n=VOP1 d=0x0000000000000000
+RD n=VOP2 d=0x0000000000000000
+RD n=VRES d=0x00000000000000000
+RD n=VSAT d=0x00000000000000000
+RD n=VZERO d=0x0000000000000000
+RD n=XPOS d=0x0000
+RD n=YPOS d=0x0000
+RD n=ZERO d=0x0000
+RD n=GPR i=0 d=0x0000
+RD n=GPR i=1 d=0x0000
+RD n=GPR i=2 d=0x0000
+RD n=GPR i=3 d=0x0000
+RD n=GPR i=4 d=0x0000
+RD n=GPR i=5 d=0x0000
+RD n=GPR i=6 d=0x0000
+RD n=GPR i=7 d=0x0000
+RD n=GPR i=8 d=0x0000
+RD n=GPR i=9 d=0x0000
+RD n=GPR i=10 d=0x0000
+RD n=GPR i=11 d=0x0000
+RD n=GPR i=12 d=0x0000
+RD n=GPR i=13 d=0x0000
+RD n=GPR i=14 d=0x0000
+RD n=GPR i=15 d=0x0000
+RD n=GPR i=16 d=0x0000
+RD n=GPR i=17 d=0x0000
+RD n=GPR i=18 d=0x0000
+RD n=GPR i=19 d=0x0000
+RD n=GPR i=20 d=0x0000
+RD n=GPR i=21 d=0x0000
+RD n=GPR i=22 d=0x0000
+RD n=GPR i=23 d=0x0000
+RD n=GPR i=24 d=0x0000
+RD n=GPR i=25 d=0x0000
+RD n=GPR i=26 d=0x0000
+RD n=GPR i=27 d=0x0000
+RD n=GPR i=28 d=0x0000
+RD n=GPR i=29 d=0x0000
+RD n=GPR i=30 d=0x0000
+RD n=GPR i=31 d=0x0000
+RD n=IACC i=0 d=0x000000
+RD n=IACC i=1 d=0x000000
+RD n=IACC i=2 d=0x000000
+RD n=IACC i=3 d=0x000000
+RD n=IACC i=4 d=0x000000
+RD n=IACC i=5 d=0x000000
+RD n=IACC i=6 d=0x000000
+RD n=IACC i=7 d=0x000000
+RD n=IN i=0 d=0x0000
+RD n=IN i=1 d=0x0000
+RD n=IN i=2 d=0x0000
+RD n=IN i=3 d=0x0000
+RD n=IN i=4 d=0x0000
+RD n=IN i=5 d=0x0000
+RD n=IN i=6 d=0x0000
+RD n=IN i=7 d=0x0000
+RD n=IN i=8 d=0x0000
+RD n=IN i=9 d=0x0000
+RD n=IN i=10 d=0x0000
+RD n=IN i=11 d=0x0000
+RD n=IN i=12 d=0x0000
+RD n=IN i=13 d=0x0000
+RD n=IN i=14 d=0x0000
+RD n=IN i=15 d=0x0000
+RD n=IN i=16 d=0x0000
+RD n=IN i=17 d=0x0000
+RD n=IN i=18 d=0x0000
+RD n=IN i=19 d=0x0000
+RD n=IN i=20 d=0x0000
+RD n=IN i=21 d=0x0000
+RD n=IN i=22 d=0x0000
+RD n=IN i=23 d=0x0000
+RD n=IN i=24 d=0x0000
+RD n=IN i=25 d=0x0000
+RD n=IN i=26 d=0x0000
+RD n=IN i=27 d=0x0000
+RD n=IN i=28 d=0x0000
+RD n=IN i=29 d=0x0000
+RD n=IN i=30 d=0x0000
+RD n=IN i=31 d=0x0000
+RD n=IN i=32 d=0x0000
+RD n=IN i=33 d=0x0000
+RD n=IN i=34 d=0x0000
+RD n=IN i=35 d=0x0000
+RD n=IN i=36 d=0x0000
+RD n=IN i=37 d=0x0000
+RD n=IN i=38 d=0x0000
+RD n=IN i=39 d=0x0000
+RD n=I_POS_IN i=0 d=0x0000
+RD n=I_POS_IN i=1 d=0x0000
+RD n=I_POS_IN i=2 d=0x0000
+RD n=I_POS_IN i=3 d=0x0000
+RD n=I_POS_IN i=4 d=0x0000
+RD n=I_POS_OUT i=0 d=0x0000
+RD n=I_POS_OUT i=1 d=0x0000
+RD n=I_POS_OUT i=2 d=0x0000
+RD n=I_RPTCNT_IN i=0 d=0x1
+RD n=I_RPTCNT_IN i=1 d=0x1
+RD n=I_RPTCNT_IN i=2 d=0x1
+RD n=I_RPTCNT_IN i=3 d=0x1
+RD n=I_RPTCNT_IN i=4 d=0x1
+RD n=I_SKIPCNT_OUT i=0 d=0x0
+RD n=I_SKIPCNT_OUT i=1 d=0x0
+RD n=I_SKIPCNT_OUT i=2 d=0x0
+RD n=I_SKIPCNT_OUT i=3 d=0x0
+RD n=I_SKIPCNT_OUT i=4 d=0x0
+RD n=OUT i=0 d=0x0000
+RD n=OUT i=1 d=0x0000
+RD n=OUT i=2 d=0x0000
+RD n=OUT i=3 d=0x0000
+RD n=OUT i=4 d=0x0000
+RD n=OUT i=5 d=0x0000
+RD n=OUT i=6 d=0x0000
+RD n=OUT i=7 d=0x0000
+RD n=OUT i=8 d=0x0000
+RD n=OUT i=9 d=0x0000
+RD n=OUT i=10 d=0x0000
+RD n=OUT i=11 d=0x0000
+RD n=S_CHCFG_IN i=0 d=0x00050000
+RD n=S_CHCFG_IN i=1 d=0x00050000
+RD n=S_CHCFG_IN i=2 d=0x00050000
+RD n=S_CHCFG_IN i=3 d=0x00050000
+RD n=S_CHCFG_IN i=4 d=0x00050000
+RD n=S_CHCFG_OUT i=0 d=0x00000000
+RD n=S_CHCFG_OUT i=1 d=0x00000000
+RD n=S_CHCFG_OUT i=2 d=0x00000000
+RD n=S_CURRCHCFG_IN i=0 d=0x00000000
+RD n=S_CURRCHCFG_IN i=1 d=0x00000000
+RD n=S_CURRCHCFG_IN i=2 d=0x00000000
+RD n=S_CURRCHCFG_IN i=3 d=0x00000000
+RD n=S_CURRCHCFG_IN i=4 d=0x00000000
+RD n=S_CURRCHCFG_OUT i=0 d=0x00000000
+RD n=S_CURRCHCFG_OUT i=1 d=0x00000000
+RD n=S_CURRCHCFG_OUT i=2 d=0x00000000
+RD n=S_CURRLINELEN_IN i=0 d=0xffff
+RD n=S_CURRLINELEN_IN i=1 d=0xffff
+RD n=S_CURRLINELEN_IN i=2 d=0xffff
+RD n=S_CURRLINELEN_IN i=3 d=0xffff
+RD n=S_CURRLINELEN_IN i=4 d=0xffff
+RD n=S_CURRLINELEN_OUT i=0 d=0xffff
+RD n=S_CURRLINELEN_OUT i=1 d=0xffff
+RD n=S_CURRLINELEN_OUT i=2 d=0xffff
+RD n=S_CURRLINE_PTR_IN i=0 d=0x00000000
+RD n=S_CURRLINE_PTR_IN i=1 d=0x00000000
+RD n=S_CURRLINE_PTR_IN i=2 d=0x00000000
+RD n=S_CURRLINE_PTR_IN i=3 d=0x00000000
+RD n=S_CURRLINE_PTR_IN i=4 d=0x00000000
+RD n=S_CURRLINE_PTR_OUT i=0 d=0x00000000
+RD n=S_CURRLINE_PTR_OUT i=1 d=0x00000000
+RD n=S_CURRLINE_PTR_OUT i=2 d=0x00000000
+RD n=S_LINELEN_IN i=0 d=0xffff
+RD n=S_LINELEN_IN i=1 d=0xffff
+RD n=S_LINELEN_IN i=2 d=0xffff
+RD n=S_LINELEN_IN i=3 d=0xffff
+RD n=S_LINELEN_IN i=4 d=0xffff
+RD n=S_LINELEN_OUT i=0 d=0xffff
+RD n=S_LINELEN_OUT i=1 d=0xffff
+RD n=S_LINELEN_OUT i=2 d=0xffff
+RD n=S_LINE_PTR_IN i=0 d=0x00000000
+RD n=S_LINE_PTR_IN i=1 d=0x00000000
+RD n=S_LINE_PTR_IN i=2 d=0x00000000
+RD n=S_LINE_PTR_IN i=3 d=0x00000000
+RD n=S_LINE_PTR_IN i=4 d=0x00000000
+RD n=S_LINE_PTR_OUT i=0 d=0x00000000
+RD n=S_LINE_PTR_OUT i=1 d=0x00000000
+RD n=S_LINE_PTR_OUT i=2 d=0x00000000
+MD n=Mem ra=0x0000000000000000 d=0x00008010	#	(32784)
+MD n=Mem ra=0x0000000000000004 d=0x42000410	#	(1107297296)
+MD n=Mem ra=0x0000000000000008 d=0x00401110	#	(4198672)
+MD n=Mem ra=0x000000000000000c d=0x04010002	#	(67174402)
+MD n=Mem ra=0x0000000000000010 d=0x06010002	#	(100728834)
+MD n=Mem ra=0x0000000000000014 d=0x05000110	#	(83886352)
+MD n=Mem ra=0x0000000000000018 d=0x11101021	#	(286265377)
+MD n=Mem ra=0x000000000000001c d=0x11104622	#	(286279202)
+MD n=Mem ra=0x0000000000000020 d=0x10004020	#	(268451872)
+MD n=Mem ra=0x0000000000000024 d=0x07fd000a	#	(134021130)
+MD n=Mem ra=0x0000000000000028 d=0x00fb0007	#	(16449543)
+MD n=Mem ra=0x000000000000002c d=0x01000000	#	(16777216)
+
+CORE n=IPUV
+
+TRACE
+
+
+ERW n=H_INCFG d=0x00000100 id=1 cn=IPUV
+R n=I_INCFG d=0x00010100 cn=IPUV
+A l=1 m="IN.CURRCHANNELS = 0" cn=IPUV
+A l=1 m="IN.CURRNHOOD = 5x5" cn=IPUV
+A l=1 m="IN.CURRSHIFT = 1" cn=IPUV
+A l=1 m="IN.CHANNELS = 1" cn=IPUV
+A l=1 m="IN.NHOOD = 5x5" cn=IPUV
+A l=1 m="IN.SHIFT = 0" cn=IPUV
+
+ERW n=H_XCFG d=0x02800001 id=2 cn=IPUV
+R n=H_XCFG d=0x02800001 cn=IPUV
+
+ERW n=H_OUTCFG d=0x00000100 id=3 cn=IPUV
+R n=I_OUTCFG d=0x00000100 cn=IPUV
+A l=1 m="OUT.CURRCHANNELS = 0" cn=IPUV
+A l=1 m="OUT.CURRSHIFT = 0" cn=IPUV
+A l=1 m="OUT.CHANNELS = 1" cn=IPUV
+A l=1 m="OUT.SHIFT = 0" cn=IPUV
+
+ERW n=S_CHCFG_IN i=0 d=0x00150000 id=4 cn=IPUV
+R n=S_CHCFG_IN i=0 d=0x00150000 cn=IPUV
+
+ERW n=S_CHCFG_OUT i=0 d=0x00000000 id=5 cn=IPUV
+R n=S_CHCFG_OUT i=0 d=0x00000000 cn=IPUV
+
+ERW n=H_POS d=0x00000000 id=6 cn=IPUV
+R n=H_POS d=0x00000000 cn=IPUV
+
+ERW n=H_START d=0x00000000 id=7 cn=IPUV
+R n=I_START d=0x00000000 cn=IPUV
+R n=I_BUFFERED d=0x1 cn=IPUV
+R n=I_START d=0x00000000 cn=IPUV
+R n=I_XSIZE d=0x0280 cn=IPUV
+R n=I_SHIFT_X d=0x1 cn=IPUV
+R n=I_INCFG d=0x01000100 cn=IPUV
+A l=1 m="IN.CURRCHANNELS = 1" cn=IPUV
+A l=1 m="IN.CURRNHOOD = 5x5" cn=IPUV
+A l=1 m="IN.CURRSHIFT = 0" cn=IPUV
+A l=1 m="IN.CHANNELS = 1" cn=IPUV
+A l=1 m="IN.NHOOD = 5x5" cn=IPUV
+A l=1 m="IN.SHIFT = 0" cn=IPUV
+R n=I_OUTCFG d=0x01000100 cn=IPUV
+A l=1 m="OUT.CURRCHANNELS = 1" cn=IPUV
+A l=1 m="OUT.CURRSHIFT = 0" cn=IPUV
+A l=1 m="OUT.CHANNELS = 1" cn=IPUV
+A l=1 m="OUT.SHIFT = 0" cn=IPUV
+A l=1 m="IN(0).REPEATVALUE = 0" cn=IPUV
+A l=1 m="IN(0).STEP = 1" cn=IPUV
+A l=1 m="IN(0).RPT = 1" cn=IPUV
+A l=1 m="IN(0).REPLACEMODE = outside hold" cn=IPUV
+A l=1 m="IN(0).REVERSE = 0" cn=IPUV
+A l=1 m="IN(0).REPLACEWIDTH = 0" cn=IPUV
+A l=1 m="IN(0).BUFFERTYPE = 0" cn=IPUV
+R n=S_CURRCHCFG_IN i=0 d=0x00150000 cn=IPUV
+A l=1 m="IN(1).REPEATVALUE = 0" cn=IPUV
+A l=1 m="IN(1).STEP = 1" cn=IPUV
+A l=1 m="IN(1).RPT = 1" cn=IPUV
+A l=1 m="IN(1).REPLACEMODE = outside const" cn=IPUV
+A l=1 m="IN(1).REVERSE = 0" cn=IPUV
+A l=1 m="IN(1).REPLACEWIDTH = 0" cn=IPUV
+A l=1 m="IN(1).BUFFERTYPE = 0" cn=IPUV
+R n=S_CURRCHCFG_IN i=1 d=0x00050000 cn=IPUV
+A l=1 m="IN(2).REPEATVALUE = 0" cn=IPUV
+A l=1 m="IN(2).STEP = 1" cn=IPUV
+A l=1 m="IN(2).RPT = 1" cn=IPUV
+A l=1 m="IN(2).REPLACEMODE = outside const" cn=IPUV
+A l=1 m="IN(2).REVERSE = 0" cn=IPUV
+A l=1 m="IN(2).REPLACEWIDTH = 0" cn=IPUV
+A l=1 m="IN(2).BUFFERTYPE = 0" cn=IPUV
+R n=S_CURRCHCFG_IN i=2 d=0x00050000 cn=IPUV
+A l=1 m="IN(3).REPEATVALUE = 0" cn=IPUV
+A l=1 m="IN(3).STEP = 1" cn=IPUV
+A l=1 m="IN(3).RPT = 1" cn=IPUV
+A l=1 m="IN(3).REPLACEMODE = outside const" cn=IPUV
+A l=1 m="IN(3).REVERSE = 0" cn=IPUV
+A l=1 m="IN(3).REPLACEWIDTH = 0" cn=IPUV
+A l=1 m="IN(3).BUFFERTYPE = 0" cn=IPUV
+R n=S_CURRCHCFG_IN i=3 d=0x00050000 cn=IPUV
+A l=1 m="IN(4).REPEATVALUE = 0" cn=IPUV
+A l=1 m="IN(4).STEP = 1" cn=IPUV
+A l=1 m="IN(4).RPT = 1" cn=IPUV
+A l=1 m="IN(4).REPLACEMODE = outside const" cn=IPUV
+A l=1 m="IN(4).REVERSE = 0" cn=IPUV
+A l=1 m="IN(4).REPLACEWIDTH = 0" cn=IPUV
+A l=1 m="IN(4).BUFFERTYPE = 0" cn=IPUV
+R n=S_CURRCHCFG_IN i=4 d=0x00050000 cn=IPUV
+R n=S_CURRLINE_PTR_IN i=0 d=0x00010000 cn=IPUV
+R n=S_CURRLINE_PTR_IN i=1 d=0x00000000 cn=IPUV
+R n=S_CURRLINE_PTR_IN i=2 d=0x00000000 cn=IPUV
+R n=S_CURRLINE_PTR_IN i=3 d=0x00000000 cn=IPUV
+R n=S_CURRLINE_PTR_IN i=4 d=0x00000000 cn=IPUV
+R n=S_CURRLINELEN_IN i=0 d=0x0280 cn=IPUV
+R n=S_CURRLINELEN_IN i=1 d=0x0280 cn=IPUV
+R n=S_CURRLINELEN_IN i=2 d=0x0280 cn=IPUV
+R n=S_CURRLINELEN_IN i=3 d=0xffff cn=IPUV
+R n=S_CURRLINELEN_IN i=4 d=0xffff cn=IPUV
+R n=I_RPTCNT_IN i=0 d=0x1 cn=IPUV
+R n=I_RPTCNT_IN i=1 d=0x1 cn=IPUV
+R n=I_RPTCNT_IN i=2 d=0x1 cn=IPUV
+R n=I_RPTCNT_IN i=3 d=0x1 cn=IPUV
+R n=I_RPTCNT_IN i=4 d=0x1 cn=IPUV
+R n=I_POS_IN i=0 d=0x0000 cn=IPUV
+R n=I_POS_IN i=1 d=0x0000 cn=IPUV
+R n=I_POS_IN i=2 d=0x0000 cn=IPUV
+R n=I_POS_IN i=3 d=0x0000 cn=IPUV
+R n=I_POS_IN i=4 d=0x0000 cn=IPUV
+A l=1 m="OUT(0).SKIP = 0" cn=IPUV
+A l=1 m="OUT(0).BUFFERTYPE = 0" cn=IPUV
+R n=S_CURRCHCFG_OUT i=0 d=0x00000000 cn=IPUV
+A l=1 m="OUT(1).SKIP = 0" cn=IPUV
+A l=1 m="OUT(1).BUFFERTYPE = 0" cn=IPUV
+R n=S_CURRCHCFG_OUT i=1 d=0x00000000 cn=IPUV
+A l=1 m="OUT(2).SKIP = 0" cn=IPUV
+A l=1 m="OUT(2).BUFFERTYPE = 0" cn=IPUV
+R n=S_CURRCHCFG_OUT i=2 d=0x00000000 cn=IPUV
+R n=S_CURRLINE_PTR_OUT i=0 d=0x00123000 cn=IPUV
+R n=S_CURRLINE_PTR_OUT i=1 d=0x00000000 cn=IPUV
+R n=S_CURRLINE_PTR_OUT i=2 d=0x00000000 cn=IPUV
+R n=S_CURRLINELEN_OUT i=0 d=0x0280 cn=IPUV
+R n=S_CURRLINELEN_OUT i=1 d=0xffff cn=IPUV
+R n=S_CURRLINELEN_OUT i=2 d=0xffff cn=IPUV
+R n=I_POS_OUT i=0 d=0x0000 cn=IPUV
+R n=I_POS_OUT i=1 d=0x0000 cn=IPUV
+R n=I_POS_OUT i=2 d=0x0000 cn=IPUV
+R n=I_SKIPCNT_OUT i=0 d=0x0 cn=IPUV
+R n=I_SKIPCNT_OUT i=1 d=0x0 cn=IPUV
+R n=I_SKIPCNT_OUT i=2 d=0x0 cn=IPUV
+R n=NIA d=0x00 cn=IPUV
+B taken=1 ea=0x0
+R n=I_RUN d=0x1 cn=IPUV
+R n=I_BUFFERED d=0x0 cn=IPUV
+R n=XPOS d=0x0000 cn=IPUV
+R n=YPOS d=0x0000 cn=IPUV
+R n=LOCK d=0xffff cn=IPUV
+R n=MASKV d=0xf cn=IPUV
+
+I ea=0x0 id=8 tic=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x00008010
+INSTR op=0x10800000					asm="mov sacc0,0x0000"
+R n=NIA d=0x04
+R n=OP1 d=0x0000
+R n=OP2 d=0x0000
+R n=RES d=0x0000
+R n=SAT d=0x0000
+R n=IACC i=0 d=0x000000
+
+I ea=0x4 id=9 tic=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x42000410
+INSTR op=0x10040042					asm="mov confalu,0x0042"
+R n=NIA d=0x08
+R n=OP1 d=0x0042
+R n=OP2 d=0x0042
+R n=RES d=0x0042
+R n=SAT d=0x0042
+R n=CONFALU d=0x042
+A l=1 m="unsigned"
+A l=1 m="saturate"
+A l=1 m="mulh shift right = 4"
+A l=1 m="accumulator shift right = 0"
+
+I ea=0x8 id=10 tic=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x00401110
+INSTR op=0x10114000					asm="mov in1,0x4000"
+R n=NIA d=0x0c
+R n=OP1 d=0x4000
+R n=OP2 d=0x4000
+R n=RES d=0x4000
+R n=SAT d=0x4000
+R n=IN i=1 d=0x4000
+
+I ea=0xc id=11 tic=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x04010002
+INSTR op=0x02000104					asm="done 0x0000000000000010,i"
+R n=NIA d=0x10
+R n=NIA d=0x10
+B taken=1 ea=0x10
+R n=IN i=7 d=0x0000
+R n=IN i=6 d=0x0000
+R n=IN i=5 d=0x4000
+R n=IN i=4 d=0x0000
+D n=Mem t=read ea=0x10000 nb=2
+INIT
+MD n=Mem ra=0x0000000000010000 d=0xd5d5d4d4	#	(3587560660)
+TRACE
+M n=Mem t=read ea=0x10000 ra=0x10000 d=0xd5d5d4d4
+R n=I_POS_IN i=0 d=0x0001
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=3 d=0xd5d5
+D n=Mem t=read ea=0x10002 nb=2
+M n=Mem t=read ea=0x10000 ra=0x10000 d=0xd5d5d4d4
+R n=I_POS_IN i=0 d=0x0002
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=2 d=0xd4d4
+D n=Mem t=read ea=0x10004 nb=2
+INIT
+MD n=Mem ra=0x0000000000010004 d=0xd4d4d5d5	#	(3570718165)
+TRACE
+M n=Mem t=read ea=0x10004 ra=0x10004 d=0xd4d4d5d5
+R n=I_POS_IN i=0 d=0x0003
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=1 d=0xd4d4
+D n=Mem t=read ea=0x10006 nb=2
+M n=Mem t=read ea=0x10004 ra=0x10004 d=0xd4d4d5d5
+R n=I_POS_IN i=0 d=0x0004
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=0 d=0xd5d5
+
+I ea=0x10 id=12 tic=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x06010002
+INSTR op=0x02000106					asm="done 0x0000000000000014,ix"
+R n=NIA d=0x14
+R n=NIA d=0x14
+B taken=1 ea=0x14
+R n=IN i=7 d=0xd5d5
+R n=IN i=6 d=0xd4d4
+R n=IN i=5 d=0xd4d4
+R n=IN i=4 d=0xd5d5
+D n=Mem t=read ea=0x10008 nb=2
+INIT
+MD n=Mem ra=0x0000000000010008 d=0xd5d5d4d4	#	(3587560660)
+TRACE
+M n=Mem t=read ea=0x10008 ra=0x10008 d=0xd5d5d4d4
+R n=I_POS_IN i=0 d=0x0005
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=3 d=0xd5d5
+D n=Mem t=read ea=0x1000a nb=2
+M n=Mem t=read ea=0x10008 ra=0x10008 d=0xd5d5d4d4
+R n=I_POS_IN i=0 d=0x0006
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=2 d=0xd4d4
+D n=Mem t=read ea=0x1000c nb=2
+INIT
+MD n=Mem ra=0x000000000001000c d=0xd4d4d5d5	#	(3570718165)
+TRACE
+M n=Mem t=read ea=0x1000c ra=0x1000c d=0xd4d4d5d5
+R n=I_POS_IN i=0 d=0x0007
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=1 d=0xd4d4
+D n=Mem t=read ea=0x1000e nb=2
+M n=Mem t=read ea=0x1000c ra=0x1000c d=0xd4d4d5d5
+R n=I_POS_IN i=0 d=0x0008
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=0 d=0xd5d5
+R n=XPOS d=0x0001
+A l=1 m="YPos = 0"
+
+I ea=0x14 id=13 tic=6
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x05000110
+INSTR op=0x10010005					asm="mov loopcnt,0x0005"
+R n=NIA d=0x18
+R n=OP1 d=0x0005
+R n=OP2 d=0x0005
+R n=RES d=0x0005
+R n=SAT d=0x0005
+R n=LOOPCNT d=0x0005
+
+I ea=0x18 id=14 tic=7
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x11101021
+INSTR op=0x21101011					asm="add in0,in0,in1"
+R n=NIA d=0x1c
+R n=OP1 d=0xd5d5
+R n=OP2 d=0xd4d4
+R n=RES d=0x1aaa9
+R n=CC_ZNCO d=0x6
+A l=1 m="Do saturate"
+R n=SAT d=0xffff
+R n=IN i=0 d=0xffff
+
+I ea=0x1c id=15 tic=8
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x11104622
+INSTR op=0x22461011					asm="sub out6,in0,in1"
+R n=NIA d=0x20
+R n=OP1 d=0xffff
+R n=OP2 d=0xd4d4
+R n=RES d=0x2b2b
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x2b2b
+R n=OUT i=6 d=0x2b2b
+
+I ea=0x20 id=16 tic=9
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x10004020
+INSTR op=0x20400010					asm="mov out0,in0"
+R n=NIA d=0x24
+R n=OP1 d=0xffff
+R n=OP2 d=0xffff
+R n=RES d=0xffff
+R n=SAT d=0xffff
+R n=OUT i=0 d=0xffff
+
+I ea=0x24 id=17 tic=10
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x07fd000a
+INSTR op=0x0a00fd07					asm="ldon 0x0000000000000018,ixo"
+R n=NIA d=0x28
+R n=NIA d=0x18
+B taken=1 ea=0x18
+R n=LOOPCNT d=0x0004
+R n=IN i=7 d=0xd5d5
+R n=IN i=6 d=0xd4d4
+R n=IN i=5 d=0xd4d4
+R n=IN i=4 d=0xffff
+D n=Mem t=read ea=0x10010 nb=2
+INIT
+MD n=Mem ra=0x0000000000010010 d=0xd8d8d7d7	#	(3638089687)
+TRACE
+M n=Mem t=read ea=0x10010 ra=0x10010 d=0xd8d8d7d7
+R n=I_POS_IN i=0 d=0x0009
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=3 d=0xd8d8
+D n=Mem t=read ea=0x10012 nb=2
+M n=Mem t=read ea=0x10010 ra=0x10010 d=0xd8d8d7d7
+R n=I_POS_IN i=0 d=0x000a
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=2 d=0xd7d7
+D n=Mem t=read ea=0x10014 nb=2
+INIT
+MD n=Mem ra=0x0000000000010014 d=0xd7d7d8d8	#	(3621247192)
+TRACE
+M n=Mem t=read ea=0x10014 ra=0x10014 d=0xd7d7d8d8
+R n=I_POS_IN i=0 d=0x000b
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=1 d=0xd7d7
+D n=Mem t=read ea=0x10016 nb=2
+M n=Mem t=read ea=0x10014 ra=0x10014 d=0xd7d7d8d8
+R n=I_POS_IN i=0 d=0x000c
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=0 d=0xd8d8
+D n=Mem t=write ea=0x123000 nb=2
+M n=Mem t=write ea=0x123000 ra=0x123000 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0001
+D n=Mem t=write ea=0x123002 nb=2
+M n=Mem t=write ea=0x123000 ra=0x123000 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0002
+D n=Mem t=write ea=0x123004 nb=2
+M n=Mem t=write ea=0x123004 ra=0x123004 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0003
+D n=Mem t=write ea=0x123006 nb=2
+M n=Mem t=write ea=0x123004 ra=0x123004 d=0x0000ffff
+R n=I_POS_OUT i=0 d=0x0004
+R n=XPOS d=0x0002
+A l=1 m="YPos = 0"
+
+I ea=0x18 id=18 tic=11
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x11101021
+INSTR op=0x21101011					asm="add in0,in0,in1"
+R n=NIA d=0x1c
+R n=OP1 d=0xd8d8
+R n=OP2 d=0xd7d7
+R n=RES d=0x1b0af
+R n=CC_ZNCO d=0x6
+A l=1 m="Do saturate"
+R n=SAT d=0xffff
+R n=IN i=0 d=0xffff
+
+I ea=0x1c id=19 tic=12
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x11104622
+INSTR op=0x22461011					asm="sub out6,in0,in1"
+R n=NIA d=0x20
+R n=OP1 d=0xffff
+R n=OP2 d=0xd7d7
+R n=RES d=0x2828
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x2828
+R n=OUT i=6 d=0x2828
+
+I ea=0x20 id=20 tic=13
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x10004020
+INSTR op=0x20400010					asm="mov out0,in0"
+R n=NIA d=0x24
+R n=OP1 d=0xffff
+R n=OP2 d=0xffff
+R n=RES d=0xffff
+R n=SAT d=0xffff
+R n=OUT i=0 d=0xffff
+
+I ea=0x24 id=21 tic=14
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x07fd000a
+INSTR op=0x0a00fd07					asm="ldon 0x0000000000000018,ixo"
+R n=NIA d=0x28
+R n=NIA d=0x18
+B taken=1 ea=0x18
+R n=LOOPCNT d=0x0003
+R n=IN i=7 d=0xd8d8
+R n=IN i=6 d=0xd7d7
+R n=IN i=5 d=0xd7d7
+R n=IN i=4 d=0xffff
+D n=Mem t=read ea=0x10018 nb=2
+INIT
+MD n=Mem ra=0x0000000000010018 d=0xd8d8d7d7	#	(3638089687)
+TRACE
+M n=Mem t=read ea=0x10018 ra=0x10018 d=0xd8d8d7d7
+R n=I_POS_IN i=0 d=0x000d
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=3 d=0xd8d8
+D n=Mem t=read ea=0x1001a nb=2
+M n=Mem t=read ea=0x10018 ra=0x10018 d=0xd8d8d7d7
+R n=I_POS_IN i=0 d=0x000e
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=2 d=0xd7d7
+D n=Mem t=read ea=0x1001c nb=2
+INIT
+MD n=Mem ra=0x000000000001001c d=0xd7d7d7d7	#	(3621246935)
+TRACE
+M n=Mem t=read ea=0x1001c ra=0x1001c d=0xd7d7d7d7
+R n=I_POS_IN i=0 d=0x000f
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=1 d=0xd7d7
+D n=Mem t=read ea=0x1001e nb=2
+M n=Mem t=read ea=0x1001c ra=0x1001c d=0xd7d7d7d7
+R n=I_POS_IN i=0 d=0x0010
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=0 d=0xd7d7
+D n=Mem t=write ea=0x123008 nb=2
+M n=Mem t=write ea=0x123008 ra=0x123008 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0005
+D n=Mem t=write ea=0x12300a nb=2
+M n=Mem t=write ea=0x123008 ra=0x123008 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0006
+D n=Mem t=write ea=0x12300c nb=2
+M n=Mem t=write ea=0x12300c ra=0x12300c d=0x00000000
+R n=I_POS_OUT i=0 d=0x0007
+D n=Mem t=write ea=0x12300e nb=2
+M n=Mem t=write ea=0x12300c ra=0x12300c d=0x0000ffff
+R n=I_POS_OUT i=0 d=0x0008
+R n=XPOS d=0x0003
+A l=1 m="YPos = 0"
+
+I ea=0x18 id=22 tic=15
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x11101021
+INSTR op=0x21101011					asm="add in0,in0,in1"
+R n=NIA d=0x1c
+R n=OP1 d=0xd7d7
+R n=OP2 d=0xd7d7
+R n=RES d=0x1afae
+R n=CC_ZNCO d=0x6
+A l=1 m="Do saturate"
+R n=SAT d=0xffff
+R n=IN i=0 d=0xffff
+
+I ea=0x1c id=23 tic=16
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x11104622
+INSTR op=0x22461011					asm="sub out6,in0,in1"
+R n=NIA d=0x20
+R n=OP1 d=0xffff
+R n=OP2 d=0xd7d7
+R n=RES d=0x2828
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x2828
+R n=OUT i=6 d=0x2828
+
+I ea=0x20 id=24 tic=17
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x10004020
+INSTR op=0x20400010					asm="mov out0,in0"
+R n=NIA d=0x24
+R n=OP1 d=0xffff
+R n=OP2 d=0xffff
+R n=RES d=0xffff
+R n=SAT d=0xffff
+R n=OUT i=0 d=0xffff
+
+I ea=0x24 id=25 tic=18
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x07fd000a
+INSTR op=0x0a00fd07					asm="ldon 0x0000000000000018,ixo"
+R n=NIA d=0x28
+R n=NIA d=0x18
+B taken=1 ea=0x18
+R n=LOOPCNT d=0x0002
+R n=IN i=7 d=0xd8d8
+R n=IN i=6 d=0xd7d7
+R n=IN i=5 d=0xd7d7
+R n=IN i=4 d=0xffff
+D n=Mem t=read ea=0x10020 nb=2
+INIT
+MD n=Mem ra=0x0000000000010020 d=0xd8d8d8d8	#	(3638089944)
+TRACE
+M n=Mem t=read ea=0x10020 ra=0x10020 d=0xd8d8d8d8
+R n=I_POS_IN i=0 d=0x0011
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=3 d=0xd8d8
+D n=Mem t=read ea=0x10022 nb=2
+M n=Mem t=read ea=0x10020 ra=0x10020 d=0xd8d8d8d8
+R n=I_POS_IN i=0 d=0x0012
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=2 d=0xd8d8
+D n=Mem t=read ea=0x10024 nb=2
+INIT
+MD n=Mem ra=0x0000000000010024 d=0xd7d7d8d8	#	(3621247192)
+TRACE
+M n=Mem t=read ea=0x10024 ra=0x10024 d=0xd7d7d8d8
+R n=I_POS_IN i=0 d=0x0013
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=1 d=0xd7d7
+D n=Mem t=read ea=0x10026 nb=2
+M n=Mem t=read ea=0x10024 ra=0x10024 d=0xd7d7d8d8
+R n=I_POS_IN i=0 d=0x0014
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=0 d=0xd8d8
+D n=Mem t=write ea=0x123010 nb=2
+M n=Mem t=write ea=0x123010 ra=0x123010 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0009
+D n=Mem t=write ea=0x123012 nb=2
+M n=Mem t=write ea=0x123010 ra=0x123010 d=0x00000000
+R n=I_POS_OUT i=0 d=0x000a
+D n=Mem t=write ea=0x123014 nb=2
+M n=Mem t=write ea=0x123014 ra=0x123014 d=0x00000000
+R n=I_POS_OUT i=0 d=0x000b
+D n=Mem t=write ea=0x123016 nb=2
+M n=Mem t=write ea=0x123014 ra=0x123014 d=0x0000ffff
+R n=I_POS_OUT i=0 d=0x000c
+R n=XPOS d=0x0004
+A l=1 m="YPos = 0"
+
+I ea=0x18 id=26 tic=19
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x11101021
+INSTR op=0x21101011					asm="add in0,in0,in1"
+R n=NIA d=0x1c
+R n=OP1 d=0xd8d8
+R n=OP2 d=0xd7d7
+R n=RES d=0x1b0af
+R n=CC_ZNCO d=0x6
+A l=1 m="Do saturate"
+R n=SAT d=0xffff
+R n=IN i=0 d=0xffff
+
+I ea=0x1c id=27 tic=20
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x11104622
+INSTR op=0x22461011					asm="sub out6,in0,in1"
+R n=NIA d=0x20
+R n=OP1 d=0xffff
+R n=OP2 d=0xd7d7
+R n=RES d=0x2828
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x2828
+R n=OUT i=6 d=0x2828
+
+I ea=0x20 id=28 tic=21
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x10004020
+INSTR op=0x20400010					asm="mov out0,in0"
+R n=NIA d=0x24
+R n=OP1 d=0xffff
+R n=OP2 d=0xffff
+R n=RES d=0xffff
+R n=SAT d=0xffff
+R n=OUT i=0 d=0xffff
+
+I ea=0x24 id=29 tic=22
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x07fd000a
+INSTR op=0x0a00fd07					asm="ldon 0x0000000000000018,ixo"
+R n=NIA d=0x28
+R n=NIA d=0x18
+B taken=1 ea=0x18
+R n=LOOPCNT d=0x0001
+R n=IN i=7 d=0xd8d8
+R n=IN i=6 d=0xd8d8
+R n=IN i=5 d=0xd7d7
+R n=IN i=4 d=0xffff
+D n=Mem t=read ea=0x10028 nb=2
+INIT
+MD n=Mem ra=0x0000000000010028 d=0xd8d8d9d9	#	(3638090201)
+TRACE
+M n=Mem t=read ea=0x10028 ra=0x10028 d=0xd8d8d9d9
+R n=I_POS_IN i=0 d=0x0015
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=3 d=0xd8d8
+D n=Mem t=read ea=0x1002a nb=2
+M n=Mem t=read ea=0x10028 ra=0x10028 d=0xd8d8d9d9
+R n=I_POS_IN i=0 d=0x0016
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=2 d=0xd9d9
+D n=Mem t=read ea=0x1002c nb=2
+INIT
+MD n=Mem ra=0x000000000001002c d=0xdadadbdb	#	(3671776219)
+TRACE
+M n=Mem t=read ea=0x1002c ra=0x1002c d=0xdadadbdb
+R n=I_POS_IN i=0 d=0x0017
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=1 d=0xdada
+D n=Mem t=read ea=0x1002e nb=2
+M n=Mem t=read ea=0x1002c ra=0x1002c d=0xdadadbdb
+R n=I_POS_IN i=0 d=0x0018
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=0 d=0xdbdb
+D n=Mem t=write ea=0x123018 nb=2
+M n=Mem t=write ea=0x123018 ra=0x123018 d=0x00000000
+R n=I_POS_OUT i=0 d=0x000d
+D n=Mem t=write ea=0x12301a nb=2
+M n=Mem t=write ea=0x123018 ra=0x123018 d=0x00000000
+R n=I_POS_OUT i=0 d=0x000e
+D n=Mem t=write ea=0x12301c nb=2
+M n=Mem t=write ea=0x12301c ra=0x12301c d=0x00000000
+R n=I_POS_OUT i=0 d=0x000f
+D n=Mem t=write ea=0x12301e nb=2
+M n=Mem t=write ea=0x12301c ra=0x12301c d=0x0000ffff
+R n=I_POS_OUT i=0 d=0x0010
+R n=XPOS d=0x0005
+A l=1 m="YPos = 0"
+
+I ea=0x18 id=30 tic=23
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x11101021
+INSTR op=0x21101011					asm="add in0,in0,in1"
+R n=NIA d=0x1c
+R n=OP1 d=0xdbdb
+R n=OP2 d=0xdada
+R n=RES d=0x1b6b5
+R n=CC_ZNCO d=0x6
+A l=1 m="Do saturate"
+R n=SAT d=0xffff
+R n=IN i=0 d=0xffff
+
+I ea=0x1c id=31 tic=24
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x11104622
+INSTR op=0x22461011					asm="sub out6,in0,in1"
+R n=NIA d=0x20
+R n=OP1 d=0xffff
+R n=OP2 d=0xdada
+R n=RES d=0x2525
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x2525
+R n=OUT i=6 d=0x2525
+
+I ea=0x20 id=32 tic=25
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x10004020
+INSTR op=0x20400010					asm="mov out0,in0"
+R n=NIA d=0x24
+R n=OP1 d=0xffff
+R n=OP2 d=0xffff
+R n=RES d=0xffff
+R n=SAT d=0xffff
+R n=OUT i=0 d=0xffff
+
+I ea=0x24 id=33 tic=26
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x07fd000a
+INSTR op=0x0a00fd07					asm="ldon 0x0000000000000018,ixo"
+R n=NIA d=0x28
+R n=LOOPCNT d=0x0000
+R n=IN i=7 d=0xd8d8
+R n=IN i=6 d=0xd9d9
+R n=IN i=5 d=0xdada
+R n=IN i=4 d=0xffff
+D n=Mem t=read ea=0x10030 nb=2
+INIT
+MD n=Mem ra=0x0000000000010030 d=0xd9d9d9d9	#	(3654932953)
+TRACE
+M n=Mem t=read ea=0x10030 ra=0x10030 d=0xd9d9d9d9
+R n=I_POS_IN i=0 d=0x0019
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=3 d=0xd9d9
+D n=Mem t=read ea=0x10032 nb=2
+M n=Mem t=read ea=0x10030 ra=0x10030 d=0xd9d9d9d9
+R n=I_POS_IN i=0 d=0x001a
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=2 d=0xd9d9
+D n=Mem t=read ea=0x10034 nb=2
+INIT
+MD n=Mem ra=0x0000000000010034 d=0xd9d9d9d9	#	(3654932953)
+TRACE
+M n=Mem t=read ea=0x10034 ra=0x10034 d=0xd9d9d9d9
+R n=I_POS_IN i=0 d=0x001b
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=1 d=0xd9d9
+D n=Mem t=read ea=0x10036 nb=2
+M n=Mem t=read ea=0x10034 ra=0x10034 d=0xd9d9d9d9
+R n=I_POS_IN i=0 d=0x001c
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=0 d=0xd9d9
+D n=Mem t=write ea=0x123020 nb=2
+M n=Mem t=write ea=0x123020 ra=0x123020 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0011
+D n=Mem t=write ea=0x123022 nb=2
+M n=Mem t=write ea=0x123020 ra=0x123020 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0012
+D n=Mem t=write ea=0x123024 nb=2
+M n=Mem t=write ea=0x123024 ra=0x123024 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0013
+D n=Mem t=write ea=0x123026 nb=2
+M n=Mem t=write ea=0x123024 ra=0x123024 d=0x0000ffff
+R n=I_POS_OUT i=0 d=0x0014
+R n=XPOS d=0x0006
+A l=1 m="YPos = 0"
+
+I ea=0x28 id=34 tic=27
+M n=Mem t=ifetch ea=0x28 ra=0x28 d=0x00fb0007
+INSTR op=0x0700fb00					asm="bal 0x0000000000000014"
+R n=NIA d=0x2c
+R n=NIA d=0x14
+B taken=1 ea=0x14
+
+I ea=0x14 id=35 tic=28
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x05000110
+INSTR op=0x10010005					asm="mov loopcnt,0x0005"
+R n=NIA d=0x18
+R n=OP1 d=0x0005
+R n=OP2 d=0x0005
+R n=RES d=0x0005
+R n=SAT d=0x0005
+R n=LOOPCNT d=0x0005
+
+I ea=0x18 id=36 tic=29
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x11101021
+INSTR op=0x21101011					asm="add in0,in0,in1"
+R n=NIA d=0x1c
+R n=OP1 d=0xd9d9
+R n=OP2 d=0xd9d9
+R n=RES d=0x1b3b2
+R n=CC_ZNCO d=0x6
+A l=1 m="Do saturate"
+R n=SAT d=0xffff
+R n=IN i=0 d=0xffff
+
+I ea=0x1c id=37 tic=30
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x11104622
+INSTR op=0x22461011					asm="sub out6,in0,in1"
+R n=NIA d=0x20
+R n=OP1 d=0xffff
+R n=OP2 d=0xd9d9
+R n=RES d=0x2626
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x2626
+R n=OUT i=6 d=0x2626
+
+I ea=0x20 id=38 tic=31
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x10004020
+INSTR op=0x20400010					asm="mov out0,in0"
+R n=NIA d=0x24
+R n=OP1 d=0xffff
+R n=OP2 d=0xffff
+R n=RES d=0xffff
+R n=SAT d=0xffff
+R n=OUT i=0 d=0xffff
+
+I ea=0x24 id=39 tic=32
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x07fd000a
+INSTR op=0x0a00fd07					asm="ldon 0x0000000000000018,ixo"
+R n=NIA d=0x28
+R n=NIA d=0x18
+B taken=1 ea=0x18
+R n=LOOPCNT d=0x0004
+R n=IN i=7 d=0xd9d9
+R n=IN i=6 d=0xd9d9
+R n=IN i=5 d=0xd9d9
+R n=IN i=4 d=0xffff
+D n=Mem t=read ea=0x10038 nb=2
+INIT
+MD n=Mem ra=0x0000000000010038 d=0xd9d9d9d9	#	(3654932953)
+TRACE
+M n=Mem t=read ea=0x10038 ra=0x10038 d=0xd9d9d9d9
+R n=I_POS_IN i=0 d=0x001d
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=3 d=0xd9d9
+D n=Mem t=read ea=0x1003a nb=2
+M n=Mem t=read ea=0x10038 ra=0x10038 d=0xd9d9d9d9
+R n=I_POS_IN i=0 d=0x001e
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=2 d=0xd9d9
+D n=Mem t=read ea=0x1003c nb=2
+INIT
+MD n=Mem ra=0x000000000001003c d=0xd9d9d9d9	#	(3654932953)
+TRACE
+M n=Mem t=read ea=0x1003c ra=0x1003c d=0xd9d9d9d9
+R n=I_POS_IN i=0 d=0x001f
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=1 d=0xd9d9
+D n=Mem t=read ea=0x1003e nb=2
+M n=Mem t=read ea=0x1003c ra=0x1003c d=0xd9d9d9d9
+R n=I_POS_IN i=0 d=0x0020
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=0 d=0xd9d9
+D n=Mem t=write ea=0x123028 nb=2
+M n=Mem t=write ea=0x123028 ra=0x123028 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0015
+D n=Mem t=write ea=0x12302a nb=2
+M n=Mem t=write ea=0x123028 ra=0x123028 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0016
+D n=Mem t=write ea=0x12302c nb=2
+M n=Mem t=write ea=0x12302c ra=0x12302c d=0x00000000
+R n=I_POS_OUT i=0 d=0x0017
+D n=Mem t=write ea=0x12302e nb=2
+M n=Mem t=write ea=0x12302c ra=0x12302c d=0x0000ffff
+R n=I_POS_OUT i=0 d=0x0018
+R n=XPOS d=0x0007
+A l=1 m="YPos = 0"
+
+I ea=0x18 id=40 tic=33
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x11101021
+INSTR op=0x21101011					asm="add in0,in0,in1"
+R n=NIA d=0x1c
+R n=OP1 d=0xd9d9
+R n=OP2 d=0xd9d9
+R n=RES d=0x1b3b2
+R n=CC_ZNCO d=0x6
+A l=1 m="Do saturate"
+R n=SAT d=0xffff
+R n=IN i=0 d=0xffff
+
+I ea=0x1c id=41 tic=34
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x11104622
+INSTR op=0x22461011					asm="sub out6,in0,in1"
+R n=NIA d=0x20
+R n=OP1 d=0xffff
+R n=OP2 d=0xd9d9
+R n=RES d=0x2626
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x2626
+R n=OUT i=6 d=0x2626
+
+I ea=0x20 id=42 tic=35
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x10004020
+INSTR op=0x20400010					asm="mov out0,in0"
+R n=NIA d=0x24
+R n=OP1 d=0xffff
+R n=OP2 d=0xffff
+R n=RES d=0xffff
+R n=SAT d=0xffff
+R n=OUT i=0 d=0xffff
+
+I ea=0x24 id=43 tic=36
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x07fd000a
+INSTR op=0x0a00fd07					asm="ldon 0x0000000000000018,ixo"
+R n=NIA d=0x28
+R n=NIA d=0x18
+B taken=1 ea=0x18
+R n=LOOPCNT d=0x0003
+R n=IN i=7 d=0xd9d9
+R n=IN i=6 d=0xd9d9
+R n=IN i=5 d=0xd9d9
+R n=IN i=4 d=0xffff
+D n=Mem t=read ea=0x10040 nb=2
+INIT
+MD n=Mem ra=0x0000000000010040 d=0xdadadbdb	#	(3671776219)
+TRACE
+M n=Mem t=read ea=0x10040 ra=0x10040 d=0xdadadbdb
+R n=I_POS_IN i=0 d=0x0021
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=3 d=0xdada
+D n=Mem t=read ea=0x10042 nb=2
+M n=Mem t=read ea=0x10040 ra=0x10040 d=0xdadadbdb
+R n=I_POS_IN i=0 d=0x0022
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=2 d=0xdbdb
+D n=Mem t=read ea=0x10044 nb=2
+INIT
+MD n=Mem ra=0x0000000000010044 d=0xdbdbdbdb	#	(3688618971)
+TRACE
+M n=Mem t=read ea=0x10044 ra=0x10044 d=0xdbdbdbdb
+R n=I_POS_IN i=0 d=0x0023
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=1 d=0xdbdb
+D n=Mem t=read ea=0x10046 nb=2
+M n=Mem t=read ea=0x10044 ra=0x10044 d=0xdbdbdbdb
+R n=I_POS_IN i=0 d=0x0024
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=0 d=0xdbdb
+D n=Mem t=write ea=0x123030 nb=2
+M n=Mem t=write ea=0x123030 ra=0x123030 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0019
+D n=Mem t=write ea=0x123032 nb=2
+M n=Mem t=write ea=0x123030 ra=0x123030 d=0x00000000
+R n=I_POS_OUT i=0 d=0x001a
+D n=Mem t=write ea=0x123034 nb=2
+M n=Mem t=write ea=0x123034 ra=0x123034 d=0x00000000
+R n=I_POS_OUT i=0 d=0x001b
+D n=Mem t=write ea=0x123036 nb=2
+M n=Mem t=write ea=0x123034 ra=0x123034 d=0x0000ffff
+R n=I_POS_OUT i=0 d=0x001c
+R n=XPOS d=0x0008
+A l=1 m="YPos = 0"
+
+I ea=0x18 id=44 tic=37
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x11101021
+INSTR op=0x21101011					asm="add in0,in0,in1"
+R n=NIA d=0x1c
+R n=OP1 d=0xdbdb
+R n=OP2 d=0xdbdb
+R n=RES d=0x1b7b6
+R n=CC_ZNCO d=0x6
+A l=1 m="Do saturate"
+R n=SAT d=0xffff
+R n=IN i=0 d=0xffff
+
+I ea=0x1c id=45 tic=38
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x11104622
+INSTR op=0x22461011					asm="sub out6,in0,in1"
+R n=NIA d=0x20
+R n=OP1 d=0xffff
+R n=OP2 d=0xdbdb
+R n=RES d=0x2424
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x2424
+R n=OUT i=6 d=0x2424
+
+I ea=0x20 id=46 tic=39
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x10004020
+INSTR op=0x20400010					asm="mov out0,in0"
+R n=NIA d=0x24
+R n=OP1 d=0xffff
+R n=OP2 d=0xffff
+R n=RES d=0xffff
+R n=SAT d=0xffff
+R n=OUT i=0 d=0xffff
+
+I ea=0x24 id=47 tic=40
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x07fd000a
+INSTR op=0x0a00fd07					asm="ldon 0x0000000000000018,ixo"
+R n=NIA d=0x28
+R n=NIA d=0x18
+B taken=1 ea=0x18
+R n=LOOPCNT d=0x0002
+R n=IN i=7 d=0xdada
+R n=IN i=6 d=0xdbdb
+R n=IN i=5 d=0xdbdb
+R n=IN i=4 d=0xffff
+D n=Mem t=read ea=0x10048 nb=2
+INIT
+MD n=Mem ra=0x0000000000010048 d=0xdbdbdbdb	#	(3688618971)
+TRACE
+M n=Mem t=read ea=0x10048 ra=0x10048 d=0xdbdbdbdb
+R n=I_POS_IN i=0 d=0x0025
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=3 d=0xdbdb
+D n=Mem t=read ea=0x1004a nb=2
+M n=Mem t=read ea=0x10048 ra=0x10048 d=0xdbdbdbdb
+R n=I_POS_IN i=0 d=0x0026
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=2 d=0xdbdb
+D n=Mem t=read ea=0x1004c nb=2
+INIT
+MD n=Mem ra=0x000000000001004c d=0xdbdbdcdc	#	(3688619228)
+TRACE
+M n=Mem t=read ea=0x1004c ra=0x1004c d=0xdbdbdcdc
+R n=I_POS_IN i=0 d=0x0027
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=1 d=0xdbdb
+D n=Mem t=read ea=0x1004e nb=2
+M n=Mem t=read ea=0x1004c ra=0x1004c d=0xdbdbdcdc
+R n=I_POS_IN i=0 d=0x0028
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=0 d=0xdcdc
+D n=Mem t=write ea=0x123038 nb=2
+M n=Mem t=write ea=0x123038 ra=0x123038 d=0x00000000
+R n=I_POS_OUT i=0 d=0x001d
+D n=Mem t=write ea=0x12303a nb=2
+M n=Mem t=write ea=0x123038 ra=0x123038 d=0x00000000
+R n=I_POS_OUT i=0 d=0x001e
+D n=Mem t=write ea=0x12303c nb=2
+M n=Mem t=write ea=0x12303c ra=0x12303c d=0x00000000
+R n=I_POS_OUT i=0 d=0x001f
+D n=Mem t=write ea=0x12303e nb=2
+M n=Mem t=write ea=0x12303c ra=0x12303c d=0x0000ffff
+R n=I_POS_OUT i=0 d=0x0020
+R n=XPOS d=0x0009
+A l=1 m="YPos = 0"
+
+I ea=0x18 id=48 tic=41
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x11101021
+INSTR op=0x21101011					asm="add in0,in0,in1"
+R n=NIA d=0x1c
+R n=OP1 d=0xdcdc
+R n=OP2 d=0xdbdb
+R n=RES d=0x1b8b7
+R n=CC_ZNCO d=0x6
+A l=1 m="Do saturate"
+R n=SAT d=0xffff
+R n=IN i=0 d=0xffff
+
+I ea=0x1c id=49 tic=42
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x11104622
+INSTR op=0x22461011					asm="sub out6,in0,in1"
+R n=NIA d=0x20
+R n=OP1 d=0xffff
+R n=OP2 d=0xdbdb
+R n=RES d=0x2424
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x2424
+R n=OUT i=6 d=0x2424
+
+I ea=0x20 id=50 tic=43
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x10004020
+INSTR op=0x20400010					asm="mov out0,in0"
+R n=NIA d=0x24
+R n=OP1 d=0xffff
+R n=OP2 d=0xffff
+R n=RES d=0xffff
+R n=SAT d=0xffff
+R n=OUT i=0 d=0xffff
+
+I ea=0x24 id=51 tic=44
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x07fd000a
+INSTR op=0x0a00fd07					asm="ldon 0x0000000000000018,ixo"
+R n=NIA d=0x28
+R n=NIA d=0x18
+B taken=1 ea=0x18
+R n=LOOPCNT d=0x0001
+R n=IN i=7 d=0xdbdb
+R n=IN i=6 d=0xdbdb
+R n=IN i=5 d=0xdbdb
+R n=IN i=4 d=0xffff
+D n=Mem t=read ea=0x10050 nb=2
+INIT
+MD n=Mem ra=0x0000000000010050 d=0xd9d9dada	#	(3654933210)
+TRACE
+M n=Mem t=read ea=0x10050 ra=0x10050 d=0xd9d9dada
+R n=I_POS_IN i=0 d=0x0029
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=3 d=0xd9d9
+D n=Mem t=read ea=0x10052 nb=2
+M n=Mem t=read ea=0x10050 ra=0x10050 d=0xd9d9dada
+R n=I_POS_IN i=0 d=0x002a
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=2 d=0xdada
+D n=Mem t=read ea=0x10054 nb=2
+INIT
+MD n=Mem ra=0x0000000000010054 d=0xdcdcdcdc	#	(3705461980)
+TRACE
+M n=Mem t=read ea=0x10054 ra=0x10054 d=0xdcdcdcdc
+R n=I_POS_IN i=0 d=0x002b
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=1 d=0xdcdc
+D n=Mem t=read ea=0x10056 nb=2
+M n=Mem t=read ea=0x10054 ra=0x10054 d=0xdcdcdcdc
+R n=I_POS_IN i=0 d=0x002c
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=0 d=0xdcdc
+D n=Mem t=write ea=0x123040 nb=2
+M n=Mem t=write ea=0x123040 ra=0x123040 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0021
+D n=Mem t=write ea=0x123042 nb=2
+M n=Mem t=write ea=0x123040 ra=0x123040 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0022
+D n=Mem t=write ea=0x123044 nb=2
+M n=Mem t=write ea=0x123044 ra=0x123044 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0023
+D n=Mem t=write ea=0x123046 nb=2
+M n=Mem t=write ea=0x123044 ra=0x123044 d=0x0000ffff
+R n=I_POS_OUT i=0 d=0x0024
+R n=XPOS d=0x000a
+A l=1 m="YPos = 0"
+
+I ea=0x18 id=52 tic=45
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x11101021
+INSTR op=0x21101011					asm="add in0,in0,in1"
+R n=NIA d=0x1c
+R n=OP1 d=0xdcdc
+R n=OP2 d=0xdcdc
+R n=RES d=0x1b9b8
+R n=CC_ZNCO d=0x6
+A l=1 m="Do saturate"
+R n=SAT d=0xffff
+R n=IN i=0 d=0xffff
+
+I ea=0x1c id=53 tic=46
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x11104622
+INSTR op=0x22461011					asm="sub out6,in0,in1"
+R n=NIA d=0x20
+R n=OP1 d=0xffff
+R n=OP2 d=0xdcdc
+R n=RES d=0x2323
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x2323
+R n=OUT i=6 d=0x2323
+
+I ea=0x20 id=54 tic=47
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x10004020
+INSTR op=0x20400010					asm="mov out0,in0"
+R n=NIA d=0x24
+R n=OP1 d=0xffff
+R n=OP2 d=0xffff
+R n=RES d=0xffff
+R n=SAT d=0xffff
+R n=OUT i=0 d=0xffff
+
+I ea=0x24 id=55 tic=48
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x07fd000a
+INSTR op=0x0a00fd07					asm="ldon 0x0000000000000018,ixo"
+R n=NIA d=0x28
+R n=LOOPCNT d=0x0000
+R n=IN i=7 d=0xd9d9
+R n=IN i=6 d=0xdada
+R n=IN i=5 d=0xdcdc
+R n=IN i=4 d=0xffff
+D n=Mem t=read ea=0x10058 nb=2
+INIT
+MD n=Mem ra=0x0000000000010058 d=0xdbdbdbdb	#	(3688618971)
+TRACE
+M n=Mem t=read ea=0x10058 ra=0x10058 d=0xdbdbdbdb
+R n=I_POS_IN i=0 d=0x002d
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=3 d=0xdbdb
+D n=Mem t=read ea=0x1005a nb=2
+M n=Mem t=read ea=0x10058 ra=0x10058 d=0xdbdbdbdb
+R n=I_POS_IN i=0 d=0x002e
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=2 d=0xdbdb
+D n=Mem t=read ea=0x1005c nb=2
+INIT
+MD n=Mem ra=0x000000000001005c d=0xdcdcdddd	#	(3705462237)
+TRACE
+M n=Mem t=read ea=0x1005c ra=0x1005c d=0xdcdcdddd
+R n=I_POS_IN i=0 d=0x002f
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=1 d=0xdcdc
+D n=Mem t=read ea=0x1005e nb=2
+M n=Mem t=read ea=0x1005c ra=0x1005c d=0xdcdcdddd
+R n=I_POS_IN i=0 d=0x0030
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=0 d=0xdddd
+D n=Mem t=write ea=0x123048 nb=2
+M n=Mem t=write ea=0x123048 ra=0x123048 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0025
+D n=Mem t=write ea=0x12304a nb=2
+M n=Mem t=write ea=0x123048 ra=0x123048 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0026
+D n=Mem t=write ea=0x12304c nb=2
+M n=Mem t=write ea=0x12304c ra=0x12304c d=0x00000000
+R n=I_POS_OUT i=0 d=0x0027
+D n=Mem t=write ea=0x12304e nb=2
+M n=Mem t=write ea=0x12304c ra=0x12304c d=0x0000ffff
+R n=I_POS_OUT i=0 d=0x0028
+R n=XPOS d=0x000b
+A l=1 m="YPos = 0"
+
+I ea=0x28 id=56 tic=49
+M n=Mem t=ifetch ea=0x28 ra=0x28 d=0x00fb0007
+INSTR op=0x0700fb00					asm="bal 0x0000000000000014"
+R n=NIA d=0x2c
+R n=NIA d=0x14
+B taken=1 ea=0x14
+
+I ea=0x14 id=57 tic=50
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x05000110
+INSTR op=0x10010005					asm="mov loopcnt,0x0005"
+R n=NIA d=0x18
+R n=OP1 d=0x0005
+R n=OP2 d=0x0005
+R n=RES d=0x0005
+R n=SAT d=0x0005
+R n=LOOPCNT d=0x0005
+
+I ea=0x18 id=58 tic=51
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x11101021
+INSTR op=0x21101011					asm="add in0,in0,in1"
+R n=NIA d=0x1c
+R n=OP1 d=0xdddd
+R n=OP2 d=0xdcdc
+R n=RES d=0x1bab9
+R n=CC_ZNCO d=0x6
+A l=1 m="Do saturate"
+R n=SAT d=0xffff
+R n=IN i=0 d=0xffff
+
+I ea=0x1c id=59 tic=52
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x11104622
+INSTR op=0x22461011					asm="sub out6,in0,in1"
+R n=NIA d=0x20
+R n=OP1 d=0xffff
+R n=OP2 d=0xdcdc
+R n=RES d=0x2323
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x2323
+R n=OUT i=6 d=0x2323
+
+I ea=0x20 id=60 tic=53
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x10004020
+INSTR op=0x20400010					asm="mov out0,in0"
+R n=NIA d=0x24
+R n=OP1 d=0xffff
+R n=OP2 d=0xffff
+R n=RES d=0xffff
+R n=SAT d=0xffff
+R n=OUT i=0 d=0xffff
+
+I ea=0x24 id=61 tic=54
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x07fd000a
+INSTR op=0x0a00fd07					asm="ldon 0x0000000000000018,ixo"
+R n=NIA d=0x28
+R n=NIA d=0x18
+B taken=1 ea=0x18
+R n=LOOPCNT d=0x0004
+R n=IN i=7 d=0xdbdb
+R n=IN i=6 d=0xdbdb
+R n=IN i=5 d=0xdcdc
+R n=IN i=4 d=0xffff
+D n=Mem t=read ea=0x10060 nb=2
+INIT
+MD n=Mem ra=0x0000000000010060 d=0xdcdcdcdc	#	(3705461980)
+TRACE
+M n=Mem t=read ea=0x10060 ra=0x10060 d=0xdcdcdcdc
+R n=I_POS_IN i=0 d=0x0031
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=3 d=0xdcdc
+D n=Mem t=read ea=0x10062 nb=2
+M n=Mem t=read ea=0x10060 ra=0x10060 d=0xdcdcdcdc
+R n=I_POS_IN i=0 d=0x0032
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=2 d=0xdcdc
+D n=Mem t=read ea=0x10064 nb=2
+INIT
+MD n=Mem ra=0x0000000000010064 d=0xdcdcdcdc	#	(3705461980)
+TRACE
+M n=Mem t=read ea=0x10064 ra=0x10064 d=0xdcdcdcdc
+R n=I_POS_IN i=0 d=0x0033
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=1 d=0xdcdc
+D n=Mem t=read ea=0x10066 nb=2
+M n=Mem t=read ea=0x10064 ra=0x10064 d=0xdcdcdcdc
+R n=I_POS_IN i=0 d=0x0034
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=0 d=0xdcdc
+D n=Mem t=write ea=0x123050 nb=2
+M n=Mem t=write ea=0x123050 ra=0x123050 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0029
+D n=Mem t=write ea=0x123052 nb=2
+M n=Mem t=write ea=0x123050 ra=0x123050 d=0x00000000
+R n=I_POS_OUT i=0 d=0x002a
+D n=Mem t=write ea=0x123054 nb=2
+M n=Mem t=write ea=0x123054 ra=0x123054 d=0x00000000
+R n=I_POS_OUT i=0 d=0x002b
+D n=Mem t=write ea=0x123056 nb=2
+M n=Mem t=write ea=0x123054 ra=0x123054 d=0x0000ffff
+R n=I_POS_OUT i=0 d=0x002c
+R n=XPOS d=0x000c
+A l=1 m="YPos = 0"
+
+I ea=0x18 id=62 tic=55
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x11101021
+INSTR op=0x21101011					asm="add in0,in0,in1"
+R n=NIA d=0x1c
+R n=OP1 d=0xdcdc
+R n=OP2 d=0xdcdc
+R n=RES d=0x1b9b8
+R n=CC_ZNCO d=0x6
+A l=1 m="Do saturate"
+R n=SAT d=0xffff
+R n=IN i=0 d=0xffff
+
+I ea=0x1c id=63 tic=56
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x11104622
+INSTR op=0x22461011					asm="sub out6,in0,in1"
+R n=NIA d=0x20
+R n=OP1 d=0xffff
+R n=OP2 d=0xdcdc
+R n=RES d=0x2323
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x2323
+R n=OUT i=6 d=0x2323
+
+I ea=0x20 id=64 tic=57
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x10004020
+INSTR op=0x20400010					asm="mov out0,in0"
+R n=NIA d=0x24
+R n=OP1 d=0xffff
+R n=OP2 d=0xffff
+R n=RES d=0xffff
+R n=SAT d=0xffff
+R n=OUT i=0 d=0xffff
+
+I ea=0x24 id=65 tic=58
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x07fd000a
+INSTR op=0x0a00fd07					asm="ldon 0x0000000000000018,ixo"
+R n=NIA d=0x28
+R n=NIA d=0x18
+B taken=1 ea=0x18
+R n=LOOPCNT d=0x0003
+R n=IN i=7 d=0xdcdc
+R n=IN i=6 d=0xdcdc
+R n=IN i=5 d=0xdcdc
+R n=IN i=4 d=0xffff
+D n=Mem t=read ea=0x10068 nb=2
+INIT
+MD n=Mem ra=0x0000000000010068 d=0xdcdcdddd	#	(3705462237)
+TRACE
+M n=Mem t=read ea=0x10068 ra=0x10068 d=0xdcdcdddd
+R n=I_POS_IN i=0 d=0x0035
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=3 d=0xdcdc
+D n=Mem t=read ea=0x1006a nb=2
+M n=Mem t=read ea=0x10068 ra=0x10068 d=0xdcdcdddd
+R n=I_POS_IN i=0 d=0x0036
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=2 d=0xdddd
+D n=Mem t=read ea=0x1006c nb=2
+INIT
+MD n=Mem ra=0x000000000001006c d=0xdddddddd	#	(3722304989)
+TRACE
+M n=Mem t=read ea=0x1006c ra=0x1006c d=0xdddddddd
+R n=I_POS_IN i=0 d=0x0037
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=1 d=0xdddd
+D n=Mem t=read ea=0x1006e nb=2
+M n=Mem t=read ea=0x1006c ra=0x1006c d=0xdddddddd
+R n=I_POS_IN i=0 d=0x0038
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=0 d=0xdddd
+D n=Mem t=write ea=0x123058 nb=2
+M n=Mem t=write ea=0x123058 ra=0x123058 d=0x00000000
+R n=I_POS_OUT i=0 d=0x002d
+D n=Mem t=write ea=0x12305a nb=2
+M n=Mem t=write ea=0x123058 ra=0x123058 d=0x00000000
+R n=I_POS_OUT i=0 d=0x002e
+D n=Mem t=write ea=0x12305c nb=2
+M n=Mem t=write ea=0x12305c ra=0x12305c d=0x00000000
+R n=I_POS_OUT i=0 d=0x002f
+D n=Mem t=write ea=0x12305e nb=2
+M n=Mem t=write ea=0x12305c ra=0x12305c d=0x0000ffff
+R n=I_POS_OUT i=0 d=0x0030
+R n=XPOS d=0x000d
+A l=1 m="YPos = 0"
+
+I ea=0x18 id=66 tic=59
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x11101021
+INSTR op=0x21101011					asm="add in0,in0,in1"
+R n=NIA d=0x1c
+R n=OP1 d=0xdddd
+R n=OP2 d=0xdddd
+R n=RES d=0x1bbba
+R n=CC_ZNCO d=0x6
+A l=1 m="Do saturate"
+R n=SAT d=0xffff
+R n=IN i=0 d=0xffff
+
+I ea=0x1c id=67 tic=60
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x11104622
+INSTR op=0x22461011					asm="sub out6,in0,in1"
+R n=NIA d=0x20
+R n=OP1 d=0xffff
+R n=OP2 d=0xdddd
+R n=RES d=0x2222
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x2222
+R n=OUT i=6 d=0x2222
+
+I ea=0x20 id=68 tic=61
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x10004020
+INSTR op=0x20400010					asm="mov out0,in0"
+R n=NIA d=0x24
+R n=OP1 d=0xffff
+R n=OP2 d=0xffff
+R n=RES d=0xffff
+R n=SAT d=0xffff
+R n=OUT i=0 d=0xffff
+
+I ea=0x24 id=69 tic=62
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x07fd000a
+INSTR op=0x0a00fd07					asm="ldon 0x0000000000000018,ixo"
+R n=NIA d=0x28
+R n=NIA d=0x18
+B taken=1 ea=0x18
+R n=LOOPCNT d=0x0002
+R n=IN i=7 d=0xdcdc
+R n=IN i=6 d=0xdddd
+R n=IN i=5 d=0xdddd
+R n=IN i=4 d=0xffff
+D n=Mem t=read ea=0x10070 nb=2
+INIT
+MD n=Mem ra=0x0000000000010070 d=0xdcdcdcdc	#	(3705461980)
+TRACE
+M n=Mem t=read ea=0x10070 ra=0x10070 d=0xdcdcdcdc
+R n=I_POS_IN i=0 d=0x0039
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=3 d=0xdcdc
+D n=Mem t=read ea=0x10072 nb=2
+M n=Mem t=read ea=0x10070 ra=0x10070 d=0xdcdcdcdc
+R n=I_POS_IN i=0 d=0x003a
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=2 d=0xdcdc
+D n=Mem t=read ea=0x10074 nb=2
+INIT
+MD n=Mem ra=0x0000000000010074 d=0xdcdcdddd	#	(3705462237)
+TRACE
+M n=Mem t=read ea=0x10074 ra=0x10074 d=0xdcdcdddd
+R n=I_POS_IN i=0 d=0x003b
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=1 d=0xdcdc
+D n=Mem t=read ea=0x10076 nb=2
+M n=Mem t=read ea=0x10074 ra=0x10074 d=0xdcdcdddd
+R n=I_POS_IN i=0 d=0x003c
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=0 d=0xdddd
+D n=Mem t=write ea=0x123060 nb=2
+M n=Mem t=write ea=0x123060 ra=0x123060 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0031
+D n=Mem t=write ea=0x123062 nb=2
+M n=Mem t=write ea=0x123060 ra=0x123060 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0032
+D n=Mem t=write ea=0x123064 nb=2
+M n=Mem t=write ea=0x123064 ra=0x123064 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0033
+D n=Mem t=write ea=0x123066 nb=2
+M n=Mem t=write ea=0x123064 ra=0x123064 d=0x0000ffff
+R n=I_POS_OUT i=0 d=0x0034
+R n=XPOS d=0x000e
+A l=1 m="YPos = 0"
+
+I ea=0x18 id=70 tic=63
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x11101021
+INSTR op=0x21101011					asm="add in0,in0,in1"
+R n=NIA d=0x1c
+R n=OP1 d=0xdddd
+R n=OP2 d=0xdcdc
+R n=RES d=0x1bab9
+R n=CC_ZNCO d=0x6
+A l=1 m="Do saturate"
+R n=SAT d=0xffff
+R n=IN i=0 d=0xffff
+
+I ea=0x1c id=71 tic=64
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x11104622
+INSTR op=0x22461011					asm="sub out6,in0,in1"
+R n=NIA d=0x20
+R n=OP1 d=0xffff
+R n=OP2 d=0xdcdc
+R n=RES d=0x2323
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x2323
+R n=OUT i=6 d=0x2323
+
+I ea=0x20 id=72 tic=65
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x10004020
+INSTR op=0x20400010					asm="mov out0,in0"
+R n=NIA d=0x24
+R n=OP1 d=0xffff
+R n=OP2 d=0xffff
+R n=RES d=0xffff
+R n=SAT d=0xffff
+R n=OUT i=0 d=0xffff
+
+I ea=0x24 id=73 tic=66
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x07fd000a
+INSTR op=0x0a00fd07					asm="ldon 0x0000000000000018,ixo"
+R n=NIA d=0x28
+R n=NIA d=0x18
+B taken=1 ea=0x18
+R n=LOOPCNT d=0x0001
+R n=IN i=7 d=0xdcdc
+R n=IN i=6 d=0xdcdc
+R n=IN i=5 d=0xdcdc
+R n=IN i=4 d=0xffff
+D n=Mem t=read ea=0x10078 nb=2
+INIT
+MD n=Mem ra=0x0000000000010078 d=0xdddddddd	#	(3722304989)
+TRACE
+M n=Mem t=read ea=0x10078 ra=0x10078 d=0xdddddddd
+R n=I_POS_IN i=0 d=0x003d
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=3 d=0xdddd
+D n=Mem t=read ea=0x1007a nb=2
+M n=Mem t=read ea=0x10078 ra=0x10078 d=0xdddddddd
+R n=I_POS_IN i=0 d=0x003e
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=2 d=0xdddd
+D n=Mem t=read ea=0x1007c nb=2
+INIT
+MD n=Mem ra=0x000000000001007c d=0xdddddddd	#	(3722304989)
+TRACE
+M n=Mem t=read ea=0x1007c ra=0x1007c d=0xdddddddd
+R n=I_POS_IN i=0 d=0x003f
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=1 d=0xdddd
+D n=Mem t=read ea=0x1007e nb=2
+M n=Mem t=read ea=0x1007c ra=0x1007c d=0xdddddddd
+R n=I_POS_IN i=0 d=0x0040
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=0 d=0xdddd
+D n=Mem t=write ea=0x123068 nb=2
+M n=Mem t=write ea=0x123068 ra=0x123068 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0035
+D n=Mem t=write ea=0x12306a nb=2
+M n=Mem t=write ea=0x123068 ra=0x123068 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0036
+D n=Mem t=write ea=0x12306c nb=2
+M n=Mem t=write ea=0x12306c ra=0x12306c d=0x00000000
+R n=I_POS_OUT i=0 d=0x0037
+D n=Mem t=write ea=0x12306e nb=2
+M n=Mem t=write ea=0x12306c ra=0x12306c d=0x0000ffff
+R n=I_POS_OUT i=0 d=0x0038
+R n=XPOS d=0x000f
+A l=1 m="YPos = 0"
+
+I ea=0x18 id=74 tic=67
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x11101021
+INSTR op=0x21101011					asm="add in0,in0,in1"
+R n=NIA d=0x1c
+R n=OP1 d=0xdddd
+R n=OP2 d=0xdddd
+R n=RES d=0x1bbba
+R n=CC_ZNCO d=0x6
+A l=1 m="Do saturate"
+R n=SAT d=0xffff
+R n=IN i=0 d=0xffff
+
+I ea=0x1c id=75 tic=68
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x11104622
+INSTR op=0x22461011					asm="sub out6,in0,in1"
+R n=NIA d=0x20
+R n=OP1 d=0xffff
+R n=OP2 d=0xdddd
+R n=RES d=0x2222
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x2222
+R n=OUT i=6 d=0x2222
+
+I ea=0x20 id=76 tic=69
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x10004020
+INSTR op=0x20400010					asm="mov out0,in0"
+R n=NIA d=0x24
+R n=OP1 d=0xffff
+R n=OP2 d=0xffff
+R n=RES d=0xffff
+R n=SAT d=0xffff
+R n=OUT i=0 d=0xffff
+
+I ea=0x24 id=77 tic=70
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x07fd000a
+INSTR op=0x0a00fd07					asm="ldon 0x0000000000000018,ixo"
+R n=NIA d=0x28
+R n=LOOPCNT d=0x0000
+R n=IN i=7 d=0xdddd
+R n=IN i=6 d=0xdddd
+R n=IN i=5 d=0xdddd
+R n=IN i=4 d=0xffff
+D n=Mem t=read ea=0x10080 nb=2
+INIT
+MD n=Mem ra=0x0000000000010080 d=0xdddddddd	#	(3722304989)
+TRACE
+M n=Mem t=read ea=0x10080 ra=0x10080 d=0xdddddddd
+R n=I_POS_IN i=0 d=0x0041
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=3 d=0xdddd
+D n=Mem t=read ea=0x10082 nb=2
+M n=Mem t=read ea=0x10080 ra=0x10080 d=0xdddddddd
+R n=I_POS_IN i=0 d=0x0042
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=2 d=0xdddd
+D n=Mem t=read ea=0x10084 nb=2
+INIT
+MD n=Mem ra=0x0000000000010084 d=0xdededede	#	(3739147998)
+TRACE
+M n=Mem t=read ea=0x10084 ra=0x10084 d=0xdededede
+R n=I_POS_IN i=0 d=0x0043
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=1 d=0xdede
+D n=Mem t=read ea=0x10086 nb=2
+M n=Mem t=read ea=0x10084 ra=0x10084 d=0xdededede
+R n=I_POS_IN i=0 d=0x0044
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=0 d=0xdede
+D n=Mem t=write ea=0x123070 nb=2
+M n=Mem t=write ea=0x123070 ra=0x123070 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0039
+D n=Mem t=write ea=0x123072 nb=2
+M n=Mem t=write ea=0x123070 ra=0x123070 d=0x00000000
+R n=I_POS_OUT i=0 d=0x003a
+D n=Mem t=write ea=0x123074 nb=2
+M n=Mem t=write ea=0x123074 ra=0x123074 d=0x00000000
+R n=I_POS_OUT i=0 d=0x003b
+D n=Mem t=write ea=0x123076 nb=2
+M n=Mem t=write ea=0x123074 ra=0x123074 d=0x0000ffff
+R n=I_POS_OUT i=0 d=0x003c
+R n=XPOS d=0x0010
+A l=1 m="YPos = 0"
+
+I ea=0x28 id=78 tic=71
+M n=Mem t=ifetch ea=0x28 ra=0x28 d=0x00fb0007
+INSTR op=0x0700fb00					asm="bal 0x0000000000000014"
+R n=NIA d=0x2c
+R n=NIA d=0x14
+B taken=1 ea=0x14
+
+I ea=0x14 id=79 tic=72
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x05000110
+INSTR op=0x10010005					asm="mov loopcnt,0x0005"
+R n=NIA d=0x18
+R n=OP1 d=0x0005
+R n=OP2 d=0x0005
+R n=RES d=0x0005
+R n=SAT d=0x0005
+R n=LOOPCNT d=0x0005
+
+I ea=0x18 id=80 tic=73
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x11101021
+INSTR op=0x21101011					asm="add in0,in0,in1"
+R n=NIA d=0x1c
+R n=OP1 d=0xdede
+R n=OP2 d=0xdede
+R n=RES d=0x1bdbc
+R n=CC_ZNCO d=0x6
+A l=1 m="Do saturate"
+R n=SAT d=0xffff
+R n=IN i=0 d=0xffff
+
+I ea=0x1c id=81 tic=74
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x11104622
+INSTR op=0x22461011					asm="sub out6,in0,in1"
+R n=NIA d=0x20
+R n=OP1 d=0xffff
+R n=OP2 d=0xdede
+R n=RES d=0x2121
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x2121
+R n=OUT i=6 d=0x2121
+
+I ea=0x20 id=82 tic=75
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x10004020
+INSTR op=0x20400010					asm="mov out0,in0"
+R n=NIA d=0x24
+R n=OP1 d=0xffff
+R n=OP2 d=0xffff
+R n=RES d=0xffff
+R n=SAT d=0xffff
+R n=OUT i=0 d=0xffff
+
+I ea=0x24 id=83 tic=76
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x07fd000a
+INSTR op=0x0a00fd07					asm="ldon 0x0000000000000018,ixo"
+R n=NIA d=0x28
+R n=NIA d=0x18
+B taken=1 ea=0x18
+R n=LOOPCNT d=0x0004
+R n=IN i=7 d=0xdddd
+R n=IN i=6 d=0xdddd
+R n=IN i=5 d=0xdede
+R n=IN i=4 d=0xffff
+D n=Mem t=read ea=0x10088 nb=2
+INIT
+MD n=Mem ra=0x0000000000010088 d=0xdededede	#	(3739147998)
+TRACE
+M n=Mem t=read ea=0x10088 ra=0x10088 d=0xdededede
+R n=I_POS_IN i=0 d=0x0045
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=3 d=0xdede
+D n=Mem t=read ea=0x1008a nb=2
+M n=Mem t=read ea=0x10088 ra=0x10088 d=0xdededede
+R n=I_POS_IN i=0 d=0x0046
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=2 d=0xdede
+D n=Mem t=read ea=0x1008c nb=2
+INIT
+MD n=Mem ra=0x000000000001008c d=0xdfdfdfdf	#	(3755991007)
+TRACE
+M n=Mem t=read ea=0x1008c ra=0x1008c d=0xdfdfdfdf
+R n=I_POS_IN i=0 d=0x0047
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=1 d=0xdfdf
+D n=Mem t=read ea=0x1008e nb=2
+M n=Mem t=read ea=0x1008c ra=0x1008c d=0xdfdfdfdf
+R n=I_POS_IN i=0 d=0x0048
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=0 d=0xdfdf
+D n=Mem t=write ea=0x123078 nb=2
+M n=Mem t=write ea=0x123078 ra=0x123078 d=0x00000000
+R n=I_POS_OUT i=0 d=0x003d
+D n=Mem t=write ea=0x12307a nb=2
+M n=Mem t=write ea=0x123078 ra=0x123078 d=0x00000000
+R n=I_POS_OUT i=0 d=0x003e
+D n=Mem t=write ea=0x12307c nb=2
+M n=Mem t=write ea=0x12307c ra=0x12307c d=0x00000000
+R n=I_POS_OUT i=0 d=0x003f
+D n=Mem t=write ea=0x12307e nb=2
+M n=Mem t=write ea=0x12307c ra=0x12307c d=0x0000ffff
+R n=I_POS_OUT i=0 d=0x0040
+R n=XPOS d=0x0011
+A l=1 m="YPos = 0"
+
+I ea=0x18 id=84 tic=77
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x11101021
+INSTR op=0x21101011					asm="add in0,in0,in1"
+R n=NIA d=0x1c
+R n=OP1 d=0xdfdf
+R n=OP2 d=0xdfdf
+R n=RES d=0x1bfbe
+R n=CC_ZNCO d=0x6
+A l=1 m="Do saturate"
+R n=SAT d=0xffff
+R n=IN i=0 d=0xffff
+
+I ea=0x1c id=85 tic=78
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x11104622
+INSTR op=0x22461011					asm="sub out6,in0,in1"
+R n=NIA d=0x20
+R n=OP1 d=0xffff
+R n=OP2 d=0xdfdf
+R n=RES d=0x2020
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x2020
+R n=OUT i=6 d=0x2020
+
+I ea=0x20 id=86 tic=79
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x10004020
+INSTR op=0x20400010					asm="mov out0,in0"
+R n=NIA d=0x24
+R n=OP1 d=0xffff
+R n=OP2 d=0xffff
+R n=RES d=0xffff
+R n=SAT d=0xffff
+R n=OUT i=0 d=0xffff
+
+I ea=0x24 id=87 tic=80
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x07fd000a
+INSTR op=0x0a00fd07					asm="ldon 0x0000000000000018,ixo"
+R n=NIA d=0x28
+R n=NIA d=0x18
+B taken=1 ea=0x18
+R n=LOOPCNT d=0x0003
+R n=IN i=7 d=0xdede
+R n=IN i=6 d=0xdede
+R n=IN i=5 d=0xdfdf
+R n=IN i=4 d=0xffff
+D n=Mem t=read ea=0x10090 nb=2
+INIT
+MD n=Mem ra=0x0000000000010090 d=0xdfdfdfdf	#	(3755991007)
+TRACE
+M n=Mem t=read ea=0x10090 ra=0x10090 d=0xdfdfdfdf
+R n=I_POS_IN i=0 d=0x0049
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=3 d=0xdfdf
+D n=Mem t=read ea=0x10092 nb=2
+M n=Mem t=read ea=0x10090 ra=0x10090 d=0xdfdfdfdf
+R n=I_POS_IN i=0 d=0x004a
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=2 d=0xdfdf
+D n=Mem t=read ea=0x10094 nb=2
+INIT
+MD n=Mem ra=0x0000000000010094 d=0xe0e0e0e0	#	(3772834016)
+TRACE
+M n=Mem t=read ea=0x10094 ra=0x10094 d=0xe0e0e0e0
+R n=I_POS_IN i=0 d=0x004b
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=1 d=0xe0e0
+D n=Mem t=read ea=0x10096 nb=2
+M n=Mem t=read ea=0x10094 ra=0x10094 d=0xe0e0e0e0
+R n=I_POS_IN i=0 d=0x004c
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=0 d=0xe0e0
+D n=Mem t=write ea=0x123080 nb=2
+M n=Mem t=write ea=0x123080 ra=0x123080 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0041
+D n=Mem t=write ea=0x123082 nb=2
+M n=Mem t=write ea=0x123080 ra=0x123080 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0042
+D n=Mem t=write ea=0x123084 nb=2
+M n=Mem t=write ea=0x123084 ra=0x123084 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0043
+D n=Mem t=write ea=0x123086 nb=2
+M n=Mem t=write ea=0x123084 ra=0x123084 d=0x0000ffff
+R n=I_POS_OUT i=0 d=0x0044
+R n=XPOS d=0x0012
+A l=1 m="YPos = 0"
+
+I ea=0x18 id=88 tic=81
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x11101021
+INSTR op=0x21101011					asm="add in0,in0,in1"
+R n=NIA d=0x1c
+R n=OP1 d=0xe0e0
+R n=OP2 d=0xe0e0
+R n=RES d=0x1c1c0
+R n=CC_ZNCO d=0x6
+A l=1 m="Do saturate"
+R n=SAT d=0xffff
+R n=IN i=0 d=0xffff
+
+I ea=0x1c id=89 tic=82
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x11104622
+INSTR op=0x22461011					asm="sub out6,in0,in1"
+R n=NIA d=0x20
+R n=OP1 d=0xffff
+R n=OP2 d=0xe0e0
+R n=RES d=0x1f1f
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x1f1f
+R n=OUT i=6 d=0x1f1f
+
+I ea=0x20 id=90 tic=83
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x10004020
+INSTR op=0x20400010					asm="mov out0,in0"
+R n=NIA d=0x24
+R n=OP1 d=0xffff
+R n=OP2 d=0xffff
+R n=RES d=0xffff
+R n=SAT d=0xffff
+R n=OUT i=0 d=0xffff
+
+I ea=0x24 id=91 tic=84
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x07fd000a
+INSTR op=0x0a00fd07					asm="ldon 0x0000000000000018,ixo"
+R n=NIA d=0x28
+R n=NIA d=0x18
+B taken=1 ea=0x18
+R n=LOOPCNT d=0x0002
+R n=IN i=7 d=0xdfdf
+R n=IN i=6 d=0xdfdf
+R n=IN i=5 d=0xe0e0
+R n=IN i=4 d=0xffff
+D n=Mem t=read ea=0x10098 nb=2
+INIT
+MD n=Mem ra=0x0000000000010098 d=0xe0e0e0e0	#	(3772834016)
+TRACE
+M n=Mem t=read ea=0x10098 ra=0x10098 d=0xe0e0e0e0
+R n=I_POS_IN i=0 d=0x004d
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=3 d=0xe0e0
+D n=Mem t=read ea=0x1009a nb=2
+M n=Mem t=read ea=0x10098 ra=0x10098 d=0xe0e0e0e0
+R n=I_POS_IN i=0 d=0x004e
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=2 d=0xe0e0
+D n=Mem t=read ea=0x1009c nb=2
+INIT
+MD n=Mem ra=0x000000000001009c d=0xdfdfdfdf	#	(3755991007)
+TRACE
+M n=Mem t=read ea=0x1009c ra=0x1009c d=0xdfdfdfdf
+R n=I_POS_IN i=0 d=0x004f
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=1 d=0xdfdf
+D n=Mem t=read ea=0x1009e nb=2
+M n=Mem t=read ea=0x1009c ra=0x1009c d=0xdfdfdfdf
+R n=I_POS_IN i=0 d=0x0050
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=0 d=0xdfdf
+D n=Mem t=write ea=0x123088 nb=2
+M n=Mem t=write ea=0x123088 ra=0x123088 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0045
+D n=Mem t=write ea=0x12308a nb=2
+M n=Mem t=write ea=0x123088 ra=0x123088 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0046
+D n=Mem t=write ea=0x12308c nb=2
+M n=Mem t=write ea=0x12308c ra=0x12308c d=0x00000000
+R n=I_POS_OUT i=0 d=0x0047
+D n=Mem t=write ea=0x12308e nb=2
+M n=Mem t=write ea=0x12308c ra=0x12308c d=0x0000ffff
+R n=I_POS_OUT i=0 d=0x0048
+R n=XPOS d=0x0013
+A l=1 m="YPos = 0"
+
+I ea=0x18 id=92 tic=85
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x11101021
+INSTR op=0x21101011					asm="add in0,in0,in1"
+R n=NIA d=0x1c
+R n=OP1 d=0xdfdf
+R n=OP2 d=0xdfdf
+R n=RES d=0x1bfbe
+R n=CC_ZNCO d=0x6
+A l=1 m="Do saturate"
+R n=SAT d=0xffff
+R n=IN i=0 d=0xffff
+
+I ea=0x1c id=93 tic=86
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x11104622
+INSTR op=0x22461011					asm="sub out6,in0,in1"
+R n=NIA d=0x20
+R n=OP1 d=0xffff
+R n=OP2 d=0xdfdf
+R n=RES d=0x2020
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x2020
+R n=OUT i=6 d=0x2020
+
+I ea=0x20 id=94 tic=87
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x10004020
+INSTR op=0x20400010					asm="mov out0,in0"
+R n=NIA d=0x24
+R n=OP1 d=0xffff
+R n=OP2 d=0xffff
+R n=RES d=0xffff
+R n=SAT d=0xffff
+R n=OUT i=0 d=0xffff
+
+I ea=0x24 id=95 tic=88
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x07fd000a
+INSTR op=0x0a00fd07					asm="ldon 0x0000000000000018,ixo"
+R n=NIA d=0x28
+R n=NIA d=0x18
+B taken=1 ea=0x18
+R n=LOOPCNT d=0x0001
+R n=IN i=7 d=0xe0e0
+R n=IN i=6 d=0xe0e0
+R n=IN i=5 d=0xdfdf
+R n=IN i=4 d=0xffff
+D n=Mem t=read ea=0x100a0 nb=2
+INIT
+MD n=Mem ra=0x00000000000100a0 d=0xe0e0dfdf	#	(3772833759)
+TRACE
+M n=Mem t=read ea=0x100a0 ra=0x100a0 d=0xe0e0dfdf
+R n=I_POS_IN i=0 d=0x0051
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=3 d=0xe0e0
+D n=Mem t=read ea=0x100a2 nb=2
+M n=Mem t=read ea=0x100a0 ra=0x100a0 d=0xe0e0dfdf
+R n=I_POS_IN i=0 d=0x0052
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=2 d=0xdfdf
+D n=Mem t=read ea=0x100a4 nb=2
+INIT
+MD n=Mem ra=0x00000000000100a4 d=0xdfdfe1e1	#	(3755991521)
+TRACE
+M n=Mem t=read ea=0x100a4 ra=0x100a4 d=0xdfdfe1e1
+R n=I_POS_IN i=0 d=0x0053
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=1 d=0xdfdf
+D n=Mem t=read ea=0x100a6 nb=2
+M n=Mem t=read ea=0x100a4 ra=0x100a4 d=0xdfdfe1e1
+R n=I_POS_IN i=0 d=0x0054
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=0 d=0xe1e1
+D n=Mem t=write ea=0x123090 nb=2
+M n=Mem t=write ea=0x123090 ra=0x123090 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0049
+D n=Mem t=write ea=0x123092 nb=2
+M n=Mem t=write ea=0x123090 ra=0x123090 d=0x00000000
+R n=I_POS_OUT i=0 d=0x004a
+D n=Mem t=write ea=0x123094 nb=2
+M n=Mem t=write ea=0x123094 ra=0x123094 d=0x00000000
+R n=I_POS_OUT i=0 d=0x004b
+D n=Mem t=write ea=0x123096 nb=2
+M n=Mem t=write ea=0x123094 ra=0x123094 d=0x0000ffff
+R n=I_POS_OUT i=0 d=0x004c
+R n=XPOS d=0x0014
+A l=1 m="YPos = 0"
+
+I ea=0x18 id=96 tic=89
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x11101021
+INSTR op=0x21101011					asm="add in0,in0,in1"
+R n=NIA d=0x1c
+R n=OP1 d=0xe1e1
+R n=OP2 d=0xdfdf
+R n=RES d=0x1c1c0
+R n=CC_ZNCO d=0x6
+A l=1 m="Do saturate"
+R n=SAT d=0xffff
+R n=IN i=0 d=0xffff
+
+I ea=0x1c id=97 tic=90
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x11104622
+INSTR op=0x22461011					asm="sub out6,in0,in1"
+R n=NIA d=0x20
+R n=OP1 d=0xffff
+R n=OP2 d=0xdfdf
+R n=RES d=0x2020
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x2020
+R n=OUT i=6 d=0x2020
+
+I ea=0x20 id=98 tic=91
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x10004020
+INSTR op=0x20400010					asm="mov out0,in0"
+R n=NIA d=0x24
+R n=OP1 d=0xffff
+R n=OP2 d=0xffff
+R n=RES d=0xffff
+R n=SAT d=0xffff
+R n=OUT i=0 d=0xffff
+
+I ea=0x24 id=99 tic=92
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x07fd000a
+INSTR op=0x0a00fd07					asm="ldon 0x0000000000000018,ixo"
+R n=NIA d=0x28
+R n=LOOPCNT d=0x0000
+R n=IN i=7 d=0xe0e0
+R n=IN i=6 d=0xdfdf
+R n=IN i=5 d=0xdfdf
+R n=IN i=4 d=0xffff
+D n=Mem t=read ea=0x100a8 nb=2
+INIT
+MD n=Mem ra=0x00000000000100a8 d=0xe1e1e1e1	#	(3789677025)
+TRACE
+M n=Mem t=read ea=0x100a8 ra=0x100a8 d=0xe1e1e1e1
+R n=I_POS_IN i=0 d=0x0055
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=3 d=0xe1e1
+D n=Mem t=read ea=0x100aa nb=2
+M n=Mem t=read ea=0x100a8 ra=0x100a8 d=0xe1e1e1e1
+R n=I_POS_IN i=0 d=0x0056
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=2 d=0xe1e1
+D n=Mem t=read ea=0x100ac nb=2
+INIT
+MD n=Mem ra=0x00000000000100ac d=0xe1e1e2e2	#	(3789677282)
+TRACE
+M n=Mem t=read ea=0x100ac ra=0x100ac d=0xe1e1e2e2
+R n=I_POS_IN i=0 d=0x0057
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=1 d=0xe1e1
+D n=Mem t=read ea=0x100ae nb=2
+M n=Mem t=read ea=0x100ac ra=0x100ac d=0xe1e1e2e2
+R n=I_POS_IN i=0 d=0x0058
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=0 d=0xe2e2
+D n=Mem t=write ea=0x123098 nb=2
+M n=Mem t=write ea=0x123098 ra=0x123098 d=0x00000000
+R n=I_POS_OUT i=0 d=0x004d
+D n=Mem t=write ea=0x12309a nb=2
+M n=Mem t=write ea=0x123098 ra=0x123098 d=0x00000000
+R n=I_POS_OUT i=0 d=0x004e
+D n=Mem t=write ea=0x12309c nb=2
+M n=Mem t=write ea=0x12309c ra=0x12309c d=0x00000000
+R n=I_POS_OUT i=0 d=0x004f
+D n=Mem t=write ea=0x12309e nb=2
+M n=Mem t=write ea=0x12309c ra=0x12309c d=0x0000ffff
+R n=I_POS_OUT i=0 d=0x0050
+R n=XPOS d=0x0015
+A l=1 m="YPos = 0"
+
+I ea=0x28 id=100 tic=93
+M n=Mem t=ifetch ea=0x28 ra=0x28 d=0x00fb0007
+INSTR op=0x0700fb00					asm="bal 0x0000000000000014"
+R n=NIA d=0x2c
+R n=NIA d=0x14
+B taken=1 ea=0x14
+
+I ea=0x14 id=101 tic=94
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x05000110
+INSTR op=0x10010005					asm="mov loopcnt,0x0005"
+R n=NIA d=0x18
+R n=OP1 d=0x0005
+R n=OP2 d=0x0005
+R n=RES d=0x0005
+R n=SAT d=0x0005
+R n=LOOPCNT d=0x0005
+
+I ea=0x18 id=102 tic=95
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x11101021
+INSTR op=0x21101011					asm="add in0,in0,in1"
+R n=NIA d=0x1c
+R n=OP1 d=0xe2e2
+R n=OP2 d=0xe1e1
+R n=RES d=0x1c4c3
+R n=CC_ZNCO d=0x6
+A l=1 m="Do saturate"
+R n=SAT d=0xffff
+R n=IN i=0 d=0xffff
+
+I ea=0x1c id=103 tic=96
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x11104622
+INSTR op=0x22461011					asm="sub out6,in0,in1"
+R n=NIA d=0x20
+R n=OP1 d=0xffff
+R n=OP2 d=0xe1e1
+R n=RES d=0x1e1e
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x1e1e
+R n=OUT i=6 d=0x1e1e
+
+I ea=0x20 id=104 tic=97
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x10004020
+INSTR op=0x20400010					asm="mov out0,in0"
+R n=NIA d=0x24
+R n=OP1 d=0xffff
+R n=OP2 d=0xffff
+R n=RES d=0xffff
+R n=SAT d=0xffff
+R n=OUT i=0 d=0xffff
+
+I ea=0x24 id=105 tic=98
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x07fd000a
+INSTR op=0x0a00fd07					asm="ldon 0x0000000000000018,ixo"
+R n=NIA d=0x28
+R n=NIA d=0x18
+B taken=1 ea=0x18
+R n=LOOPCNT d=0x0004
+R n=IN i=7 d=0xe1e1
+R n=IN i=6 d=0xe1e1
+R n=IN i=5 d=0xe1e1
+R n=IN i=4 d=0xffff
+D n=Mem t=read ea=0x100b0 nb=2
+INIT
+MD n=Mem ra=0x00000000000100b0 d=0xe1e1e1e1	#	(3789677025)
+TRACE
+M n=Mem t=read ea=0x100b0 ra=0x100b0 d=0xe1e1e1e1
+R n=I_POS_IN i=0 d=0x0059
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=3 d=0xe1e1
+D n=Mem t=read ea=0x100b2 nb=2
+M n=Mem t=read ea=0x100b0 ra=0x100b0 d=0xe1e1e1e1
+R n=I_POS_IN i=0 d=0x005a
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=2 d=0xe1e1
+D n=Mem t=read ea=0x100b4 nb=2
+INIT
+MD n=Mem ra=0x00000000000100b4 d=0xe1e1e2e2	#	(3789677282)
+TRACE
+M n=Mem t=read ea=0x100b4 ra=0x100b4 d=0xe1e1e2e2
+R n=I_POS_IN i=0 d=0x005b
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=1 d=0xe1e1
+D n=Mem t=read ea=0x100b6 nb=2
+M n=Mem t=read ea=0x100b4 ra=0x100b4 d=0xe1e1e2e2
+R n=I_POS_IN i=0 d=0x005c
+R n=I_RPTCNT_IN i=0 d=0x1
+R n=IN i=0 d=0xe2e2
+D n=Mem t=write ea=0x1230a0 nb=2
+M n=Mem t=write ea=0x1230a0 ra=0x1230a0 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0051
+D n=Mem t=write ea=0x1230a2 nb=2
+M n=Mem t=write ea=0x1230a0 ra=0x1230a0 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0052
+D n=Mem t=write ea=0x1230a4 nb=2
+M n=Mem t=write ea=0x1230a4 ra=0x1230a4 d=0x00000000
+R n=I_POS_OUT i=0 d=0x0053
+D n=Mem t=write ea=0x1230a6 nb=2
+M n=Mem t=write ea=0x1230a4 ra=0x1230a4 d=0x0000ffff
+R n=I_POS_OUT i=0 d=0x0054
+R n=XPOS d=0x0016
+A l=1 m="YPos = 0"
+
+I ea=0x18 id=106 tic=99
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x11101021
+INSTR op=0x21101011					asm="add in0,in0,in1"
+R n=NIA d=0x1c
+R n=OP1 d=0xe2e2
+R n=OP2 d=0xe1e1
+R n=RES d=0x1c4c3
+R n=CC_ZNCO d=0x6
+A l=1 m="Do saturate"
+R n=SAT d=0xffff
+R n=IN i=0 d=0xffff
+
+I ea=0x1c id=107 tic=100
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x11104622
+INSTR op=0x22461011					asm="sub out6,in0,in1"
+R n=NIA d=0x20
+R n=OP1 d=0xffff
+R n=OP2 d=0xe1e1
+R n=RES d=0x1e1e
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x1e1e
+R n=OUT i=6 d=0x1e1e
+
+RESULTS
+RD n=CC_ZNCO d=0x0
+RD n=CONFALU d=0x042
+RD n=CSE_SET_LOCK d=0x0
+RD n=HD_BREAKENABLE d=0x00
+RD n=H_CURRPOS d=0x00000000
+RD n=H_CURRXCFG d=0x04000001
+RD n=H_DREGA d=0x00
+RD n=H_DREGD d=0x0000
+RD n=H_IMEMA d=0x0
+RD n=H_IMEMD d=0x00000000
+RD n=H_INCFG d=0x00010001
+RD n=H_OUTCFG d=0x00000000
+RD n=H_POS d=0x00000000
+RD n=H_START d=0x00000000
+RD n=H_STATUS d=0x00000000
+RD n=H_XCFG d=0x02800001
+RD n=I_BUFFERED d=0x0
+RD n=I_DEBUGMODE d=0x0
+RD n=I_DREGDACCESS d=0x0
+RD n=I_EVENTS d=0x0
+RD n=I_INCFG d=0x01000100
+RD n=I_OPIXA_INC d=0x0
+RD n=I_OUTCFG d=0x01000100
+RD n=I_RUN d=0x1
+RD n=I_SHIFT_X d=0x1
+RD n=I_START d=0x00000000
+RD n=I_VFLAG_C d=0x0
+RD n=I_VFLAG_L d=0x0
+RD n=I_VFLAG_N d=0x0
+RD n=I_VFLAG_O d=0x0
+RD n=I_VFLAG_U d=0x0
+RD n=I_VFLAG_Z d=0x0
+RD n=I_XSIZE d=0x0280
+RD n=LOCK d=0xffff
+RD n=LOOPCNT d=0x0004
+RD n=MASKV d=0xf
+RD n=MASKVQ d=0x0
+RD n=NIA d=0x20
+RD n=ONE d=0xffff
+RD n=OP1 d=0xffff
+RD n=OP2 d=0xe1e1
+RD n=OPIX d=0x0000
+RD n=OPIXA d=0x00
+RD n=RES d=0x1e1e
+RD n=RES32 d=0x0000000000000000
+RD n=SAT d=0x1e1e
+RD n=SIG_LINE_DONE d=0x0
+RD n=SRES d=0x00000
+RD n=SSAT d=0x0000
+RD n=S_EMUMEM d=0x0
+RD n=VFLAG_C d=0x0
+RD n=VFLAG_N d=0x0
+RD n=VFLAG_O d=0x0
+RD n=VFLAG_Z d=0x0
+RD n=VONE d=0xffffffffffffffff
+RD n=VOP1 d=0x0000000000000000
+RD n=VOP2 d=0x0000000000000000
+RD n=VRES d=0x00000000000000000
+RD n=VSAT d=0x00000000000000000
+RD n=VZERO d=0x0000000000000000
+RD n=XPOS d=0x0016
+RD n=YPOS d=0x0000
+RD n=ZERO d=0x0000
+RD n=GPR i=0 d=0x0000
+RD n=GPR i=1 d=0x0000
+RD n=GPR i=2 d=0x0000
+RD n=GPR i=3 d=0x0000
+RD n=GPR i=4 d=0x0000
+RD n=GPR i=5 d=0x0000
+RD n=GPR i=6 d=0x0000
+RD n=GPR i=7 d=0x0000
+RD n=GPR i=8 d=0x0000
+RD n=GPR i=9 d=0x0000
+RD n=GPR i=10 d=0x0000
+RD n=GPR i=11 d=0x0000
+RD n=GPR i=12 d=0x0000
+RD n=GPR i=13 d=0x0000
+RD n=GPR i=14 d=0x0000
+RD n=GPR i=15 d=0x0000
+RD n=GPR i=16 d=0x0000
+RD n=GPR i=17 d=0x0000
+RD n=GPR i=18 d=0x0000
+RD n=GPR i=19 d=0x0000
+RD n=GPR i=20 d=0x0000
+RD n=GPR i=21 d=0x0000
+RD n=GPR i=22 d=0x0000
+RD n=GPR i=23 d=0x0000
+RD n=GPR i=24 d=0x0000
+RD n=GPR i=25 d=0x0000
+RD n=GPR i=26 d=0x0000
+RD n=GPR i=27 d=0x0000
+RD n=GPR i=28 d=0x0000
+RD n=GPR i=29 d=0x0000
+RD n=GPR i=30 d=0x0000
+RD n=GPR i=31 d=0x0000
+RD n=IACC i=0 d=0x000000
+RD n=IACC i=1 d=0x000000
+RD n=IACC i=2 d=0x000000
+RD n=IACC i=3 d=0x000000
+RD n=IACC i=4 d=0x000000
+RD n=IACC i=5 d=0x000000
+RD n=IACC i=6 d=0x000000
+RD n=IACC i=7 d=0x000000
+RD n=IN i=0 d=0xffff
+RD n=IN i=1 d=0xe1e1
+RD n=IN i=2 d=0xe1e1
+RD n=IN i=3 d=0xe1e1
+RD n=IN i=4 d=0xffff
+RD n=IN i=5 d=0xe1e1
+RD n=IN i=6 d=0xe1e1
+RD n=IN i=7 d=0xe1e1
+RD n=IN i=8 d=0x0000
+RD n=IN i=9 d=0x0000
+RD n=IN i=10 d=0x0000
+RD n=IN i=11 d=0x0000
+RD n=IN i=12 d=0x0000
+RD n=IN i=13 d=0x0000
+RD n=IN i=14 d=0x0000
+RD n=IN i=15 d=0x0000
+RD n=IN i=16 d=0x0000
+RD n=IN i=17 d=0x0000
+RD n=IN i=18 d=0x0000
+RD n=IN i=19 d=0x0000
+RD n=IN i=20 d=0x0000
+RD n=IN i=21 d=0x0000
+RD n=IN i=22 d=0x0000
+RD n=IN i=23 d=0x0000
+RD n=IN i=24 d=0x0000
+RD n=IN i=25 d=0x0000
+RD n=IN i=26 d=0x0000
+RD n=IN i=27 d=0x0000
+RD n=IN i=28 d=0x0000
+RD n=IN i=29 d=0x0000
+RD n=IN i=30 d=0x0000
+RD n=IN i=31 d=0x0000
+RD n=IN i=32 d=0x0000
+RD n=IN i=33 d=0x0000
+RD n=IN i=34 d=0x0000
+RD n=IN i=35 d=0x0000
+RD n=IN i=36 d=0x0000
+RD n=IN i=37 d=0x0000
+RD n=IN i=38 d=0x0000
+RD n=IN i=39 d=0x0000
+RD n=I_POS_IN i=0 d=0x005c
+RD n=I_POS_IN i=1 d=0x0000
+RD n=I_POS_IN i=2 d=0x0000
+RD n=I_POS_IN i=3 d=0x0000
+RD n=I_POS_IN i=4 d=0x0000
+RD n=I_POS_OUT i=0 d=0x0054
+RD n=I_POS_OUT i=1 d=0x0000
+RD n=I_POS_OUT i=2 d=0x0000
+RD n=I_RPTCNT_IN i=0 d=0x1
+RD n=I_RPTCNT_IN i=1 d=0x1
+RD n=I_RPTCNT_IN i=2 d=0x1
+RD n=I_RPTCNT_IN i=3 d=0x1
+RD n=I_RPTCNT_IN i=4 d=0x1
+RD n=I_SKIPCNT_OUT i=0 d=0x0
+RD n=I_SKIPCNT_OUT i=1 d=0x0
+RD n=I_SKIPCNT_OUT i=2 d=0x0
+RD n=I_SKIPCNT_OUT i=3 d=0x0
+RD n=I_SKIPCNT_OUT i=4 d=0x0
+RD n=OUT i=0 d=0xffff
+RD n=OUT i=1 d=0x0000
+RD n=OUT i=2 d=0x0000
+RD n=OUT i=3 d=0x0000
+RD n=OUT i=4 d=0x0000
+RD n=OUT i=5 d=0x0000
+RD n=OUT i=6 d=0x1e1e
+RD n=OUT i=7 d=0x0000
+RD n=OUT i=8 d=0x0000
+RD n=OUT i=9 d=0x0000
+RD n=OUT i=10 d=0x0000
+RD n=OUT i=11 d=0x0000
+RD n=S_CHCFG_IN i=0 d=0x00150000
+RD n=S_CHCFG_IN i=1 d=0x00050000
+RD n=S_CHCFG_IN i=2 d=0x00050000
+RD n=S_CHCFG_IN i=3 d=0x00050000
+RD n=S_CHCFG_IN i=4 d=0x00050000
+RD n=S_CHCFG_OUT i=0 d=0x00000000
+RD n=S_CHCFG_OUT i=1 d=0x00000000
+RD n=S_CHCFG_OUT i=2 d=0x00000000
+RD n=S_CURRCHCFG_IN i=0 d=0x00150000
+RD n=S_CURRCHCFG_IN i=1 d=0x00050000
+RD n=S_CURRCHCFG_IN i=2 d=0x00050000
+RD n=S_CURRCHCFG_IN i=3 d=0x00050000
+RD n=S_CURRCHCFG_IN i=4 d=0x00050000
+RD n=S_CURRCHCFG_OUT i=0 d=0x00000000
+RD n=S_CURRCHCFG_OUT i=1 d=0x00000000
+RD n=S_CURRCHCFG_OUT i=2 d=0x00000000
+RD n=S_CURRLINELEN_IN i=0 d=0x0280
+RD n=S_CURRLINELEN_IN i=1 d=0x0280
+RD n=S_CURRLINELEN_IN i=2 d=0x0280
+RD n=S_CURRLINELEN_IN i=3 d=0xffff
+RD n=S_CURRLINELEN_IN i=4 d=0xffff
+RD n=S_CURRLINELEN_OUT i=0 d=0x0280
+RD n=S_CURRLINELEN_OUT i=1 d=0xffff
+RD n=S_CURRLINELEN_OUT i=2 d=0xffff
+RD n=S_CURRLINE_PTR_IN i=0 d=0x00010000
+RD n=S_CURRLINE_PTR_IN i=1 d=0x00000000
+RD n=S_CURRLINE_PTR_IN i=2 d=0x00000000
+RD n=S_CURRLINE_PTR_IN i=3 d=0x00000000
+RD n=S_CURRLINE_PTR_IN i=4 d=0x00000000
+RD n=S_CURRLINE_PTR_OUT i=0 d=0x00123000
+RD n=S_CURRLINE_PTR_OUT i=1 d=0x00000000
+RD n=S_CURRLINE_PTR_OUT i=2 d=0x00000000
+RD n=S_LINELEN_IN i=0 d=0x0280
+RD n=S_LINELEN_IN i=1 d=0x0280
+RD n=S_LINELEN_IN i=2 d=0x0280
+RD n=S_LINELEN_IN i=3 d=0xffff
+RD n=S_LINELEN_IN i=4 d=0xffff
+RD n=S_LINELEN_OUT i=0 d=0x0280
+RD n=S_LINELEN_OUT i=1 d=0xffff
+RD n=S_LINELEN_OUT i=2 d=0xffff
+RD n=S_LINE_PTR_IN i=0 d=0x00010000
+RD n=S_LINE_PTR_IN i=1 d=0x00000000
+RD n=S_LINE_PTR_IN i=2 d=0x00000000
+RD n=S_LINE_PTR_IN i=3 d=0x00000000
+RD n=S_LINE_PTR_IN i=4 d=0x00000000
+RD n=S_LINE_PTR_OUT i=0 d=0x00123000
+RD n=S_LINE_PTR_OUT i=1 d=0x00000000
+RD n=S_LINE_PTR_OUT i=2 d=0x00000000
+MD n=Mem ra=0x0000000000000000 d=0x00008010	#	(32784)
+MD n=Mem ra=0x0000000000000004 d=0x42000410	#	(1107297296)
+MD n=Mem ra=0x0000000000000008 d=0x00401110	#	(4198672)
+MD n=Mem ra=0x000000000000000c d=0x04010002	#	(67174402)
+MD n=Mem ra=0x0000000000000010 d=0x06010002	#	(100728834)
+MD n=Mem ra=0x0000000000000014 d=0x05000110	#	(83886352)
+MD n=Mem ra=0x0000000000000018 d=0x11101021	#	(286265377)
+MD n=Mem ra=0x000000000000001c d=0x11104622	#	(286279202)
+MD n=Mem ra=0x0000000000000020 d=0x10004020	#	(268451872)
+MD n=Mem ra=0x0000000000000024 d=0x07fd000a	#	(134021130)
+MD n=Mem ra=0x0000000000000028 d=0x00fb0007	#	(16449543)
+MD n=Mem ra=0x000000000000002c d=0x01000000	#	(16777216)
+MD n=Mem ra=0x0000000000010000 d=0xd5d5d4d4	#	(3587560660)
+MD n=Mem ra=0x0000000000010004 d=0xd4d4d5d5	#	(3570718165)
+MD n=Mem ra=0x0000000000010008 d=0xd5d5d4d4	#	(3587560660)
+MD n=Mem ra=0x000000000001000c d=0xd4d4d5d5	#	(3570718165)
+MD n=Mem ra=0x0000000000010010 d=0xd8d8d7d7	#	(3638089687)
+MD n=Mem ra=0x0000000000010014 d=0xd7d7d8d8	#	(3621247192)
+MD n=Mem ra=0x0000000000010018 d=0xd8d8d7d7	#	(3638089687)
+MD n=Mem ra=0x000000000001001c d=0xd7d7d7d7	#	(3621246935)
+MD n=Mem ra=0x0000000000010020 d=0xd8d8d8d8	#	(3638089944)
+MD n=Mem ra=0x0000000000010024 d=0xd7d7d8d8	#	(3621247192)
+MD n=Mem ra=0x0000000000010028 d=0xd8d8d9d9	#	(3638090201)
+MD n=Mem ra=0x000000000001002c d=0xdadadbdb	#	(3671776219)
+MD n=Mem ra=0x0000000000010030 d=0xd9d9d9d9	#	(3654932953)
+MD n=Mem ra=0x0000000000010034 d=0xd9d9d9d9	#	(3654932953)
+MD n=Mem ra=0x0000000000010038 d=0xd9d9d9d9	#	(3654932953)
+MD n=Mem ra=0x000000000001003c d=0xd9d9d9d9	#	(3654932953)
+MD n=Mem ra=0x0000000000010040 d=0xdadadbdb	#	(3671776219)
+MD n=Mem ra=0x0000000000010044 d=0xdbdbdbdb	#	(3688618971)
+MD n=Mem ra=0x0000000000010048 d=0xdbdbdbdb	#	(3688618971)
+MD n=Mem ra=0x000000000001004c d=0xdbdbdcdc	#	(3688619228)
+MD n=Mem ra=0x0000000000010050 d=0xd9d9dada	#	(3654933210)
+MD n=Mem ra=0x0000000000010054 d=0xdcdcdcdc	#	(3705461980)
+MD n=Mem ra=0x0000000000010058 d=0xdbdbdbdb	#	(3688618971)
+MD n=Mem ra=0x000000000001005c d=0xdcdcdddd	#	(3705462237)
+MD n=Mem ra=0x0000000000010060 d=0xdcdcdcdc	#	(3705461980)
+MD n=Mem ra=0x0000000000010064 d=0xdcdcdcdc	#	(3705461980)
+MD n=Mem ra=0x0000000000010068 d=0xdcdcdddd	#	(3705462237)
+MD n=Mem ra=0x000000000001006c d=0xdddddddd	#	(3722304989)
+MD n=Mem ra=0x0000000000010070 d=0xdcdcdcdc	#	(3705461980)
+MD n=Mem ra=0x0000000000010074 d=0xdcdcdddd	#	(3705462237)
+MD n=Mem ra=0x0000000000010078 d=0xdddddddd	#	(3722304989)
+MD n=Mem ra=0x000000000001007c d=0xdddddddd	#	(3722304989)
+MD n=Mem ra=0x0000000000010080 d=0xdddddddd	#	(3722304989)
+MD n=Mem ra=0x0000000000010084 d=0xdededede	#	(3739147998)
+MD n=Mem ra=0x0000000000010088 d=0xdededede	#	(3739147998)
+MD n=Mem ra=0x000000000001008c d=0xdfdfdfdf	#	(3755991007)
+MD n=Mem ra=0x0000000000010090 d=0xdfdfdfdf	#	(3755991007)
+MD n=Mem ra=0x0000000000010094 d=0xe0e0e0e0	#	(3772834016)
+MD n=Mem ra=0x0000000000010098 d=0xe0e0e0e0	#	(3772834016)
+MD n=Mem ra=0x000000000001009c d=0xdfdfdfdf	#	(3755991007)
+MD n=Mem ra=0x00000000000100a0 d=0xe0e0dfdf	#	(3772833759)
+MD n=Mem ra=0x00000000000100a4 d=0xdfdfe1e1	#	(3755991521)
+MD n=Mem ra=0x00000000000100a8 d=0xe1e1e1e1	#	(3789677025)
+MD n=Mem ra=0x00000000000100ac d=0xe1e1e2e2	#	(3789677282)
+MD n=Mem ra=0x00000000000100b0 d=0xe1e1e1e1	#	(3789677025)
+MD n=Mem ra=0x00000000000100b4 d=0xe1e1e2e2	#	(3789677282)
+MD n=Mem ra=0x0000000000123000 d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000123004 d=0x0000ffff	#	(65535)
+MD n=Mem ra=0x0000000000123008 d=0x00000000	#	(0)
+MD n=Mem ra=0x000000000012300c d=0x0000ffff	#	(65535)
+MD n=Mem ra=0x0000000000123010 d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000123014 d=0x0000ffff	#	(65535)
+MD n=Mem ra=0x0000000000123018 d=0x00000000	#	(0)
+MD n=Mem ra=0x000000000012301c d=0x0000ffff	#	(65535)
+MD n=Mem ra=0x0000000000123020 d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000123024 d=0x0000ffff	#	(65535)
+MD n=Mem ra=0x0000000000123028 d=0x00000000	#	(0)
+MD n=Mem ra=0x000000000012302c d=0x0000ffff	#	(65535)
+MD n=Mem ra=0x0000000000123030 d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000123034 d=0x0000ffff	#	(65535)
+MD n=Mem ra=0x0000000000123038 d=0x00000000	#	(0)
+MD n=Mem ra=0x000000000012303c d=0x0000ffff	#	(65535)
+MD n=Mem ra=0x0000000000123040 d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000123044 d=0x0000ffff	#	(65535)
+MD n=Mem ra=0x0000000000123048 d=0x00000000	#	(0)
+MD n=Mem ra=0x000000000012304c d=0x0000ffff	#	(65535)
+MD n=Mem ra=0x0000000000123050 d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000123054 d=0x0000ffff	#	(65535)
+MD n=Mem ra=0x0000000000123058 d=0x00000000	#	(0)
+MD n=Mem ra=0x000000000012305c d=0x0000ffff	#	(65535)
+MD n=Mem ra=0x0000000000123060 d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000123064 d=0x0000ffff	#	(65535)
+MD n=Mem ra=0x0000000000123068 d=0x00000000	#	(0)
+MD n=Mem ra=0x000000000012306c d=0x0000ffff	#	(65535)
+MD n=Mem ra=0x0000000000123070 d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000123074 d=0x0000ffff	#	(65535)
+MD n=Mem ra=0x0000000000123078 d=0x00000000	#	(0)
+MD n=Mem ra=0x000000000012307c d=0x0000ffff	#	(65535)
+MD n=Mem ra=0x0000000000123080 d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000123084 d=0x0000ffff	#	(65535)
+MD n=Mem ra=0x0000000000123088 d=0x00000000	#	(0)
+MD n=Mem ra=0x000000000012308c d=0x0000ffff	#	(65535)
+MD n=Mem ra=0x0000000000123090 d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000123094 d=0x0000ffff	#	(65535)
+MD n=Mem ra=0x0000000000123098 d=0x00000000	#	(0)
+MD n=Mem ra=0x000000000012309c d=0x0000ffff	#	(65535)
+MD n=Mem ra=0x00000000001230a0 d=0x00000000	#	(0)
+MD n=Mem ra=0x00000000001230a4 d=0x0000ffff	#	(65535)

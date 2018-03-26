@@ -1,0 +1,282 @@
+/*-*- C -*-*******************************************************************
+ *
+ *  Copyright Freescale 2013, All rights reserved.
+ *  Copyright NXP 2017, All rights reserved.
+ * 
+ *  SPDX-License-Identifier: BSD-3-Clause
+ *
+ ****************************************************************************/
+/** \addtogroup IPUS_Flow
+ *  @{
+ ****************************************************************************/
+/**  \file      IPUS_Flow.c
+ *   \author    Michael Staudenmaier
+ *
+ *   \internal
+ *    language  ADL
+ ****************************************************************************/
+
+define (arch = IPUS_Flow) {
+  // ***********************************************************************
+  // Instruction Fields
+  // ***********************************************************************
+
+  define (instrfield=COND) {
+    """
+    Branch Condition
+    """;
+    bits = (4,0);
+    display = hex;
+    enumerated = ("AL", "NV", "EQ", "NE", "CC", "CS", "MI", "PL",
+                  "OS", "OC", "GE", "LT", "HI", "LS", "GT");
+  }
+
+  // ***********************************************************************
+  // Instructions
+  // ***********************************************************************
+
+  // unconditional
+  define(instr=bal) {
+    """
+    Unconditional branch instruction.
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0),OPCD(7),RELADDR,COND(COND_AL));
+    syntax=("%i %f", RELADDR);
+    action = {
+      NIA=RELADDR;
+    };
+  }
+
+  define(instr=bnv) {
+    """
+    Branch never instruction. This is equivalent to a NOP.
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0),OPCD(7),RELADDR,COND(COND_NV));
+    syntax=("%i %f", RELADDR);
+    action = {
+    };
+  };
+
+  // Zero flag
+  define(instr=beq) {
+    """
+    Branch if equal instruction.
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0),OPCD(7),RELADDR,COND(COND_EQ));
+    syntax=("%i %f", RELADDR);
+    action = {
+#ifdef LOG_MORE
+      info(1,"CC_ZNCO = ",CC_ZNCO[3],CC_ZNCO[2],CC_ZNCO[1],CC_ZNCO[0]);
+#endif
+      if(F_Z(CC_ZNCO))
+        NIA=RELADDR;
+    };
+  };
+
+  define(instr=bne) {
+    """
+    Branch if not equal instruction.
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0),OPCD(7),RELADDR,COND(COND_NE));
+    syntax=("%i %f", RELADDR);
+    action = {
+#ifdef LOG_MORE
+      info(1,"CC_ZNCO = ",CC_ZNCO[3],CC_ZNCO[2],CC_ZNCO[1],CC_ZNCO[0]);
+#endif
+      if(F_ZQ(CC_ZNCO))
+        NIA=RELADDR;
+    };
+  };  
+
+  // Carry flag
+  define(instr=bcs) {
+    """
+    Branch if if carry flag is set.
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0),OPCD(7),RELADDR,COND(COND_CS));
+    syntax=("%i %f", RELADDR);
+    action = {
+#ifdef LOG_MORE
+      info(1,"CC_ZNCO = ",CC_ZNCO[3],CC_ZNCO[2],CC_ZNCO[1],CC_ZNCO[0]);
+#endif
+      if(F_C(CC_ZNCO))
+        NIA=RELADDR;
+    };
+  };
+
+  define(instr=bcc) {
+    """
+    Branch if carry flag is cleared.
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0),OPCD(7),RELADDR,COND(COND_CC));
+    syntax=("%i %f", RELADDR);
+    action = {
+#ifdef LOG_MORE
+      info(1,"CC_ZNCO = ",CC_ZNCO[3],CC_ZNCO[2],CC_ZNCO[1],CC_ZNCO[0]);
+#endif
+      if(F_CQ(CC_ZNCO))
+        NIA=RELADDR;
+    };
+  };
+
+  // Negative Flag
+  define(instr=bmi) {
+    """
+    Branch if negative flag is set.
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0),OPCD(7),RELADDR,COND(COND_MI));
+    syntax=("%i %f", RELADDR);
+    action = {
+#ifdef LOG_MORE
+      info(1,"CC_ZNCO = ",CC_ZNCO[3],CC_ZNCO[2],CC_ZNCO[1],CC_ZNCO[0]);
+#endif
+      if(F_N(CC_ZNCO))
+        NIA=RELADDR;
+    };
+  };  
+
+  define(instr=bpl) {
+    """
+    Branch if negative flag is cleared.
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0),OPCD(7),RELADDR,COND(COND_PL));
+    syntax=("%i %f", RELADDR);
+    action = {
+#ifdef LOG_MORE
+      info(1,"CC_ZNCO = ",CC_ZNCO[3],CC_ZNCO[2],CC_ZNCO[1],CC_ZNCO[0]);
+#endif
+      if(F_NQ(CC_ZNCO))
+        NIA=RELADDR;
+    };
+  };  
+
+  // Overflow flag
+  define(instr=bos) {
+    """
+    Branch if overflow flag is set.
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0),OPCD(7),RELADDR,COND(COND_OS));
+    syntax=("%i %f", RELADDR);
+    action = {
+#ifdef LOG_MORE
+      info(1,"CC_ZNCO = ",CC_ZNCO[3],CC_ZNCO[2],CC_ZNCO[1],CC_ZNCO[0]);
+#endif
+      if(F_O(CC_ZNCO))
+        NIA=RELADDR;
+    };
+  };  
+
+  define(instr=boc) {
+    """
+    Branch if overflow flag is cleared.
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0),OPCD(7),RELADDR,COND(COND_OC));
+    syntax=("%i %f", RELADDR);
+    action = {
+#ifdef LOG_MORE
+      info(1,"CC_ZNCO = ",CC_ZNCO[3],CC_ZNCO[2],CC_ZNCO[1],CC_ZNCO[0]);
+#endif
+      if(F_OQ(CC_ZNCO))
+        NIA=RELADDR;
+    };
+  };  
+
+  // signed arithmetics
+  define(instr=bge) {
+    """
+    Branch if greater or equal (signed).
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0),OPCD(7),RELADDR,COND(COND_GE));
+    syntax=("%i %f", RELADDR);
+    action = {
+#ifdef LOG_MORE
+      info(1,"CC_ZNCO = ",CC_ZNCO[3],CC_ZNCO[2],CC_ZNCO[1],CC_ZNCO[0]);
+#endif
+      if((F_N(CC_ZNCO)  && F_O(CC_ZNCO)) ||
+         (F_NQ(CC_ZNCO) && F_OQ(CC_ZNCO)))
+        NIA=RELADDR;
+    };
+  };  
+
+  define(instr=blt) {
+    """
+    Branch if lower than (signed).
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0),OPCD(7),RELADDR,COND(COND_LT));
+    syntax=("%i %f", RELADDR);
+    action = {
+#ifdef LOG_MORE
+      info(1,"CC_ZNCO = ",CC_ZNCO[3],CC_ZNCO[2],CC_ZNCO[1],CC_ZNCO[0]);
+#endif
+      if(((CC_ZNCO.N & ~CC_ZNCO.O) |
+          (~CC_ZNCO.N & CC_ZNCO.O))
+         == 1)
+        NIA=RELADDR;
+      //if((F_N(CC_ZNCO)  && F_OQ(CC_ZNCO)) ||
+      //   (F_NQ(CC_ZNCO) && F_O(CC_ZNCO)))
+      //  NIA=RELADDR;
+    };
+  };
+
+  define(instr=bgt) {
+    """
+    Branch if greater than (signed).
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0),OPCD(7),RELADDR,COND(COND_GT));
+    syntax=("%i %f", RELADDR);
+    action = {
+#ifdef LOG_MORE
+      info(1,"CC_ZNCO = ",CC_ZNCO[3],CC_ZNCO[2],CC_ZNCO[1],CC_ZNCO[0]);
+#endif
+      if((F_N(CC_ZNCO)  && F_O(CC_ZNCO)  && F_ZQ(CC_ZNCO)) ||
+         (F_NQ(CC_ZNCO) && F_OQ(CC_ZNCO) && F_ZQ(CC_ZNCO)))
+        NIA=RELADDR;
+    };
+  };  
+
+  // unsigned arithmetics
+  define(instr=bhi) {
+    """
+    Branch if higher (unsigned).
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0),OPCD(7),RELADDR,COND(COND_HI));
+    syntax=("%i %f", RELADDR);
+    action = {
+#ifdef LOG_MORE
+      info(1,"CC_ZNCO = ",CC_ZNCO[3],CC_ZNCO[2],CC_ZNCO[1],CC_ZNCO[0]);
+#endif
+      if(F_CQ(CC_ZNCO) && F_ZQ(CC_ZNCO))
+        NIA=RELADDR;
+    };
+  };  
+
+  define(instr=bls) {
+    """
+    Branch if lower or same (unsigned).
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0),OPCD(7),RELADDR,COND(COND_LS));
+    syntax=("%i %f", RELADDR);
+    action = {
+#ifdef LOG_MORE
+      info(1,"CC_ZNCO = ",CC_ZNCO[3],CC_ZNCO[2],CC_ZNCO[1],CC_ZNCO[0]);
+#endif
+      if(F_C(CC_ZNCO) || F_Z(CC_ZNCO))
+        NIA=RELADDR;
+    };
+  };  
+}

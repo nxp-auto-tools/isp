@@ -1,0 +1,2064 @@
+// *-*- c -*-******************************************************************
+// *
+// *  Copyright Freescale 2013, All rights reserved.
+// *  Copyright NXP 2017, All rights reserved.
+// * 
+// *  SPDX-License-Identifier: BSD-3-Clause
+// *
+// ***************************************************************************/
+// ** \addtogroup Ipuv_HostRegs
+// *  @{
+// ***************************************************************************/
+// ** 
+// *  
+// *  \file      IPUS_HostRegs.adl
+// *  \author    Stephan Herrmann
+// *  \date      \$Date: 2006/09/15 10:50:49 $
+// *
+// *  \internal
+// *   language  ADL
+// *   $Id: fsl_header.el,v 1.1 2006/09/15 10:50:49 norberts Exp $
+// ***************************************************************************/
+
+#include "IPUS_Defines.h"
+
+define (arch = IPUS_HostRegs) {
+
+  // Start next line
+  void StartLine() {
+
+    // check if we can progress to next line
+    if (I_BUFFERED == 0) return;
+    if (I_RUN == 1) return;
+
+    I_RUN=1;             // needs to be done before updateing XPOS
+    I_BUFFERED=0;
+
+    // start the next line
+    { 
+      int start=I_START.NEXT.uint32();
+      NIA=start;
+      I_START.CURR=start;
+    }
+
+    H_CURRXCFG=H_XCFG;   // needs to be done before updateing XPOS
+
+    I_INACFG.CURRCFG=I_INACFG.NEXTCFG;
+
+    //H_INACFG(31,16)/*.CURRCFG*/=H_INACFG.NEXTCFG;
+#ifdef HASINB
+    I_INBCFG.CURRCFG=I_INBCFG.NEXTCFG;
+#endif
+#ifdef HASINALPHA
+    I_INALCFG.CURRCFG=I_INALCFG.NEXTCFG;
+#endif
+    I_OUTCFG.CURRCFG=I_OUTCFG.NEXTCFG;
+
+    // update position... this will also check for end of line!
+    XPOS=H_POS(31,16);
+    YPOS=H_POS(15,0);
+
+    StreamDMAStartLine();
+
+    // lock DREG read out
+    LOCK=-1;
+
+    // initialize MASK
+    MASKV=-1;
+#ifndef MAKEDOC
+#ifdef POWERSAVE_TREE
+    //disable adder tree until configured
+    I_ADDT_EN=0;
+
+    //disable sorting tree until configured
+    I_SORT_EN=0;
+#endif
+
+    I_ACC_CHANGED(4,4)=0;
+
+    // clear STAT register
+    I_STAT_NEW_LINE=1;
+
+    // clear LUT register
+    I_LUT_CLEAR=1;
+
+    // set active
+    if (I_RUN==1) set_active_count(-1);
+#endif // MAKEDOC
+  }
+
+#ifndef MAKEDOC
+  int Check_Register_Locked(int drega) {
+    // returns 1 when register is locked for Host reads
+
+    // lock is not enabled from CSE
+    if (CSE_SET_LOCK == 0) return 0;
+
+    if (drega < 112) return 1;  // lower than GPR
+    if (drega > 251) return 1;  // higher than best 5 of n
+    if (drega < 128) {          // check GPRs
+      int lockbits=0;
+      int lockmask;
+      drega -= 112;
+      // select bits for the block of 4 GPRS
+      lockbits=((LOCK.uint32()) >> (2* (drega>>2))) & 0x3;
+      switch (lockbits) {
+      case 0:
+        lockmask=0xf;
+        break;
+      case 1:
+        lockmask=0xc;
+        break;
+      case 2:
+        lockmask=0x1;
+        break;
+      default:
+        lockmask=0x0;
+      }
+      // check for bit in mask
+      if (lockmask & (1 << (drega & 0x3))) return 0;
+      return 1;
+    }
+    if(drega < 132) {           // check OUTs
+      if (LOCK(8) == 0) return 0;
+    }
+
+    if (drega >= 242) {         // check best 5 of n
+      if (LOCK(11) == 0) return 0;
+    }
+
+    return 1; // locked
+  }
+#endif // MAKEDOC
+
+  // ***********************************************************************
+  // Registers
+  // ***********************************************************************
+
+  // Simualtion control register
+
+  // Input signals
+  define (reg=CSE_SET_LOCK) {
+    """
+    Input Signal:
+    Indicate if the core runs in locked mode (no debug, register read out)
+
+    + 1 = Locked / Secure Mode
+    """;
+    width = 1;
+    reset = 0; // default is unlocked
+  }
+
+  // Host registers
+  define (reg=H_START) {
+    """
+    Host Register:
+    Trigger new line
+    """;
+    width = 32;
+    define (field=CURR) {
+      """
+      Instruction start address for current line being processed (read only)
+      """;
+      bits = (23,16);
+      readonly = true;
+    }
+    define (field=NEXT) {
+      """
+      start address  for next line to be processed (read/write)
+      """;
+      bits = (7,0);
+    }
+#ifndef MAKEDOC
+    //pseudo = true;
+    define (read) {
+      action = { return I_START; };
+    }
+    define (write) {
+      action = func(bits<32> val) {
+        I_START.NEXT = val(7,0);
+
+        I_BUFFERED = 1;  // buffered
+        StartLine();     // to running
+      };
+    }
+#endif
+  }
+
+  // Host registers
+  define (reg=I_START) {
+    """
+    Internal Register:
+    Identical to H_START
+    """;
+    width = 32;
+    define (field=CURR) {
+      """
+      Instruction start address for current line being processed (read only)
+      """;
+      bits = (23,16);
+    }
+    define (field=NEXT) {
+      """
+      start address  for next line to be processed (read/write)
+      """;
+      bits = (7,0);
+    }
+  }
+
+  define (reg=H_STATUS) {
+    """
+    Host Register:
+    Reads the operation status, clear events
+    """;
+    width = 32;
+    define (field=EVENTS) {
+      """
+      Number of events, write to decrement
+      """;
+      bits = (1,0);
+    }
+    define (field=STATUS) {
+      """
+      Status
+
+      + 0: idle
+      + 1: running
+      + 3: running and buffered
+      """;
+      bits = (9,8);
+    }
+    define (field=RUN) {
+      """
+      Engine is currently running
+
+      + 1: running
+      """;
+      bits = (8,8);
+    }
+     define (field=BUFFERED) {
+      """
+      Engine has a buffered setup. Do not add/modify line setup anymore
+      until buffered became active (running).
+
+      + 1: buffered
+      """;
+      bits = (9,9);
+    }
+   define (field=DEBUG) {
+      """
+      Debug Mode
+
+      + 0: normal
+      + 1: debug mode
+      """;
+      bits = (10,10);
+    }
+    define (field=REMAINING) {
+      """
+      Number of remaining pixels
+      """;
+      bits = (31,16);
+    }
+#ifndef MAKEDOC
+    define (read) {
+      action = {
+        bits <32> retval;
+        retval=0;
+        retval( 1, 0) = I_EVENTS;
+        retval( 8, 8) = I_RUN;
+        retval( 9, 9) = I_BUFFERED;
+        retval(10,10) = I_DEBUGMODE;
+        retval(31,16) = I_XSIZE - XPOS;
+        return retval;
+      };
+    }
+    define (write) {
+      action = func(bits<32> val) {
+        I_EVENTS = -(val(1,0).uint32());  // decrement by val
+      };
+    }
+#endif // MAKEDOC
+  }
+
+  define (reg=I_RUN) {
+    """
+    Internal Register:
+    Core is running
+    Is identical to H_STATUS.RUN
+    """;
+    width = 1;
+    reset = 0;
+  }
+
+  define (reg=I_BUFFERED) {
+    """
+    Internal Register:
+    Core has buffered setup for next line.
+    Is identical to H_STATUS.BUFFERED
+    """;
+    width = 1;
+    reset = 0;
+  }
+
+  define (reg=I_EVENTS) {
+    """
+    Internal Register:
+    Number of processed lines.
+    Is identical to H_STATUS.EVENTS
+
+    + counts up per done line
+    + counts down per cleared event
+    """;
+    width = 2;
+    reset = 0;
+#ifndef MAKEDOC
+    define (write) {
+      action = func(bits<2> val) {
+        bits <3> events;
+        events = I_EVENTS.uint32() + val.uint32();
+        if (events(2) == 1) { // decrement overflow
+          I_EVENTS = 0;
+        }
+        else if (events(1,0) == 3) { // overflow increment
+          I_EVENTS=2;
+        }
+        else {
+          I_EVENTS = events(1,0);
+        }
+      };
+    }
+#endif // MAKEDOC
+  }
+
+
+  //define (reg=I_STATUS) {
+  //  """
+  //  Internal Register:
+  //  Operation status
+  //  bits [1:0]
+  //  0: idle
+  //  1: running
+  //  3: running and buffered
+  //  bit [2]:
+  //  0: normal
+  //  1: debug mode
+  //  """;
+  //  width = 3;
+  //}
+
+  define (reg=H_POS) {
+    """
+    Host Register:
+    Start Position for next line to be processed
+    """;
+    width = 32;
+    define (field=XPOS) {
+      """
+      XPOS
+      """;
+      bits = (31,16);
+    }
+    define (field=YPOS) {
+      """
+      YPOS
+      """;
+      bits = (15,0);
+    }
+  }
+
+  define (reg=H_CURRPOS) {
+    """
+    Host Register:
+    Position of current line processed (read only)
+    """;
+    width = 32;
+    define (field=XPOS) {
+      """
+      XPOS (same value as current core register)
+      """;
+      bits = (31,16);
+    }
+    define (field=YPOS) {
+      """
+      YPOS (same value as current core register)
+      """;
+      bits = (15,0);
+    }
+#ifndef MAKEDOC
+    define (read) {
+      action = {
+        return concat(XPOS,YPOS);
+      };
+    }
+    define (write) {
+      action = func(bits<32> val) { return ; };
+    }
+#endif // MAKEDOC
+  }
+
+  // ***************************************
+  // X-position counter configuration
+  define (reg=H_XCFG) {
+    """
+    Host Register:
+    X counter configuration for next line
+    """;
+    width = 32;
+    reset = 0x04000001;
+    define (field=XSIZE) {
+      """
+      XSIZE (to be compared with XPOS to detect end of line)
+      """;
+      bits = (31,16);
+    }
+    define (field=SHIFT) {
+      """
+      Progress XPOS by SHIFT pixels (constant value of 1)
+      """;
+      bits = (1,0);
+    }
+#ifndef MAKEDOC
+    define (write) {
+      action = func(bits<32> val) {
+        int in=val.int32();
+        H_XCFG = in & 0xffff0007 | ((in & 0x3)? 0x0 : 0x4);
+        //info(0,"TEJ H_XCFG = ",H_XCFG );  // sth shopuld be in trace anyway!?
+      };
+    }
+#endif // MAKEDOC
+  }
+        
+  define (reg=H_CURRXCFG) {
+    """
+    Host Register:
+    X counter configuration for current line
+    """;
+    width = 32;
+    reset = 0x04000001;
+    define (field=XSIZE) {
+      """
+      XSIZE (to be compared with XPOS to detect end of line)
+      """;
+      bits = (31,16);
+    }
+    define (field=SHIFT) {
+      """
+      Progress XPOS by SHIFT pixels (constant value of 1)
+      """;
+      bits = (1,0);
+      readonly = true;
+    }
+#ifndef MAKEDOC
+    define (read) {
+      action = {
+        bits<32> retval;
+        retval=0;
+        retval(31,16)=I_XSIZE;
+        retval(2,0)  =I_SHIFT_X;
+        return retval;
+      };
+    }
+    define (write) {
+      action = func(bits<32> val) {
+        I_XSIZE = val(31,16);
+        I_SHIFT_X = val(2,0);
+        //I_SHIFT_X = 1;
+      };
+    }
+#endif // MAKEDOC
+  }
+
+  define (reg=I_XSIZE) {
+    """
+    Internal Register:
+    Identical to H_CURRXCFG.XSIZE.
+    Stop processing when XPOS reaches H_CURRXCFG.XSIZE (line length)
+    """;
+    width = 16;
+    reset = 1024;
+  }
+
+  define (reg=I_SHIFT_X) {
+    """
+    Internal Register:
+    Identical to H_CURRXCFG.SHIFT.
+    Increment XPOS counter by positions per \"done *,*x*\"
+    """;
+    width = 3;
+    reset = 1;
+#ifndef MAKEDOC
+    define (write) {
+      action = func(bits<3> val) {
+        val=val & 0x3;
+        if (val==0) {
+          I_SHIFT_X=4;
+        }
+        else {
+          I_SHIFT_X=val;
+        }
+      };
+    }
+#endif // MAKEDOC
+  }
+
+  // ***************************************
+  // IMA registers
+  define (reg=H_IMEMA) {
+    """
+    Host Register:
+    IMEM address register
+    """;
+    width = 6;
+    // accessible only in unpretected mode!!!
+  }
+
+  define (reg=H_IMEMD) {
+    """
+    Host Register:
+    IMEM data value at address H_IMEMA
+    Any access to H_IMEMD will progress H_IMEMA to the next instruction address
+    """;
+    width = 32;
+#ifndef MAKEDOC
+    define (read) {
+      action = {
+        bits<32> data;
+        data=Mem(H_IMEMA*4,4);
+        H_IMEMA = (H_IMEMA + 1) & 0x3f;
+        return data;
+      };
+                        
+    };
+    define (write) {
+
+      action = func(bits<32> val) {
+        Mem(H_IMEMA*4,4) = val;
+        H_IMEMA = (H_IMEMA + 1) & 0x3f;
+      };
+    }
+#endif //  MAKEDOC
+   }
+
+  define (reg=H_DREGA) {
+    """
+    Host Register:
+    Data register address register
+    """;
+    width = 8;
+    // accessible only in unpretected mode!!!
+  }
+
+  define (reg=H_DREGD) {
+    """
+    Host Register:
+    Data register value at address H_DREGA.
+    Any access to H_DREGD will progress H_DREGA to the next register address
+    """;
+    width = 16;
+#ifndef MAKEDOC
+    define (read) {
+      action = {
+        bits<16> data;
+        // check lock
+        if (Check_Register_Locked(H_DREGA.uint32())) {
+          data=0;  // locked
+#ifdef LOG_MORE
+          info(1,"Read locked register R[",H_DREGA.uint32(),"]");
+#endif
+        }
+        else {
+          // do access
+          I_DREGDACCESS=1;
+          if(H_DREGA==0) {
+            data=NIA + 4;
+          }
+          else {
+            data=R(H_DREGA);
+          }
+          I_DREGDACCESS=0;
+        }
+        H_DREGA = (H_DREGA +1) & 0xff;
+        return data;
+      };
+                        
+    };
+    define (write) {
+
+      action = func(bits<16> val) {  // write via the ALU result / write port,
+                                     // stall engine if running
+        if (H_DREGA != 252) { // write access to LOCK bit is prohibited
+          RES=val;
+          SAT=val;
+          I_DREGDACCESS=1;
+          R(H_DREGA) = SAT;
+          I_DREGDACCESS=0;
+          tree_recompute();
+        }
+        H_DREGA = (H_DREGA +1) & 0xff;
+      };
+    }
+#endif // MAKEDOC
+  }
+
+#ifndef MAKEDOC
+  define (reg=I_DREGDACCESS) {
+    """
+    Internal Register:
+    Indicating a register access via the peripheral registers
+    """;
+    width = 1;
+    reset = 0;
+  }
+#endif // MAKEDOC
+
+  // ***************************************
+  // Input Parameters for INA
+  define (reg=H_INACFG) {
+    """
+    Host Register:
+    Input Matrix A configuration
+    """;
+    width = 32;
+    reset = 0x00010001;
+    define (field=CURRCFG) {
+      """
+      Status of current line to be processed (read only)
+      """;
+      bits = (31,16);
+      readonly = true;
+    }
+    define (field=CURRLINE2) {
+      """
+      Indicates if currently line 2 is enabled (for IN[16] to IN[23])
+
+      + 1: enabled
+      """;
+      bits = (26,26);
+    }
+    define (field=CURRLINE1) {
+      """
+      Indicates if currently line 1 is enabled (for IN[8] to IN[15])
+
+      + 1: enabled
+      """;
+      bits = (25,25);
+    }
+    define (field=CURRLINE0) {
+      """
+      Indicates if currently line 0 is enabled (for IN[0] to IN[7])
+
+      + 1: enabled
+      """;
+      bits = (24,24);
+    }
+    define (field=CURRNHOOD) {
+      """
+      Current line neighborhood type
+
+      + 0: 2D (3x3)
+      + 1: horizontal (9x1)
+      """;
+      bits = (18,18);
+    }
+    define (field=CURRSHIFT) {
+      """
+      constant value of 1 pixel
+      """;
+      bits = (17,16);
+    }
+    define (field=NEXTCFG) {
+      """
+      Setup for next line to be processed (becomes valid with next
+      write to H_START)
+      """;
+      bits = (15,0);
+    }
+    define (field=LINE2) {
+      """
+      Indicates if line 2 is enabled for next line (for IN[16] to IN[23])
+
+      + 1: enabled
+      """;
+      bits = (10,10);
+    }
+    define (field=LINE1) {
+      """
+      Indicates if line 1 is enabled for next line (for IN[8] to IN[15])
+
+      + 1: enabled
+      """;
+      bits = (9,9);
+    }
+    define (field=LINE0) {
+      """
+      Indicates if line 0 is enabled for next line (for IN[0] to IN[7])
+
+      + 1: enabled
+      """;
+      bits = (8,8);
+    }
+    define (field=NHOOD) {
+      """
+      next line neighborhood type
+
+      + 0: 2D (3x3)
+      + 1: horizontal (9x1)
+      """;
+      bits = (2,2);
+    }
+    define (field=SHIFT) {
+      """
+      constant value of 1 pixel
+      """;
+      readonly=true;
+      bits = (1,0);
+    }
+#ifndef MAKEDOC
+    define (read) {
+      action = { return I_INACFG; };
+    }
+    define (write) {
+      action = func (bits<32> val) {
+        I_INACFG.NEXTCFG = (val(16,0).uint32() & 0x0704) | 0x1;
+      };
+    }
+#endif // MAKEDOC
+  }
+
+  define (reg=I_INACFG) {
+    """
+    Internal Register:
+    Identical to H_INACFG (Input Matrix A configuration)
+    """;
+    width = 32;
+    reset = 0x00010001;
+    define (field=CURRCFG) {
+      """
+      Status of current line to be processed (read only)
+      """;
+      bits = (31,16);
+    }
+    define (field=CURRLINE2) {
+      """
+      Indicates if currently line 2 is enabled (for IN[6] to IN[8])
+
+      + 1: enabled
+      """;
+      bits = (26,26);
+    }
+    define (field=CURRLINE1) {
+      """
+      Indicates if currently line 1 is enabled (for IN[3] to IN[5])
+
+      + 1: enabled
+      """;
+      bits = (25,25);
+    }
+    define (field=CURRLINE0) {
+      """
+      Indicates if currently line 0 is enabled (for IN[0] to IN[2])
+
+      + 1: enabled
+      """;
+      bits = (24,24);
+    }
+    define (field=CURRNHOOD) {
+      """
+      Current line neighborhood type
+
+      + 0: 2D (3x3)
+      + 1: horizontal (9x1)
+      """;
+      bits = (18,18);
+    }
+    define (field=CURRSHIFT) {
+      """
+      constant value of 1 pixel
+      """;
+      bits = (17,16);
+    }
+    define (field=NEXTCFG) {
+      """
+      Setup for next line to be processed (becomes valid with next
+      write to H_START)
+      """;
+      bits = (15,0);
+    }
+    define (field=LINE2) {
+      """
+      Indicates if line 2 is enabled for next line (for IN[6] to IN[8])
+
+      + 1: enabled
+      """;
+      bits = (10,10);
+    }
+    define (field=LINE1) {
+      """
+      Indicates if line 1 is enabled for next line (for IN[3] to IN[5])
+
+      + 1: enabled
+      """;
+      bits = (9,9);
+    }
+    define (field=LINE0) {
+      """
+      Indicates if line 0 is enabled for next line (for IN[0] to IN[2])
+
+      + 1: enabled
+      """;
+      bits = (8,8);
+    }
+    define (field=NHOOD) {
+      """
+      next line neighborhood type
+
+      + 0: 2D (3x3)
+      + 1: horizontal (9x1)
+      """;
+      bits = (2,2);
+    }
+    define (field=SHIFT) {
+      """
+      constant value of 1 pixel
+      """;
+      bits = (1,0);
+    }
+#ifndef MAKEDOC
+    define (read) {
+      action = { return I_INACFG; };
+      //  
+      //  bits<32> retval;
+      //  retval=0;
+      //  retval(26,24) = I_CHANNELS_INA;
+      //  retval(18)    = I_NHOOD_INA;
+      //  retval(17,16) = I_SHIFT_INA;
+      //  retval(15,0)  = H_INACFG(15,0);
+      //  return retval;
+      //};
+    }
+    define (write) {
+      action = func (bits<32> val) {
+        I_INACFG=val;
+
+        info(1,"INA.CURRCHANNELS = ",
+             I_INACFG(26,24));
+        if (ThisReg.CURRNHOOD == 0) {
+          info(1,"INA.CURRNHOOD = 3x3");
+        }
+        else {
+          info(1,"INA.CURRNHOOD = 9x1");
+        }
+        info(1,"INA.CURRSHIFT = ",
+             I_INACFG(17,16));
+
+        info(1,"INA.CHANNELS = ",
+             I_INACFG(10,8));
+        if (ThisReg.NHOOD == 0) {
+          info(1,"INA.NHOOD = 3x3");
+        }
+        else {
+          info(1,"INA.NHOOD = 9x1");
+        }
+        info(1,"INA.SHIFT = ",
+             I_INACFG(1,0));
+      };
+    }
+#endif // MAKEDOC
+  }
+
+  // Input Parameters for INB *************
+#ifdef HASINB
+  define (reg=H_INBCFG) {
+    """
+    Host Register:
+    Input Matrix B configuration
+    """;
+    width = 32;
+    reset=0x00010001;
+    define (field=CURRCFG) {
+      """
+      Status of current line to be processed (read only)
+      """;
+      bits = (31,16);
+      readonly = true;
+    }
+    define (field=CURRLINE2) {
+      """
+      Indicates if currently line 2 is enabled
+
+      + 1: enabled
+      """;
+      bits = (26,26);
+    }
+    define (field=CURRLINE1) {
+      """
+      Indicates if currently line 1 is enabled
+
+      + 1: enabled
+      """;
+      bits = (25,25);
+    }
+    define (field=CURRLINE0) {
+      """
+      Indicates if currently line 0 is enabled
+
+      + 1: enabled
+      """;
+      bits = (24,24);
+    }
+    define (field=CURRNHOOD) {
+      """
+      Current line neighborhood type
+
+      + 0: 2D (3x3)
+      + 1: horizontal (9x1)
+      """;
+      bits = (18,18);
+    }
+    define (field=CURRSHIFT) {
+      """
+      constant value of 1 pixel
+      """;
+      bits = (17,16);
+    }
+    define (field=NEXTCFG) {
+      """
+      Setup for next line to be processed (becomes valid with next
+      write to H_START)
+      """;
+      bits = (15,0);
+    }
+    define (field=LINE2) {
+      """
+      Indicates if line 2 is enabled for next line (for IN[6] to IN[8])
+
+      + 1: enabled
+      """;
+      bits = (10,10);
+    }
+    define (field=LINE1) {
+      """
+      Indicates if line 1 is enabled for next line (for IN[3] to IN[5])
+
+      + 1: enabled
+      """;
+      bits = (9,9);
+    }
+    define (field=LINE0) {
+      """
+      Indicates if line 0 is enabled for next line (for IN[0] to IN[2])
+
+      + 1: enabled
+      """;
+      bits = (8,8);
+    }
+    define (field=NHOOD) {
+      """
+      next line neighborhood type
+
+      + 0: 2D (3x3)
+      + 1: horizontal (9x1)
+      """;
+      bits = (2,2);
+    }
+    define (field=SHIFT) {
+      """
+      constant value of 1 pixel
+      """;
+      readonly=true;
+      bits = (1,0);
+    }
+#ifndef MAKEDOC
+    define (read) {
+      action = { return I_INBCFG; };
+    }
+    define (write) {
+      action = func (bits<32> val) {
+        I_INBCFG.NEXTCFG = (val(16,0).uint32() & 0x0704) | 0x1;
+      };
+    }
+#endif // MAKEDOC
+  }
+
+  define (reg=I_INBCFG) {
+    """
+    Internal Register:
+    Identical to H_INBCFG (Input Matrix A configuration)
+    """;
+    width = 32;
+    reset = 0x00010001;
+    define (field=CURRCFG) {
+      """
+      Status of current line to be processed (read only)
+      """;
+      bits = (31,16);
+    }
+    define (field=CURRLINE2) {
+      """
+      Indicates if currently line 2 is enabled
+
+      + 1: enabled
+      """;
+      bits = (26,26);
+    }
+    define (field=CURRLINE1) {
+      """
+      Indicates if currently line 1 is enabled
+
+      + 1: enabled
+      """;
+      bits = (25,25);
+    }
+    define (field=CURRLINE0) {
+      """
+      Indicates if currently line 0 is enabled
+
+      + 1: enabled
+      """;
+      bits = (24,24);
+    }
+    define (field=CURRNHOOD) {
+      """
+      Current line neighborhood type
+
+      + 0: horizontal (9x1)
+      + 1: 2D (3x3)
+      """;
+      bits = (18,18);
+    }
+    define (field=CURRSHIFT) {
+      """
+      constant value of 1 pixel
+      """;
+      bits = (17,16);
+    }
+    define (field=NEXTCFG) {
+      """
+      Setup for next line to be processed (becomes valid with next
+      write to H_START)
+      """;
+      bits = (15,0);
+    }
+    define (field=LINE2) {
+      """
+      Indicates if line 2 is enabled for next line
+
+      + 1: enabled
+      """;
+      bits = (10,10);
+    }
+    define (field=LINE1) {
+      """
+      Indicates if line 1 is enabled for next line
+
+      + 1: enabled
+      """;
+      bits = (9,9);
+    }
+    define (field=LINE0) {
+      """
+      Indicates if line 0 is enabled for next line
+
+      + 1: enabled
+      """;
+      bits = (8,8);
+    }
+    define (field=NHOOD) {
+      """
+      next line neighborhood type
+
+      + 0: 2D (3x3)
+      + 1: horizontal (9x1)
+      """;
+      bits = (2,2);
+    }
+    define (field=SHIFT) {
+      """
+      constant value of 1 pixel
+      """;
+      bits = (1,0);
+    }
+#ifndef MAKEDOC
+    define (read) {
+      action = { return I_INBCFG; };
+      //  
+      //  bits<32> retval;
+      //  retval=0;
+      //  retval(26,24) = I_CHANNELS_INB;
+      //  retval(18)    = I_NHOOD_INB;
+      //  retval(17,16) = I_SHIFT_INB;
+      //  retval(15,0)  = H_INBCFG(15,0);
+      //  return retval;
+      //};
+    }
+    define (write) {
+      action = func (bits<32> val) {
+        I_INBCFG=val;
+
+        info(1,"INB.CURRCHANNELS = ",
+             I_INBCFG(26,24));
+        if (ThisReg.CURRNHOOD == 0) {
+          info(1,"INB.CURRNHOOD = 3x3");
+        }
+        else {
+          info(1,"INB.CURRNHOOD = 9x1");
+        }
+        info(1,"INB.CURRSHIFT = ",
+             I_INBCFG(17,16));
+
+        info(1,"INB.CHANNELS = ",
+             I_INBCFG(10,8));
+        if (ThisReg.NHOOD == 0) {
+          info(1,"INB.NHOOD = 3x3");
+        }
+        else {
+          info(1,"INB.NHOOD = 9x1");
+        }
+        info(1,"INB.SHIFT = ",
+             I_INBCFG(1,0));
+      };
+    }
+#endif // MAKEDOC
+  }
+
+#endif
+
+  // Input Parameters for INAlpha *************
+#ifdef HASINALPHA
+  define (reg=H_INALCFG) {
+    """
+    Host Register:
+    Input Matrix Alpha configuration
+    """;
+    width = 32;
+    reset=0x00010001;
+    define (field=CURRCFG) {
+      """
+      Status of current line to be processed (read only)
+      """;
+      bits = (31,16);
+      readonly = true;
+    }
+    define (field=CURRLINE2) {
+      """
+      Indicates if currently line 2 is enabled
+
+      + 1: enabled
+      """;
+      bits = (26,26);
+    }
+    define (field=CURRLINE1) {
+      """
+      Indicates if currently line 1 is enabled
+
+      + 1: enabled
+      """;
+      bits = (25,25);
+    }
+    define (field=CURRLINE0) {
+      """
+      Indicates if currently line 0 is enabled
+
+      + 1: enabled
+      """;
+      bits = (24,24);
+    }
+    define (field=CURRNHOOD) {
+      """
+      Current line neighborhood type
+
+      + 0: horizontal (9x1)
+      + 1: 2D (3x3)
+      """;
+      bits = (18,18);
+    }
+    define (field=CURRSHIFT) {
+      """
+      constant value of 1 pixel
+      """;
+      bits = (17,16);
+    }
+    define (field=NEXTCFG) {
+      """
+      Setup for next line to be processed (becomes valid with next
+      write to H_START)
+      """;
+      bits = (15,0);
+    }
+    define (field=LINE2) {
+      """
+      Indicates if line 2 is enabled for next line (for IN[6] to IN[8])
+
+      + 1: enabled
+      """;
+      bits = (10,10);
+    }
+    define (field=LINE1) {
+      """
+      Indicates if line 1 is enabled for next line (for IN[3] to IN[5])
+
+      + 1: enabled
+      """;
+      bits = (9,9);
+    }
+    define (field=LINE0) {
+      """
+      Indicates if line 0 is enabled for next line (for IN[0] to IN[2])
+
+      + 1: enabled
+      """;
+      bits = (8,8);
+    }
+    define (field=NHOOD) {
+      """
+      next line neighborhood type
+
+      + 0: horizontal (9x1)
+      + 1: 2D (3x3)
+      """;
+      bits = (2,2);
+    }
+    define (field=SHIFT) {
+      """
+      constant value of 1 pixel
+      """;
+      readonly=true;
+      bits = (1,0);
+    }
+#ifndef MAKEDOC
+    define (read) {
+      action = { return I_INALCFG; };
+    }
+    define (write) {
+      action = func (bits<32> val) {
+        I_INALCFG.NEXTCFG = (val(16,0).uint32() & 0x0704) | 0x1;
+      };
+    }
+#endif // MAKEDOC
+  }
+
+  define (reg=I_INALCFG) {
+    """
+    Internal Register:
+    Identical to H_INALCFG (Input Matrix A configuration)
+    """;
+    width = 32;
+    reset = 0x00010001;
+    define (field=CURRCFG) {
+      """
+      Status of current line to be processed (read only)
+      """;
+      bits = (31,16);
+    }
+    define (field=CURRLINE2) {
+      """
+      Indicates if currently line 2 is enabled
+
+      + 1: enabled
+      """;
+      bits = (26,26);
+    }
+    define (field=CURRLINE1) {
+      """
+      Indicates if currently line 1 is enabled
+
+      + 1: enabled
+      """;
+      bits = (25,25);
+    }
+    define (field=CURRLINE0) {
+      """
+      Indicates if currently line 0 is enabled
+
+      + 1: enabled
+      """;
+      bits = (24,24);
+    }
+    define (field=CURRNHOOD) {
+      """
+      Current line neighborhood type
+
+      + 0: horizontal (9x1)
+      + 1: 2D (3x3)
+      """;
+      bits = (18,18);
+    }
+    define (field=CURRSHIFT) {
+      """
+      constant value of 1 pixel
+      """;
+      bits = (17,16);
+    }
+    define (field=NEXTCFG) {
+      """
+      Setup for next line to be processed (becomes valid with next
+      write to H_START)
+      """;
+      bits = (15,0);
+    }
+    define (field=LINE2) {
+      """
+      Indicates if line 2 is enabled for next line
+
+      + 1: enabled
+      """;
+      bits = (10,10);
+    }
+    define (field=LINE1) {
+      """
+      Indicates if line 1 is enabled for next line
+
+      + 1: enabled
+      """;
+      bits = (9,9);
+    }
+    define (field=LINE0) {
+      """
+      Indicates if line 0 is enabled for next line
+
+      + 1: enabled
+      """;
+      bits = (8,8);
+    }
+    define (field=NHOOD) {
+      """
+      next line neighborhood type
+
+      + 0: 2D (3x3)
+      + 1: horizontal (9x1)
+      """;
+      bits = (2,2);
+    }
+    define (field=SHIFT) {
+      """
+      constant value of 1 pixel
+      """;
+      bits = (1,0);
+    }
+#ifndef MAKEDOC
+    define (read) {
+      action = { return I_INALCFG; };
+      //  
+      //  bits<32> retval;
+      //  retval=0;
+      //  retval(26,24) = I_CHANNELS_INAL;
+      //  retval(18)    = I_NHOOD_INAL;
+      //  retval(17,16) = I_SHIFT_INAL;
+      //  retval(15,0)  = H_INALCFG(15,0);
+      //  return retval;
+      //};
+    }
+    define (write) {
+      action = func (bits<32> val) {
+        I_INALCFG=val;
+
+        info(1,"INAL.CURRCHANNELS = ",
+             I_INALCFG(26,24));
+        if (ThisReg.CURRNHOOD == 0) {
+          info(1,"INAL.CURRNHOOD = 3x3");
+        }
+        else {
+          info(1,"INAL.CURRNHOOD = 9x1");
+        }
+        info(1,"INAL.CURRSHIFT = ",
+             I_INALCFG(17,16));
+
+        info(1,"INAL.CHANNELS = ",
+             I_INALCFG(10,8));
+        if (ThisReg.NHOOD == 0) {
+          info(1,"INAL.NHOOD = 3x3");
+        }
+        else {
+          info(1,"INAL.NHOOD = 9x1");
+        }
+        info(1,"INAL.SHIFT = ",
+             I_INALCFG(1,0));
+      };
+    }
+#endif // MAKEDOC
+  }
+
+#endif
+
+  // ***************************************
+  // Output parameters
+  define (reg=H_OUTCFG) {
+    """
+    Host Register:
+    Output configuration
+    """;
+    width = 32;
+    reset=0x00010001;
+    define (field=CURRCFG) {
+      """
+      Status of current line to be processed (read only)
+      """;
+      bits = (31,16);
+      readonly = true;
+    }
+    define (field=CURRLINE3) {
+      """
+      Indicates if currently line 3 is enabled, connected to OUT(3)
+
+      + 1: enabled
+      """;
+      bits = (27,27);
+    }
+    define (field=CURRLINE2) {
+      """
+      Indicates if currently line 2 is enabled, connected to OUT(2)
+
+      + 1: enabled
+      """;
+      bits = (26,26);
+    }
+    define (field=CURRLINE1) {
+      """
+      Indicates if currently line 1 is enabled, connected to OUT(1)
+
+      + 1: enabled
+      """;
+      bits = (25,25);
+    }
+    define (field=CURRLINE0) {
+      """
+      Indicates if currently line 0 is enabled, connected to OUT(0)
+
+      + 1: enabled
+      """;
+      bits = (24,24);
+    }
+    define (field=CURRSHIFT) {
+      """
+      constant value of 1 pixel
+      """;
+      bits = (17,16);
+    }
+    define (field=NEXTCFG) {
+      """
+      Setup for next line to be processed (becomes valid with next
+      write to H_START)
+      """;
+      bits = (15,0);
+    }
+    define (field=LINE3) {
+      """
+      Indicates if line 3 is enabled for next line, connected to OUT(3)
+
+      + 1: enabled
+      """;
+      bits = (11,11);
+    }
+    define (field=LINE2) {
+      """
+      Indicates if line 2 is enabled for next line, connected to OUT(2)
+
+      + 1: enabled
+      """;
+      bits = (10,10);
+    }
+    define (field=LINE1) {
+      """
+      Indicates if line 1 is enabled for next line, connected to OUT(1)
+
+      + 1: enabled
+      """;
+      bits = (9,9);
+    }
+    define (field=LINE0) {
+      """
+      Indicates if line 0 is enabled for next line, connected to OUT(0)
+
+      + 1: enabled
+      """;
+      bits = (8,8);
+    }
+    define (field=SHIFT) {
+      """
+      constant value of 1 pixel
+      """;
+      readonly=true;
+      bits = (1,0);
+    }
+#ifndef MAKEDOC
+    define (read) {
+      action = { return I_OUTCFG; };
+    }
+    define (write) {
+      action = func (bits<32> val) {
+        I_OUTCFG.NEXTCFG = (val(15,0).uint32() & 0x0F00) | 0x1;
+      };
+    }
+#endif // MAKEDOC
+  }
+
+  define (reg=I_OUTCFG) {
+    """
+    Internal Register:
+    Identical to H_OUTCFG (Output configuration)
+    """;
+    width = 32;
+    reset=0x00010001;
+    define (field=CURRCFG) {
+      """
+      Status of current line to be processed (read only)
+      """;
+      bits = (31,16);
+    }
+#if (OUTPUT_STREAMS>=4)
+    define (field=CURRLINE3) {
+      """
+      Indicates if currently line 3 is enabled, connected to OUT(3)
+
+      + 1: enabled
+      """;
+      bits = (27,27);
+    }
+#endif
+#if (OUTPUT_STREAMS>=3)
+    define (field=CURRLINE2) {
+      """
+      Indicates if currently line 2 is enabled, connected to OUT(2)
+
+      + 1: enabled
+      """;
+      bits = (26,26);
+    }
+#endif
+#if (OUTPUT_STREAMS>=2)
+    define (field=CURRLINE1) {
+      """
+      Indicates if currently line 1 is enabled, connected to OUT(1)
+
+      + 1: enabled
+      """;
+      bits = (25,25);
+    }
+#endif
+#if (OUTPUT_STREAMS>=1)
+    define (field=CURRLINE0) {
+      """
+      Indicates if currently line 0 is enabled, connected to OUT(0)
+
+      + 1: enabled
+      """;
+      bits = (24,24);
+    }
+#endif
+    define (field=CURRSHIFT) {
+      """
+      constant value of 1 pixel
+      """;
+      bits = (17,16);
+    }
+    define (field=NEXTCFG) {
+      """
+      Setup for next line to be processed (becomes valid with next
+      write to H_START)
+      """;
+      bits = (15,0);
+    }
+    define (field=LINE3) {
+      """
+      Indicates if line 3 is enabled for next line, connected to OUT(3)
+
+      + 1: enabled
+      """;
+      bits = (11,11);
+    }
+    define (field=LINE2) {
+      """
+      Indicates if line 2 is enabled for next line, connected to OUT(2)
+
+      + 1: enabled
+      """;
+      bits = (10,10);
+    }
+    define (field=LINE1) {
+      """
+      Indicates if line 1 is enabled for next line, connected to OUT(1)
+
+      + 1: enabled
+      """;
+      bits = (9,9);
+    }
+    define (field=LINE0) {
+      """
+      Indicates if line 0 is enabled for next line, connected to OUT(0)
+
+      + 1: enabled
+      """;
+      bits = (8,8);
+    }
+    define (field=SHIFT) {
+      """
+      constant value of 1 pixel
+      """;
+      bits = (1,0);
+    }
+#ifndef MAKEDOC
+    define (read) {
+      action = { return I_OUTCFG; };
+    }
+    define (write) {
+      action = func (bits<32> val) {
+        I_OUTCFG=val;
+
+        info(1,"OUT.CURRCHANNELS = ",
+             I_OUTCFG(27,24));
+        info(1,"OUT.CURRSHIFT = ",
+             I_OUTCFG(17,16));
+
+        info(1,"OUT.CHANNELS = ",
+             I_OUTCFG(10,8));
+        info(1,"OUT.SHIFT = ",
+             I_OUTCFG(1,0));
+      };
+    }
+#endif // MAKEDOC
+  }
+
+//  define (reg=I_CURROUTCFG) {
+//    """
+//    Internal Register:
+//    Identical to H_OUTCFG.CURRCFG
+//    """;
+//    width = 16;
+//#ifndef MAKEDOC
+//    define (read) {
+//      action = {
+//        bits<8> retval;
+//        retval=0;
+//#if (OUTPUT_STREAMS==4)
+//        retval(11, 8) = I_CHANNELS_OUT;
+//#endif
+//#if (OUTPUT_STREAMS==3)
+//        retval(10, 8) = I_CHANNELS_OUT;
+//#endif
+//#if (OUTPUT_STREAMS==2)
+//        retval( 9, 8) = I_CHANNELS_OUT;
+//#endif
+//#if (OUTPUT_STREAMS==1)
+//        retval( 8, 8) = I_CHANNELS_OUT;
+//#endif
+//        return retval;
+//      };
+//    }
+//    define (write) {
+//      action = func (bits<16> val) {
+//        I_CHANNELS_OUT=val(11,8);
+//        //I_SHIFT_OUT=val(1,0); disabled for IPUS engines shift is always 1
+//      };
+//    }
+//#endif // MAKEDOC
+//  }
+
+//#ifndef MAKEDOC
+//  define (reg=I_CHANNELS_OUT) {
+//    """
+//    Host Register:
+//    Enabled Lines
+//    """;
+//    width = OUTPUT_STREAMS;
+//  }
+//
+//  define (reg=I_SHIFT_OUT) {
+//    """
+//    Host Register:
+//    Shift Input by positions
+//    """;
+//    width = 3;
+//    define (write) {
+//      action = func(bits<3> val) {
+//        val=val & 0x3;
+//        if (val==0) {
+//          I_SHIFT_OUT=4;
+//        }
+//        else {
+//          I_SHIFT_OUT=val;
+//        }
+//      };
+//    }
+//    reset = 1;
+//  }
+//#endif // MAKEDOC
+
+  // ***************************************
+  // Histogram Registers
+  define (reg=H_HISTA) {
+    """
+    Host Register:
+    Data register address register
+    """;
+    width = 8;
+    // accessible only in unpretected mode!!!
+  }
+
+  define (reg=H_HISTD) {
+    """
+    Host Register:
+    Data register data register
+    """;
+    width = 32;
+#ifndef MAKEDOC
+    define (read) {
+      action = {
+        bits<32> data;
+
+        if ((LOCK(9)==1) && (CSE_SET_LOCK == 1)) {
+          return 0;
+        }
+        if (I_HCL(H_HISTA) == 1) {
+          data = 0;
+        }
+        else {
+          data=Mem(HIST_OFFSET + H_HISTA*4,4);
+        }
+        H_HISTA = (H_HISTA +1) & 0xff;
+        return data;
+      };
+    }
+    define (write) {
+      action = func(bits<32> val) {
+        Mem(HIST_OFFSET + H_HISTA*4,4)=val;
+        I_HCL(H_HISTA,H_HISTA) = 0;
+        H_HISTA = (H_HISTA +1) & 0xff;
+      };
+    }
+#endif // MAKEDOC
+  }
+
+  define (reg=H_HISTCL) {
+    """
+    Host Register:
+    Clear all Histogram bins
+    """;
+    width = 1;
+#ifndef MAKEDOC
+    define(write) {
+      action = func (bits<1> clear) {
+        /* if (clear==1) */ {
+          I_HCL(256,256)=0x1;
+          I_HCL(255,224)=0xffffffff;
+          I_HCL(223,192)=0xffffffff;
+          I_HCL(191,160)=0xffffffff;
+          I_HCL(159,128)=0xffffffff;
+          I_HCL(127, 96)=0xffffffff;
+          I_HCL( 95, 64)=0xffffffff;
+          I_HCL( 63, 32)=0xffffffff;
+          I_HCL( 31,  0)=0xffffffff;
+          H_HISTAMAX=0;
+          H_HISTPEAK=0;
+        }
+      };
+    }
+#endif // MAKEDOC
+  }
+
+#ifndef MAKEDOC
+  define (reg=I_HCL) {
+    """
+    Internal register:
+    Flag if a Histogram bin needs to be cleared
+    """;
+    width=257;
+    reset=0x1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+  }
+#endif // MAKEDOC
+
+  define (reg=H_HISTAMAX) {
+    """
+    Core Register:
+    Binb of the Histogram peak value
+    """;
+    width = 8;
+  }
+
+  define (reg=H_HISTPEAK) {
+    """
+    Core Register:
+    Binb of the Histogram peak value
+    """;
+    width = 32;
+  }
+
+  // ***************************************
+  // Statistics Registers
+  define (reg=H_STATA) {
+    """
+    Host Register:
+    Statistics fields address register (record x 4 + field)
+    """;
+    width = 10;
+    // accessible only in unprotected mode!!!
+  }
+
+  define (reg=H_STATD) {
+    """
+    Host Register:
+    Statistics register data register
+    """;
+    width = 32;
+#ifndef MAKEDOC
+    define (read) {
+      action = {
+        bits<32> data;
+        bits<2>  fieldtype;
+        int record, field;
+
+        if ((LOCK(10) == 1) && (CSE_SET_LOCK == 1)) {
+          return 0;
+        }
+        record=H_STATA.uint32();
+        field=record & 0x3;
+        record >>= 2;
+
+        fieldtype=CONFSTAT((field*2) +1,(field*2));
+
+        if (I_SCL(record) == 1) {
+          if (fieldtype == STAT_OP_MAX) {
+            data=0x80000000;
+          }
+          else if (fieldtype == STAT_OP_MIN) {
+            data=0x7fffffff;
+          }
+          else {
+            data=0;
+          }
+        }
+        else {
+          data=Mem(STAT_OFFSET + record*16 + field*4,4);
+        }
+        H_STATA = (H_STATA +1) & 0x3ff;
+        return data;
+      };
+    }
+    define (write) {
+      action = func(bits<32> val) {
+        int record, field;
+
+        record=H_STATA.uint32();
+        field=record & 0x3;
+        record >>= 2;
+
+        Mem(STAT_OFFSET + record*16 + field*4,4)=val;
+        I_SCL(record,record) = 0;
+        H_STATA = (H_STATA +1) & 0x3ff;
+      };
+    }
+#endif // MAKEDOC
+  }
+
+  define (reg=H_STATCL) {
+    """
+    Host Register:
+    Clear all Statistics records
+    """;
+    width = 1;
+#ifndef MAKEDOC
+    define(write) {
+      action = func (bits<1> clear) {
+        /* if (clear==1) */ {
+          I_SCL(255,224)=0xffffffff;
+          I_SCL(223,192)=0xffffffff;
+          I_SCL(191,160)=0xffffffff;
+          I_SCL(159,128)=0xffffffff;
+          I_SCL(127, 96)=0xffffffff;
+          I_SCL( 95, 64)=0xffffffff;
+          I_SCL( 63, 32)=0xffffffff;
+          I_SCL( 31,  0)=0xffffffff;
+          I_STAT_DIRTY=0;
+        }
+      };
+    }
+#endif // MAKEDOC
+  }
+
+#ifndef MAKEDOC
+  define (reg=I_SCL) {
+    """
+    Internal register:
+    Flag if a Statistics record needs to be cleared
+    """;
+    width=256;
+    reset=0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+  }
+#endif // MAKEDOC
+
+  // ***************************************
+  // LUT Registers
+  define (reg=H_LUTA) {
+    """
+    Host Register:
+    Look Up Table address register. Two 16 bit LUT words are in
+    one 32 bit word of H_LUTD
+    """;
+#ifdef LUT4K
+    width = 12;
+#else
+    width = 10;
+#endif        
+    // accessible only in unprotected mode!!!
+  }
+
+  define (reg=H_LUTD) {
+    """
+    Host Register:
+    Look Up Table data register.
+    Any access to H_LUTD will progress H_LUTA by two LUT entries.
+    """;
+    width = 32;
+    define (field=LUT0) {
+      """
+      First LUT entry (little endian)
+      """;
+      bits = (15,0);
+    } 
+    define (field=LUT1) {
+      """
+      Second LUT entry (little endian)
+      """;
+      bits = (31,16);
+    } 
+#ifndef MAKEDOC
+    define (read) {
+      action = {
+        bits<32> data;
+        int record;
+        int mask;
+
+#ifdef LUT4K
+        mask=0xfff;
+#else
+        mask=0x3ff;
+#endif        
+
+        if((LOCK(12)==1) && (CSE_SET_LOCK == 1)) {
+          return 0;
+        }
+        record=H_LUTA.uint32();
+
+        // little endian
+        data(15,0)=Mem(LUT_OFFSET + record*2,2);
+        record=(record +1) & mask;
+        data(31,16)=Mem(LUT_OFFSET + record*2,2);
+        record++;
+
+        H_LUTA = record;
+        return data;
+      };
+                        
+    };
+    define (write) {
+      action = func(bits<32> val) {
+        int record;
+        int mask;
+
+#ifdef LUT4K
+        mask=0xfff;
+#else
+        mask=0x3ff;
+#endif        
+
+        record=H_LUTA.uint32();
+
+        // little endian
+        Mem(LUT_OFFSET + record*2,2)=val(15,0);
+        record=(record +1) & mask;
+        Mem(LUT_OFFSET + record*2,2)=val(31,16);
+        record++;
+
+        H_LUTA = record;
+      };
+    }
+#endif // MAKEDOC
+  }
+
+  // ***************************************
+  // Debug Registers
+        
+  define (reg=I_DEBUGMODE) {
+    """
+    Internal Register:
+    Debug Mode. Is identical to H_STATUS.DEBUG
+    """;
+    width = 1;
+    reset = 0;
+  }
+
+  define (reg=HD_BREAKENABLE) {
+    """
+    Host Debug Register:
+    Enable Break Conditions.
+    """;
+    width = 8;
+    reset = 0;
+  }
+
+  // ***********************************************************************
+  // Register IPS address mapping
+  // ***********************************************************************
+  define (regfile=H_IPS) {
+    """
+    IPS peripheral register (Host registers) address mapping
+    """;
+    size = 32;
+    width = 32;
+    define (entry= 0x00) { reg = H_START; }
+    define (entry= 0x01) { reg = H_STATUS; }
+    define (entry= 0x02) { reg = H_POS; }
+    define (entry= 0x03) { reg = H_CURRPOS; }
+    define (entry= 0x04) { reg = H_XCFG; }
+    define (entry= 0x05) { reg = H_CURRXCFG; }
+    define (entry= 0x06) { reg = H_INACFG; }
+#ifdef HASINB
+    define (entry= 0x07) { reg = H_INBCFG; }
+#endif
+#ifdef HASINALPHA
+    define (entry= 0x08) { reg = H_INALCFG; }
+#endif
+    define (entry= 0x09) { reg = H_OUTCFG; }
+
+
+    define (entry= 0x10) { reg = H_IMEMA; }
+    define (entry= 0x11) { reg = H_IMEMD; }
+    define (entry= 0x12) { reg = H_DREGA; }
+    define (entry= 0x13) { reg = H_DREGD; }
+    define (entry= 0x14) { reg = H_HISTA; }
+    define (entry= 0x15) { reg = H_HISTD; }
+    define (entry= 0x16) { reg = H_HISTPEAK; }
+    define (entry= 0x17) { reg = H_HISTAMAX; }
+    define (entry= 0x18) { reg = H_HISTCL; }
+    define (entry= 0x19) { reg = H_STATA; }
+    define (entry= 0x1a) { reg = H_STATD; }
+    //define (entry= 0x16) { reg = H_STATPEAK; }
+    //define (entry= 0x17) { reg = H_STATAMAX; }
+    define (entry= 0x1b) { reg = H_STATCL; }
+    define (entry= 0x1e) { reg = H_LUTA; }
+    define (entry= 0x1f) { reg = H_LUTD; }
+
+    // profiling registers
+
+    // debug registers
+    define (entry= 0x39) { reg = IADDR; }
+    define (entry= 0x3a) { reg = CC_ZNCO; }
+    //define (entry= 0x3b) { reg = D_DBGMS; }
+    //define (entry= 0x3c) { reg = D_BKPT; }
+    //define (entry= 0x3d) { reg = D_BKPTPOS; }
+    //define (entry= 0x3e) { reg = D_BKPTADDR; }
+    //define (entry= 0x3f) { reg = D_DIR; }
+  }
+
+#ifndef MAKEDOC
+  define (regfile=SIMREGS) {
+    """
+    Internal Simulator register
+    """;
+    size = 4;
+    width = 256;
+    define (entry= 0x0) { reg = I_HCL; }
+    define (entry= 0x1) { reg = I_SCL; }
+  }
+#endif // MAKEDOC
+}

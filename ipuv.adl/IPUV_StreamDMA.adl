@@ -1,0 +1,1048 @@
+// *-*- c -*-******************************************************************
+// *
+// *  Copyright Freescale 2013, All rights reserved.
+// *  Copyright NXP 2017, All rights reserved.
+// * 
+// *  SPDX-License-Identifier: BSD-3-Clause
+// *
+// ****************************************************************************
+// /** \addtogroup Ipus
+// *  Place the description of a module here.
+// *  @{
+// ****************************************************************************
+// /** 
+// *  
+// *  \file      IPUS_StreamDMA.adl
+// *  \author    Herrmann Stephan-R70157
+// *  \date      \$Date: 2013/08/01 10:50:49 $
+// *
+// *  \internal
+// *   language  ADL
+// *   $Id: fsl_header.el,v 1.1 2013/09/15 10:50:49 stephanh Exp $
+// ****************************************************************************
+
+#include "IPUV_Defines.h"
+
+define (arch = IPUV_StreamDMA) {
+
+  /// Start next line
+  void StreamDMAStartLine() {
+    int i;
+
+    for (i=0; i< INPUT_STREAMS; i++) {
+      S_CURRCHCFG_IN(i)=S_CHCFG_IN(i);
+    }
+
+    for (i=0; i< INPUT_STREAMS; i++) {
+      S_CURRLINE_PTR_IN(i)=S_LINE_PTR_IN(i);
+    }
+
+    for (i=0; i< INPUT_STREAMS; i++) {
+      S_CURRLINELEN_IN(i)=S_LINELEN_IN(i);
+    }
+
+    for (i=0; i< INPUT_STREAMS; i++) {  // reset Stream DMA counters
+      I_RPTCNT_IN(i)=S_CHCFG_IN(i)(19,18); // RPT;
+    }
+
+    for (i=0; i< INPUT_STREAMS; i++) {  // reset Stream DMA counters
+      I_POS_IN(i)=0 - S_CHCFG_IN(i)(26,24); // REPLACEWIDTH;
+    }
+
+    for (i=0; i< OUTPUT_STREAMS; i++) {
+      S_CURRCHCFG_OUT(i)=S_CHCFG_OUT(i);
+    }
+
+    for (i=0; i< OUTPUT_STREAMS; i++) {
+      S_CURRLINE_PTR_OUT(i)=S_LINE_PTR_OUT(i);
+    }
+
+    for (i=0; i< OUTPUT_STREAMS; i++) {
+      S_CURRLINELEN_OUT(i)=S_LINELEN_OUT(i);
+    }
+
+    for (i=0; i< OUTPUT_STREAMS; i++) {
+      I_POS_OUT(i)=0;
+    }
+
+    for (i=0; i< OUTPUT_STREAMS; i++) {
+      I_SKIPCNT_OUT(i)=0;
+    }
+  }
+
+// ****************************************************************************
+// *  Registers
+// ****************************************************************************
+
+#ifndef MAKEDOC
+  define (reg=S_EMUMEM) {
+    """
+    Internal Register:
+    Emunlate memory for input interface
+    """;
+    width = 1; // internal signed value, 8 bit resolution
+    reset = 0;
+  }
+#endif // MAKEDOC
+
+#ifndef STREAM_IPS_IN_IPU
+  define (reg=S_CFG) {
+    """
+    StreamDMA Host Register:
+    Channel enable bits
+    """;
+    width = 32;
+    define (field=OUT3) {
+      """
+      OUT line 3 enabled (not available)
+      """;
+      bits = (27,27);
+    }
+    define (field=OUT2) {
+      """
+      OUT line 2 enabled  (for OUT[8] to OUT[11])
+      """;
+      bits = (26,26);
+    }
+    define (field=OUT1) {
+      """
+      OUT line 1 enabled (for OUT[4] to OUT[7])
+      """;
+      bits = (25,25);
+    }N/A
+    define (field=OUT0) {
+      """
+      OUT line 0 enabled (for OUT[0] to OUT[3])
+      """;
+      bits = (24,24);
+    }
+    define (field=IN4) {
+      """
+      IN line 4 enabled (for INB[32] to INB[39])
+      """;
+      bits = (4,4);
+    }
+    define (field=IN0) {
+      """
+      IN line 3 enabled  (for IN[24] to IN[31])
+      """;
+      bits = (3,3);
+    }
+    define (field=IN2) {
+      """
+      INA line 2 enabled (for IN[16] to IN[23])
+      """;
+      bits = (2,2);
+    }
+    define (field=INA1) {
+      """
+      INA line 1 enabled (for IN[8] to IN[15])
+      """;
+      bits = (1,1);
+    }
+    define (field=INA0) {
+      """
+      INA line 0 enabled (for IN[0] to IN[7])
+      """;
+      bits = (0,0);
+    }
+    width = 32;
+    define (read) {
+      action = {
+        bits<32> retval;
+        retval=0;
+        retval( 4, 0)=S_CHANNELS_IN;
+        retval(26,24)=S_CHANNELS_OUT;
+        return retval;
+      };
+    }
+    define (write) {
+      action = func (bits<32> val) {
+        S_CHANNELS_IN=val( 4, 0);
+        S_CHANNELS_OUT=val(26,24);
+      };
+    }
+  }
+#endif
+
+#ifdef SYSC
+  define (reg=SysC_StreamDMA_Channel) {
+    """
+    SystemC simulator register (make un-architected register)
+    channel number of stream dma access
+
+    +  -1 no streamDMA access
+    + 0-2 write: StreamDMA write channel
+    + 0-4 read:  StreamDMA read channel
+    """;
+    width = 32;
+  }
+#endif
+
+  // Stream Parameters for IN ***************
+#ifndef STREAM_IPS_IN_IPU
+  define (reg=S_CHANNELS_IN) {
+    """
+    StreamIF Host Register:
+    Enabled Lines for channel IN
+    """;
+    width = 3;
+  }
+#endif
+
+  define (regfile=S_LINE_PTR_IN) {
+    """
+    StreamIF Host Register:
+    Line Start Addresses
+    """;
+    width = 32;
+    size  = INPUT_STREAMS;
+  }
+
+  define (regfile=S_CURRLINE_PTR_IN) {
+    """
+    StreamIF Host Register:
+    Active Line Start Addresses (read only)
+    """;
+    width = 32;
+    size  = INPUT_STREAMS;
+  }
+
+  define (regfile=S_LINELEN_IN) {
+    """
+    StreamIF Host Register:
+    Line length in pixels
+    """;
+    width = 16;   // unsigned value
+    size  = INPUT_STREAMS;
+    reset = 0xFFFF;
+  }
+
+  define (regfile=S_CURRLINELEN_IN) {
+    """
+    StreamIF Host Register:
+    Active line length in pixels (read only)
+    """;
+    width = 16;   // unsigned value
+    size  = INPUT_STREAMS;
+    reset = 0xFFFF;
+  }
+
+  define (regfile=S_CHCFG_IN) {
+    """
+    StreamIF Host Register:
+    Configuration for input streams of next line to be processed
+    """;
+    width = 32;
+    reset = 0x50000;
+    size  = INPUT_STREAMS;
+    define (field=REPLACEVALUE) {
+      """
+      Value to use for pixels outside the valid image area
+      """;
+      bits = (15,0);
+    }
+    define (field=STEP) {
+      """
+      Offset between two pixels being presented to the IPU engine
+
+      + 0: 4 pixels offset
+      + 1: 1 pixel offset (no pixel is skipped, all pixels are exercised)
+      + 2: 2 pixels offset
+      + 3: 3 pixels offset
+      """;
+      bits = (17,16);
+    }
+    define (field=RPT) {
+      """
+      How often a pixel is presented to the IPU engine
+
+      + 0: 4 times
+      + 1: 1 time (increment each pixel)
+      + 2: 2 times
+      + 3: 3 times
+      """;
+      bits = (19,18);
+    }
+    define (field=REPLACEMODE) {
+      """
+      Scheme for which pixels are getting the REPLAVEVALUE
+
+      + 0: outside pixel = REPLACEVALUE, inside pixel = pixel value
+      + 1: outside pixel = copy pixel from boundary, inside pixels = pixel value
+      + 2: reserved
+      + 3: outside pixel = REPLACEVALUE, inside pixels = REPLACEVALUE
+      + 4: outside pixel = 0 , inside pixels = REPLACEVALUE
+      """;
+      // + 2: not implemented: outside pixel = repeat boundary
+      // with width; inside pxel = pixel value
+      bits = (22,20);
+    }
+    define (field=REVERSE) {
+      """
+      Do reverse scan of the line 
+
+      + 0: normal scan (left to right)
+      + 1: reverse scan (right to left)
+      """;
+      bits = (23,23);
+    }
+    define (field=REPLACEWIDTH) {
+      """
+      How many pixels are assumed at the beginning of the line outside
+      the image. This might be used for filters with horizontal neighborhood.
+      Example: 
+
+      + 0: the image is not extended at the beginning of the line
+           (first pixels is valid)
+      + 2: will present two more pixels at the beginning of the line.
+           The 3rd pixel is the first valid pixel. The two first pixels
+           are treated according to the REPLACEMODE
+      """;
+      bits = (26,24);
+    }
+    define (field=BUFFERTYPE) {
+      """
+      Data type of memory buffer. The IPU will always get 16 bit values. 
+
+      + 0: 16-bit
+      + 1: 8-bit, data is put to MSBs
+      + 2: 8-bit, data is put to LSBs
+      """;
+      bits = (29,28);
+    }
+#ifdef LOG_MORE
+    define (read) {
+      action = func (unsigned line_no) { return S_CHCFG_IN(line_no);};
+    }
+
+    define (write) {
+      action = func (unsigned line_no, bits<32> val) {
+        S_CHCFG_IN(line_no)=val;
+        info(1,"IN(",line_no,").REPEATVALUE = ",
+             S_CHCFG_IN(line_no)(15,0));
+        info(1,"IN(",line_no,").STEP = ",
+             S_CHCFG_IN(line_no)(17,16));
+        info(1,"IN(",line_no,").RPT = ",
+             S_CHCFG_IN(line_no)(19,18));
+        {
+          static const char *mode[8] = {"0: outside const",
+                                        "1: outside hold",
+                                        "2: reseved",
+                                        "3: repalce all w/ const",
+                                        "4: inside const, outside 0",
+                                        "5: reserved",
+                                        "6: reserved",
+                                        "7: reserved"};
+          info(1,"IN(",line_no,").REPLACEMODE = ",
+               mode[S_CHCFG_IN(line_no)(22,20).uint32()]);
+        }
+        info(1,"IN(",line_no,").REVERSE = ",
+             S_CHCFG_IN(line_no)(23));
+        info(1,"IN(",line_no,").REPLACEWIDTH = ",
+             S_CHCFG_IN(line_no)(26,24));
+        //info(1,"IN(",line_no,").TRANSFORM = ",
+        //     S_CHCFG_IN(line_no)(27));
+        //info(1,"IN(",line_no,").BUFFERTYPE = ",
+        //     S_CHCFG_IN(line_no)(29,28));
+        {
+          static const char *mode[4] = {"0: 16bpp",
+                                        "1: 8bpp to MSB",
+                                        "2: 8bpp to LSB",
+                                        "3: reserved"};
+          info(1,"IN(",line_no,").BUFFERTYPE = ",
+               mode[S_CHCFG_IN(line_no)(29,28).uint32()]);
+        }
+      };
+    }
+#endif
+  }
+
+  define (regfile=S_CURRCHCFG_IN) {
+    """
+    StreamIF Host Register:
+    Active configuration status for input streams (read onyl)
+    """;
+    width = 32;
+    size=INPUT_STREAMS;
+    define (field=REPLAVEVALUE) {
+      """
+      Value to use for pixels outside the valid image area
+      """;
+      bits = (15,0);
+    }
+    define (field=STEP) {
+      """
+      Offset between two pixels being presented to the IPU engine
+
+      + 0: 4 pixels offset
+      + 1: 1 pixel offset (no pixel is skipped, all pixels are exercised)
+      + 2: 2 pixels offset
+      + 3: 3 pixels offset
+      """;
+      bits = (17,16);
+    }
+    define (field=RPT) {
+      """
+      How often a pixel is presented to the IPU engine
+
+      + 0: 4 times
+      + 1: 1 time (increment each pixel)
+      + 2: 2 times
+      + 3: 3 times
+      """;
+      bits = (19,18);
+    }
+    define (field=REPLACEMODE) {
+      """
+      Scheme for which pixels are getting the REPLAVEVALUE
+
+      + 0: outside pixel = REPLACEVALUE, inside pixel = pixel value
+      + 1: outside pixel = copy pixel from boundary, inside pixels = pixel value
+      + 2: reserved
+      + 3: outside pixel = REPLACEVALUE, inside pixels = REPLACEVALUE
+      + 4: outside pixel = 0 , inside pixels = REPLACEVALUE
+      """;
+      //      + 2: not implemented: outside pixel = repeat boundary with width; inside pxel = pixel value
+      bits = (22,20);
+    }
+    define (field=REVERSE) {
+      """
+      Do reverse scan of the line 
+
+      + 0: normal scan (left to right)
+      + 1: reverse scan (right to left)
+      """;
+      bits = (23,23);
+    }
+    define (field=REPLACEWIDTH) {
+      """
+      How many pixels are assumed at the beginning of the line outside
+      the image. This might be used for filters with horizontal neighborhood.
+      Example: 
+
+      + 0: the image is not extended at the beginning of the line
+           (first pixels is valid)
+      + 2: will present two more pixels at the beginning of the line.
+           The 3rd pixel is the first valid pixel. The two first pixels
+           are treated according to the REPLACEMODE
+      """;
+      bits = (26,24);
+    }
+    define (field=BUFFERTYPE) {
+      """
+      Data type of memory buffer. The IPU will always get 16 bit values. 
+
+      + 0: 16-bit
+      + 1: 8-bit, data is put to MSBs
+      + 2: 8-bit, data is put to LSBs
+      """;
+      bits = (29,28);
+    }
+
+#ifdef LOG_MORE
+    define (read) {
+      action = func (unsigned line_no) { return S_CURRCHCFG_IN(line_no);};
+    }
+    define (write) {
+      action = func (unsigned line_no, bits<32> val) {
+        S_CURRCHCFG_IN(line_no)=val;
+        info(1,"IN(",line_no,").REPEATVALUE = ",
+             S_CURRCHCFG_IN(line_no)(15,0));
+        info(1,"IN(",line_no,").STEP = ",
+             S_CURRCHCFG_IN(line_no)(17,16));
+        info(1,"IN(",line_no,").RPT = ",
+             S_CURRCHCFG_IN(line_no)(19,18));
+        {
+          static const char *mode[8] = {"0: outside const",
+                                        "1: outside hold",
+                                        "2: reseved",
+                                        "3: repalce all w/ const",
+                                        "4: inside const, outside 0",
+                                        "5: reserved",
+                                        "6: reserved",
+                                        "7: reserved"};
+          info(1,"IN(",line_no,").REPLACEMODE = ",
+               mode[S_CURRCHCFG_IN(line_no)(22,20).uint32()]);
+        }
+        //switch (S_CURRCHCFG_IN(line_no)(22,20).uint32()) {
+        //case 0:
+        //  info(1,"IN(",line_no,").REPLACEMODE = ",
+        //       "outside const");
+        //  break;
+        //case 1:
+        //  info(1,"IN(",line_no,").REPLACEMODE = ",
+        //       "outside hold");
+        //  break;
+        //case 3:
+        //  info(1,"IN(",line_no,").REPLACEMODE = ",
+        //       "repalce all w/ const");
+        //  break;
+        //case 4:
+        //  info(1,"IN(",line_no,").REPLACEMODE = ",
+        //       "inside const, outside 0");
+        //  break;
+        //case 2:
+        //default:
+        //  info(1,"IN(",line_no,").REPLACEMODE = ",
+        //       "reserved");
+        //  break;
+        //}
+        info(1,"IN(",line_no,").REVERSE = ",
+             S_CURRCHCFG_IN(line_no)(23));
+        info(1,"IN(",line_no,").REPLACEWIDTH = ",
+             S_CURRCHCFG_IN(line_no)(26,24));
+        //info(1,"IN(",line_no,").TRANSFORM = ",
+        //     S_CURRCHCFG_IN(line_no)(27));
+        //info(1,"IN(",line_no,").BUFFERTYPE = ",
+        //     S_CURRCHCFG_IN(line_no)(29,28));
+        {
+          static const char *mode[4] = {"0: 16bpp",
+                                        "1: 8bpp to MSB",
+                                        "2: 8bpp to LSB",
+                                        "3: reserved"};
+          info(1,"IN(",line_no,").BUFFERTYPE = ",
+               mode[S_CURRCHCFG_IN(line_no)(29,28).uint32()]);
+        }
+      };
+    }
+#endif
+  }
+
+
+  define (regfile=I_RPTCNT_IN) {
+    """
+    Internal Register:
+    counting the repeat status
+    """;
+    width = 2;
+    reset = 1;
+    size  = INPUT_STREAMS;
+    define (read) {
+      action = func (unsigned line_no) {
+        if (I_RPTCNT_IN(line_no) == 0) return 4;
+        return I_RPTCNT_IN(line_no);
+      };
+    }
+  }
+
+  define (regfile=I_POS_IN) {
+    """
+    Internal Register:
+    Current pixel position in the line
+    """;
+    width = 18; // internal signed value, 8 bit resolution
+    size  = INPUT_STREAMS;
+  }
+
+  // do stream in for IN
+  define (regfile=P) {
+    """
+    Internal Register:
+    Prefetch Register for IN StreamDMA input. Once data is
+    moved to IN, the StreamDMA engine will autonomously fill
+    the register with the next value from the line.
+    """;
+    width = 16; // internal signed value, 8 bit resolution
+    size  = INPUT_STREAMS;
+#ifndef MAKEDOC
+    pseudo = true;
+    define (read) {
+      action = func(unsigned line_no) {
+        bits<32> cfg;
+        bits<16> retval;
+        bits<32> addr;
+        bits<1>  odd_byte;
+        int len,pos,step;
+        int lineend;
+        int offset;
+        int wordsize;
+
+        cfg=S_CURRCHCFG_IN(line_no);
+        wordsize=(cfg(29,28) == 0)? 2 : 1; // BUFFERTYPE
+        len=S_CURRLINELEN_IN(line_no).uint32()-1;
+        pos=I_POS_IN(line_no).int32();
+        step=cfg(17,16).uint32(); //STEP
+        if (!step) step=4;
+        lineend= (pos > len)? 1 : 0;
+
+#ifndef SYSC
+#ifdef LOG_MORE
+         // unconfigured output address
+        if ((cfg(22,20).uint32() < 3) &&
+            (S_CURRLINE_PTR_IN(line_no).uint32() < 0x10000)) {
+          error(1,
+                "\n********************\n",
+                "ERROR: invalid address IN_PTR(",
+                line_no,") = ",S_CURRLINE_PTR_IN(line_no),
+                "\n********************\n");
+        }
+#endif
+#endif
+
+        if (S_EMUMEM == 1) {  // do not implemnt this branch in HW!!!
+          retval=I_POS_IN(line_no);
+        }
+        else {
+
+          offset=pos;
+          if (cfg(23)==1) {  // REVERSE
+            offset=len - offset;
+          };
+
+          switch (cfg(22,20).uint32() ) { //REPLACEMODE
+          case 0:   // normal with pad to constant (hold order 0)
+            if ((offset<0)  || (offset > len)) {
+              odd_byte=0;
+              retval = cfg(15,0); // REPLACEVALUE
+            }
+            else {
+              addr=S_CURRLINE_PTR_IN(line_no)+(offset*wordsize);
+              // for byte selection from word
+              odd_byte=addr(0);
+              // do word read always and then select later the right byte lane
+              addr(0)=0;
+#ifdef SYSC
+              SysC_StreamDMA_Channel=line_no;
+#endif
+              retval=Mem(addr,2);
+#ifdef SYSC
+              SysC_StreamDMA_Channel=-1;
+#endif
+            }
+            break;
+          case 1:  // normal mode, pad with nearest valid pixel (hold order 1)
+            if (offset<0) {
+              offset=0;
+            }
+            if (offset>len) {
+              offset= len;   // last valid pixel
+            }
+            addr=S_CURRLINE_PTR_IN(line_no)+(offset*wordsize);
+            // for byte selection from word
+            odd_byte=addr(0);
+            // do word read always and then select later the right byte lane
+            addr(0)=0;
+#ifdef SYSC
+            SysC_StreamDMA_Channel=line_no;
+#endif
+            retval=Mem(addr,2);
+#ifdef SYSC
+            SysC_StreamDMA_Channel=-1;
+#endif
+            break;
+
+          case 3:  // constant
+            odd_byte=0;
+            retval=cfg(15,0); // REPLACEVALUE
+            break;
+          default: // constant for valid, 0 for invalid
+            odd_byte=0;
+            if ((offset<0)  || (offset > len)) {
+              retval=0;
+            }
+            else {
+              retval=cfg(15,0); // REPLACEVALUE
+            }
+          }
+
+          // 8 bit alignment
+          if (wordsize == 1) {
+            if (odd_byte == 1) {
+              retval(7,0)=retval(15,8);    // odd address in MSBs?
+            }
+            else {
+              retval(15,8) = retval(7,0);  // even address in LSBs
+            }
+            if (cfg(29,28) == 1) {
+              //BUFFERTYPE = 8bit MSB
+              retval(7,0)=0;
+            }
+            else {  //BUFFERTYPE = 8bit LSB
+              retval(15,8)=0;
+            }
+          }
+        }
+
+        if (I_RPTCNT_IN(line_no) == 1) {
+          if (lineend  == 0) { // stop incrementing after line end
+            I_POS_IN(line_no) = pos + step;
+            I_RPTCNT_IN(line_no) = cfg(19,18); //RPT
+          }
+        }
+        else {
+          I_RPTCNT_IN(line_no) = I_RPTCNT_IN(line_no) -1;
+        }
+        return retval;
+
+      };
+    }
+    define (write) {
+      action = func(unsigned line_no, bits<16> OUT) {
+        return;
+      };
+    }
+#endif // MAKEDOC
+  }
+
+  // Stream Parameters for OUT ***************
+#ifndef STREAM_IPS_IN_IPU
+  define (reg=S_CHANNELS_OUT) {
+    """
+    StreamIF Host Register:
+    Enabled Lines for channel OUT
+    """;
+    width = 3;
+  }
+#endif
+
+  // from output registers
+  define (regfile=S_LINE_PTR_OUT) {
+    """
+    StreamIF Host Register:
+    Line Start Addresses
+    """;
+    width = 32;
+    size=OUTPUT_STREAMS;
+  }
+
+  define (regfile=S_CURRLINE_PTR_OUT) {
+    """
+    StreamIF Host Register:
+    Active Line Start Addresses
+    """;
+    width = 32;
+    size  = OUTPUT_STREAMS;
+    define (write) {
+      action = func (unsigned line_no,bits<32> val) {
+        // force 3 LSBs to 0: 64 bit alligned addresses
+        S_CURRLINE_PTR_OUT(line_no) = val.uint32() & 0xfffffff8;
+        //warning(1,"testwarning");
+        if (val(2,0) != 0) {
+          error(1,
+                "\n********************\n",
+                "ERROR: unaligned address OUT_PTR(",
+                line_no,") = ",S_CURRLINE_PTR_OUT(line_no),
+                "\n********************\n");
+        }
+      };
+    }
+  }
+
+  define (regfile=S_LINELEN_OUT) {
+    """
+    StreamIF Host Register:
+    Line length in pixels
+    """;
+    width = 16;   // unsigned value
+    size  = OUTPUT_STREAMS;
+    reset = 0xFFFF;
+  }
+
+  define (regfile=S_CURRLINELEN_OUT) {
+    """
+    StreamIF Host Register:
+    Active line length in pixels (read only)
+    """;
+    width = 16;   // unsigned value
+    size  = OUTPUT_STREAMS;
+    reset = 0xFFFF;
+  }
+
+  define (regfile=S_CHCFG_OUT) {
+    """
+    StreamIF Host Register:
+    Configuration for output streams
+    """;
+    width = 32;
+    reset = 0x00000;
+    size  = OUTPUT_STREAMS;
+    define (field=SKIP) {
+      """
+      Skip pixel when writing this channel SKIP times
+
+      + 0: 0 pixels (store evrey pixel)
+      + 1: 1 pixel  (store every second pixel)
+      + 2: 2 pixels (store every 3rd pixel)
+      + 3: 3 pixels (store every 4th pixel)
+      """;
+      bits = (17,16);
+    }
+    define (field=BUFFERTYPE) {
+      """
+      Data type of memory buffer.
+
+      + 0: 16-bit
+      + 1: 8-bit, data from MSBs
+      + 2: 8-bit, data from LSBs
+      """;
+      bits = (29,28);
+    }
+#ifdef LOG_MORE
+    define (read) {
+      action = func (unsigned line_no) { return S_CHCFG_OUT(line_no);};
+    }
+    define (write) {
+      action = func (unsigned line_no, bits<32> val) {
+        S_CHCFG_OUT(line_no)=val;
+        info(1,"OUT(",line_no,").SKIP = ",
+             S_CHCFG_OUT(line_no)(17,16));
+        //info(1,"OUT(",line_no,").BUFFERTYPE = ",
+        //     S_CHCFG_OUT(line_no)(29,28));
+        {
+          static const char *mode[4] = {"0: 16bpp",
+                                        "1: 8bpp from MSB",
+                                        "2: 8bpp from LSB",
+                                        "3: reserved"};
+          info(1,"OUT(",line_no,").BUFFERTYPE = ",
+               mode[S_CHCFG_OUT(line_no)(29,28).uint32()]);
+        }
+      };
+    }
+#endif
+  }
+
+  define (regfile=S_CURRCHCFG_OUT) {
+    """
+    StreamIF Host Register:
+    Active configuration for output streams
+    """;
+    width = 32;
+    size  = OUTPUT_STREAMS;
+    define (field=SKIP) {
+      """
+      Skip pixel when writing this channel SKIP times
+
+      + 0: 0 pixels (store evrey pixel)
+      + 1: 1 pixel  (store every second pixel)
+      + 2: 2 pixels (store every 3rd pixel)
+      + 3: 3 pixels (store every 4th pixel)
+      """;
+      bits = (17,16);
+    }
+    define (field=BUFFERTYPE) {
+      """
+      Data type of memory buffer.
+
+      + 0: 16-bit
+      + 1: 8-bit, data from MSBs
+      + 2: 8-bit, data from LSBs
+      """;
+      bits = (29,28);
+    }
+#ifdef LOG_MORE
+    define (read) {
+      action = func (unsigned line_no) { return S_CURRCHCFG_OUT(line_no);};
+    }
+    define (write) {
+      action = func (unsigned line_no, bits<32> val) {
+        S_CURRCHCFG_OUT(line_no)=val;
+        info(1,"OUT(",line_no,").SKIP = ",
+             S_CURRCHCFG_OUT(line_no)(17,16));
+        {
+          static const char *mode[4] = {"0: 16bpp",
+                                        "1: 8bpp from MSB",
+                                        "2: 8bpp from LSB",
+                                        "3: reserved"};
+          info(1,"OUT(",line_no,").BUFFERTYPE = ",
+               mode[S_CURRCHCFG_OUT(line_no)(29,28).uint32()]);
+        }
+      };
+    }
+#endif
+  }
+
+  define (regfile=I_POS_OUT) {
+    """
+    Internal Register:
+    Current byte position in the line
+    """;
+    width = 18; // internal signed value, 8 bit resolution
+    size=OUTPUT_STREAMS;
+  }
+
+  define (regfile=I_SKIPCNT_OUT) {
+    """
+    Internal Register:
+    counting the skip status
+    """;
+    width = 2;
+    reset=0;
+    size=5;
+  }
+
+  // do stream out
+  define (regfile=O) {
+    """
+    Internal Register:
+    StreamDMA output interface. Once data is
+    moved from OUT, the StreamDMA engine will autonomously write
+    the register back to the memory (buffering 64 bits). 
+    """;
+    width = 16; // internal signed value, 8 bit resolution
+    size=OUTPUT_STREAMS;
+#ifndef MAKEDOC
+    pseudo = true;
+    define (read) {
+      action = func(unsigned line_no) {
+        return 0;
+      };
+    }
+    define (write) {
+      action = func(unsigned line_no, bits<16> val) {
+        bits<32> cfg;
+        bits<32> addr;
+        int offset;
+        int wordsize;
+
+        cfg=S_CURRCHCFG_OUT(line_no);
+        wordsize=(cfg(29,28) == 0)? 2 : 1; // BUFFERTYPE
+        offset=I_POS_OUT(line_no).int32();
+
+        if (offset >= (int)(S_CURRLINELEN_OUT(line_no).uint32())) return;
+
+        if (I_SKIPCNT_OUT(line_no) == 0) {
+
+          // write is doing byte or short writes!!
+          addr=S_CURRLINE_PTR_OUT(line_no)+(offset*wordsize);
+#ifndef SYSC
+          if (addr.uint32() < 0x10000) { // unconfigured output address
+            error(1,
+                  "\n********************\n",
+                  "ERROR: invalid address OUT_PTR(",
+                  line_no,") = ",S_CURRLINE_PTR_OUT(line_no),
+                  "\n********************\n");
+          }
+#endif
+
+#ifdef SYSC
+          SysC_StreamDMA_Channel=line_no;
+#endif
+          if (wordsize == 1) {
+            //if (odd_byte ==1) {
+            //  val(7,0)=val(15,8);    // odd address in MSBs?
+            //}
+            //else {
+            //  val(15,8) = val(7,0);  // even address in LSBs
+            //}
+            if (cfg(29,28) == 1) {
+              //BUFFERTYPE = 8bit MSB
+              Mem(addr,1)= val(15,8);
+            }
+            else {  //BUFFERTYPE = 8bit LSB
+              Mem(addr,1)= val(7,0);
+            }
+          }
+          else {
+            Mem(addr,2)=val;
+          }
+#ifdef SYSC
+          SysC_StreamDMA_Channel=-1;
+#endif
+
+          I_POS_OUT(line_no) = I_POS_OUT(line_no)+1;
+          if (cfg(17,16) != 0) {  // SKIP, condition not needed for RTL, this should only avoid log in trace if feature is disabled
+            I_SKIPCNT_OUT(line_no)=cfg(17,16);
+          }
+        }
+        else {
+          if (cfg(17,16) != 0) {  // Skip condition not needed for RTL, this should only avoid log in trace if feature is disabled
+            I_SKIPCNT_OUT(line_no)=I_SKIPCNT_OUT(line_no) -1;
+          }
+        }
+      };
+    }
+#endif // MAKEDOC
+  }
+
+  // ***********************************************************************
+  // Register IPS address mapping
+  // ***********************************************************************
+#ifdef STREAM_IPS_IN_IPU
+  defmod (regfile=H_IPS) {
+    size = 192;
+    // StreamDMA
+    //define (entry= 0x40)  { reg = S_CFG; }
+    define (entry= 0x41)  { reg = S_LINELEN_IN(0); }
+    define (entry= 0x42)  { reg = S_CHCFG_IN(0); }
+    define (entry= 0x43)  { reg = S_LINE_PTR_IN(0); }
+    define (entry= 0x44)  { reg = S_LINELEN_IN(1); }
+    define (entry= 0x45)  { reg = S_CHCFG_IN(1); }
+    define (entry= 0x46)  { reg = S_LINE_PTR_IN(1); }
+    define (entry= 0x47)  { reg = S_LINELEN_IN(2); }
+    define (entry= 0x48)  { reg = S_CHCFG_IN(2); }
+    define (entry= 0x49)  { reg = S_LINE_PTR_IN(2); }
+    define (entry= 0x51)  { reg = S_LINELEN_IN(3); }
+    define (entry= 0x52)  { reg = S_CHCFG_IN(3); }
+    define (entry= 0x53)  { reg = S_LINE_PTR_IN(3); }
+    define (entry= 0x54)  { reg = S_LINELEN_IN(4); }
+    define (entry= 0x55)  { reg = S_CHCFG_IN(4); }
+    define (entry= 0x56)  { reg = S_LINE_PTR_IN(4); }
+
+    define (entry= 0x71)  { reg = S_LINELEN_OUT(0); }
+    define (entry= 0x72)  { reg = S_CHCFG_OUT(0); }
+    define (entry= 0x73)  { reg = S_LINE_PTR_OUT(0); }
+#ifdef OUTPUT_STREAM1
+    define (entry= 0x74)  { reg = S_LINELEN_OUT(1); }
+    define (entry= 0x75)  { reg = S_CHCFG_OUT(1); }
+    define (entry= 0x76)  { reg = S_LINE_PTR_OUT(1); }
+#endif
+#ifdef OUTPUT_STREAM2
+    define (entry= 0x77)  { reg = S_LINELEN_OUT(2); }
+    define (entry= 0x78)  { reg = S_CHCFG_OUT(2); }
+    define (entry= 0x79)  { reg = S_LINE_PTR_OUT(2); }
+#endif
+
+    define (entry= 0x81)  { reg = S_CURRLINELEN_IN(0); }
+    define (entry= 0x82)  { reg = S_CURRCHCFG_IN(0); }
+    define (entry= 0x83)  { reg = S_CURRLINE_PTR_IN(0); }
+    define (entry= 0x84)  { reg = S_CURRLINELEN_IN(1); }
+    define (entry= 0x85)  { reg = S_CURRCHCFG_IN(1); }
+    define (entry= 0x86)  { reg = S_CURRLINE_PTR_IN(1); }
+    define (entry= 0x87)  { reg = S_CURRLINELEN_IN(2); }
+    define (entry= 0x88)  { reg = S_CURRCHCFG_IN(2); }
+    define (entry= 0x89)  { reg = S_CURRLINE_PTR_IN(2); }
+    define (entry= 0x91)  { reg = S_CURRLINELEN_IN(3); }
+    define (entry= 0x92)  { reg = S_CURRCHCFG_IN(3); }
+    define (entry= 0x93)  { reg = S_CURRLINE_PTR_IN(3); }
+    define (entry= 0x94)  { reg = S_CURRLINELEN_IN(4); }
+    define (entry= 0x95)  { reg = S_CURRCHCFG_IN(4); }
+    define (entry= 0x96)  { reg = S_CURRLINE_PTR_IN(4); }
+
+    define (entry= 0xb1)  { reg = S_CURRLINELEN_OUT(0); }
+    define (entry= 0xb2)  { reg = S_CURRCHCFG_OUT(0); }
+    define (entry= 0xb3)  { reg = S_CURRLINE_PTR_OUT(0); }
+#ifdef OUTPUT_STREAM1
+    define (entry= 0xb4)  { reg = S_CURRLINELEN_OUT(1); }
+    define (entry= 0xb5)  { reg = S_CURRCHCFG_OUT(1); }
+    define (entry= 0xb6)  { reg = S_CURRLINE_PTR_OUT(1); }
+#endif
+#ifdef OUTPUT_STREAM2
+    define (entry= 0xb7)  { reg = S_CURRLINELEN_OUT(2); }
+    define (entry= 0xb8)  { reg = S_CURRCHCFG_OUT(2); }
+    define (entry= 0xb9)  { reg = S_CURRLINE_PTR_OUT(2); }
+#endif
+  }
+
+#else // STREAM_IPS_IN_IPU is not defined
+
+  define (regfile=H_IPS_SDMA) {
+    """
+    IPS peripheral register (Host Registers) address mapping
+    for StreamDMA units
+    """;
+    size = 64;
+    width = 32;
+    // StreamDMA
+    define (entry= 0x00)  { reg = S_CFG; }
+    define (entry= 0x01)  { reg = S_LINELEN_IN; }
+    define (entry= 0x06)  { reg = S_CHCFG_IN; }
+    define (entry= 0x0b)  { reg = S_LINE_PTR_IN; }
+    define (entry= 0x31)  { reg = S_LINELEN_OUT; }
+    define (entry= 0x35)  { reg = S_CHCFG_OUT; }
+    define (entry= 0x39)  { reg = S_LINE_PTR_OUT; }
+  }
+
+#endif // STREAM_IPS_IN_IPU
+
+}

@@ -1,0 +1,132 @@
+simload imem.elf
+traceon trace.dat
+
+
+set start_test [symbol start_test]
+set end_test   [symbol end_test]
+
+puts "IMem:"
+puts "Start $start_test"
+puts "Stop  $end_test"
+puts "Size  [expr $end_test - $start_test]"
+puts [ mem $start_test 64 2 8 ]
+puts "###############"
+
+######################
+# Setup IPUV registers
+set linelen            640
+#set lines              400
+set lines              1
+set line               0
+set xpos               0
+
+
+writereg H_INCFG       0x100
+#[10: 8]  :I_CHANNELS_IN =1
+#[ 2]     :I_NHOOD       =0
+#[ 1: 0]  :I_SHIFT_IN    =0 // means 4
+
+writereg H_XCFG        [expr ($linelen<<16) + 1 ]
+#[1:0]    :I_SHIFT_X      =1
+#[31:16]  :I_XSIZE        =$linelen
+
+writereg H_OUTCFG      0x0100
+#[11: 8]  :I_CHANNELS_OUT =1
+#[ 1: 0]  :I_SHIFT_OUT    =0 // means 4
+
+#writereg H_HISTCL      1
+
+######################
+# Setup StreamDMA registers
+
+#writereg S_CFG         0x01000001
+#bits[31:24] OUT channels
+#bits[ 7: 0] IN channels
+
+setreg S_LINELEN_IN0  $linelen
+setreg S_LINELEN_IN1  $linelen
+setreg S_LINELEN_IN2  $linelen
+
+writereg S_CHCFG_IN0  0x00150000
+#writereg S_CHCFG_IN1  0x00150000
+#writereg S_CHCFG_IN2  0x00150000
+#[15: 0] :S_REPLACEVALUE_INA = 0
+#[17:16] :S_STEP_INA         = 1
+#[19:18] :S_RPT_INA          = 1
+#[22:20] :S_REPLACEMODE_INA  = 1
+#[23:23] :S_REVERSE_INA      = 0
+#[26:24] :S_REPLACEWIDTH_INA = 2
+#[27:27] :S_TRANSFORM_INA    = 0
+#[29:28] :S_BUFFERTYPE       = 0
+
+setreg S_LINELEN_OUT0  [expr $linelen]
+writereg S_CHCFG_OUT0  0x00000000
+#[17:16] :S_SKIP_OUT         = 0
+
+######################
+# load image
+setreg S_EMUMEM 0
+simload data.elf
+
+set img0 [symbol img0]
+puts "Image0  $img0"
+puts [ mem $img0 64 2 8 ]
+
+set img1 [symbol img1]
+puts "Image1  $img1"
+puts [ mem $img1 64 2 8 ]
+
+set out0 [symbol endimg1]
+set out0 [expr ($out0 + 7 ) & 0xfffffff8]
+set out0dump $out0
+puts "Out0    $out0"
+
+puts "###############"
+puts  "Files: "
+puts  [inputlist]
+puts "###############"
+
+#set start0 0x100000
+
+#clrfilter
+
+set sttime [ clock seconds ]
+
+while {$line < $lines} {
+### set up for line
+	writereg H_POS [expr ($xpos <<16) | $line]
+	setreg S_LINE_PTR_IN0  $img0
+	setreg S_LINE_PTR_OUT0 $out0
+
+### start engine    	
+	writereg H_START $start_test
+	if { $line == 0 } {
+	        step 100
+	        traceoff
+	}
+	setactive 1
+	go  // trigger start
+
+### read out status	
+	#puts "Line: $line"
+	#puts "Instructions: [icount]"
+
+### prepare for next line
+	set line [expr $line + 1]
+
+	set img0 [expr $img0 + ($linelen * 2) ]
+	setreg S_LINE_PTR_IN0  $img0
+
+	set out0 [expr $out0 + ($linelen * 2) ]
+	setreg S_LINE_PTR_OUT0 $out0
+
+#	  traceoff
+}
+icount
+
+set memdump [open out0.mem w]
+puts $memdump [ mem $out0dump 0x100 2 8 ]
+close $memdump
+
+setactive 0
+#quit

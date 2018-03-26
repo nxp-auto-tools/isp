@@ -1,0 +1,896 @@
+/*-*- c -*-*******************************************************************
+ *
+ *  Copyright Freescale 2013, All rights reserved.
+ *  Copyright NXP 2017, All rights reserved.
+ * 
+ *  SPDX-License-Identifier: BSD-3-Clause
+ *
+ ****************************************************************************/
+/** \addtogroup Ipuv_Scalar
+ *  @{
+ ****************************************************************************/
+/**
+ *  \file      IPUV_Scalar.adl
+ *  \author    S.Herrmann, M.Staudenmaier
+ *
+ *  \internal
+ *   language  ADL
+ ****************************************************************************/
+
+define (arch = IPUV_Scalar) {
+
+  // get condition code functions *********
+  void salu_cc_set_NZ(sbits<16> res) {
+#ifndef MAKEDOC
+    bits<1> N = res(15);
+    bits<1> Z = (res(15,0)==0)? 1:0;
+    bits<1> C = CC_ZNCO.C;
+    bits<1> O = CC_ZNCO.O;
+
+    CC_ZNCO = concat(Z,N,C,O);
+#endif // MAKEDOC
+  }
+
+  void salu_cc_set_NZCO(salu_op_t alu_op,sbits<16> res, 
+                        sbits<16> op1,sbits<16> op2) {
+#ifndef MAKEDOC
+    bits<1> N = res(15);
+    bits<1> Z = (res(15,0)==0)? 1:0;
+    bits<1> C = 0;
+    bits<1> O = 0;
+
+    switch(alu_op){
+    case SALU_OP_ADD:   // add
+      O = (( op1>=0 && op2>=0 && res<0 )||
+           ( op1<0  && op2<0  && res>=0));
+      C = (( op1<0  && op2<0) ||
+           ((op1<0  || op2<0) && res>=0)); 
+      break;
+
+    case SALU_OP_SUB:   // sub
+      O = (( op1>=0 && op2<0 && res<0 ) ||
+           ( op1<0  && op2>=0  && res>=0 ));
+      C = (( op1>=0 && op2<0) ||
+           ((op1>=0 || op2<0) && res<0));
+      break;
+    default:
+      break;
+    }
+    CC_ZNCO = concat(Z,N,C,O);
+#endif // MAKEDOC
+  }
+
+  // Scalar ALU.
+  void salu(salu_op_t alu_op, sbits<16> op1, sbits<16> op2) {
+
+    int32_t sop1,sop2,sres;
+
+    if (CONFALU.SGN==1) {         // signed
+      sop1=op1.int32();
+      sop2=op2.int32();
+    }
+    else {
+      sop1=op1.uint32();
+      sop2=op2.uint32();
+    }
+
+    OP1 = op1;
+    OP2 = op2;
+        
+    switch (alu_op) {
+    case SALU_OP_MOV: 
+      RES=sop2;
+      break;
+    case SALU_OP_ADD:
+      RES=sop1+sop2;
+      salu_cc_set_NZCO(alu_op, RES, OP1, OP2);
+      break;
+    case SALU_OP_SUB:
+      RES=sop1-sop2;
+      salu_cc_set_NZCO(alu_op, RES, OP1, OP2);
+      break;
+    case SALU_OP_ABSDIFF:
+      RES=(sop1>sop2)?(sop1-sop2) : (sop2-sop1);
+      salu_cc_set_NZ(RES);
+      break;
+    case SALU_OP_MULH:
+      {
+        int sign=0;
+        int shr;
+
+        shr=CONFALU.SHR.uint32();
+        //if (shr==0) shr=16;
+        //if (CONFALU.SHR==1) {         // (CONFSGN==1) signed
+        //  sop1=signExtend(OP1,32);
+        //  sop2=signExtend(OP2,32);
+        //}
+        //else {
+        //  sop1=zeroExtend(OP1,32);
+        //  sop2=zeroExtend(OP2,32);
+        //}
+        sres=sop1*sop2;
+        if (CONFALU.SGN==1) {         //  signed
+          RES32=sres>>shr;
+        }
+        else {
+          RES32=((unsigned int)sres)>>shr;
+        }
+
+        if((sop1!=0) && (sop2!=0)) {
+          if (sop1<0) sign++;
+          if (sop2<0) sign++;
+        }
+        if (sign==1) { // negative result
+          RES=concat((bits<1>) 1,
+                     (RES32(30,16).uint32()==0x7fff)? (bits<1>)1:(bits<1>)0,
+                     RES32(15,0));
+        }
+        else {  // positive result
+          if (CONFALU.SGN==1) {         // (CONFSGN==1) signed
+            RES=concat((bits<1>) 0,
+                       (RES32(30,16).uint32()==0)? (bits<1>)0:(bits<1>)1,
+                       RES32(15,0));
+          }
+          else {
+            RES=concat((bits<1>) 0,
+                       (RES32(31,16).uint32()==0)? (bits<1>)0:(bits<1>)1,
+                       RES32(15,0));
+          }
+        }
+      }
+//#ifndef MAKEDOC
+//      I_DELAY_UPDATE=1;   // two cycle ALU instruction
+//#endif // MAKEDOC
+      break;
+    case SALU_OP_MULL:
+      RES32=sop1*sop2;
+      RES=RES32(15,0);  // always unsigned
+//#ifndef MAKEDOC
+//      I_DELAY_UPDATE=1;   // two cycle ALU instruction
+//#endif // MAKEDOC
+      break;
+    //case SALU_OP_SQD:
+    //  RES32=(sop1-sop2)*(sop1-sop2);
+    //  RES=RES32>>CONFALU.SHR.uint32();
+    //  salu_cc_set_NZ(RES);
+    //  break;
+    case SALU_OP_AND:
+      RES=sop1&sop2;
+      salu_cc_set_NZ(RES);
+      break;
+    case SALU_OP_OR:
+      RES=sop1|sop2;
+      salu_cc_set_NZ(RES);
+      break;
+    case SALU_OP_XOR:
+      RES=sop1^sop2;
+      salu_cc_set_NZ(RES);
+      break;
+    case SALU_OP_MIN:
+      RES=(sop1<sop2)? sop1: sop2;
+      salu_cc_set_NZ(RES);
+      break;
+    case SALU_OP_MAX:
+      RES=(sop1>sop2)? sop1: sop2;
+      salu_cc_set_NZ(RES);
+      break;
+    case SALU_OP_ASR:
+      RES=op1.int32()>>(sop2 & 0xf);
+      salu_cc_set_NZ(RES);
+      break;
+    case SALU_OP_LSR:
+      RES=(sop1 & 0xffff)>>(sop2 & 0xf);
+      salu_cc_set_NZ(RES);
+      break;
+    case SALU_OP_ASL:
+      RES32=sop1<<(sop2 & 0xf);
+      if (sop1<0) { // negative result
+        RES=concat((bits<1>) 1, (RES32(30,16).uint32()==0x7fff)? (bits<1>)1:(bits<1>)0,RES32(15,0));
+      }
+      else {  // positive result
+        RES=concat((bits<1>) 0, (RES32(30,16).uint32()==0)? (bits<1>)0:(bits<1>)1,RES32(15,0));
+      }
+      salu_cc_set_NZ(RES);
+      //salu_cc_set_NZCO(SALU_OP_ADD, RES, OP1, OP2);
+      break;
+    case SALU_OP_CLZ:
+      int m=0;
+      while(m<16 && ((sop2 & 0x8000)==0)){
+        ++m;
+        sop2<<=1;
+      }
+      if (m==16) m|=0xfff0; // replicate bit[4] to bit[15:4] and set N flag
+      RES=m;
+      salu_cc_set_NZ(RES);
+      break;
+    }
+
+    // process saturation
+    if (CONFALU.SAT==1) {         //
+    if (CONFALU.SGN==1) {         // signed
+        if (RES.int32() < SMIN16) {   // negative overflow
+#ifdef LOG_MORE
+          info(1,"Do saturate");
+#endif
+          SAT=SMIN16;
+        }
+        else if (RES.int32() > SMAX16) { // positive overflow
+#ifdef LOG_MORE
+          info(1,"Do saturate");
+#endif
+          SAT=SMAX16;
+        }
+        else {
+          SAT=RES(15,0);
+        }
+      }
+      else {             // unsigned logic
+        if (RES.int32() < UMIN16) {   // negative overflow
+#ifdef LOG_MORE
+          info(1,"Do saturate");
+#endif
+          SAT=UMIN16;
+        }
+        else if (RES.uint32() > UMAX16) { // positive overflow
+#ifdef LOG_MORE
+          info(1,"Do saturate");
+#endif
+          SAT=UMAX16;
+        }
+        else {
+          SAT=RES(15,0);
+        }
+      }
+    }
+    else {
+      SAT=RES(15,0);
+    }
+
+  }
+
+  // ***********************************************************************
+  // Registers
+  // ***********************************************************************
+  define (reg=OP1) {
+    """
+    Internal Signal:
+    ALU Operand 1
+    """;
+    width = 17;
+    //is_signed = true;
+  }
+
+  define (reg=OP2) {
+    """
+    Internal Signal:
+    ALU Operand 2
+    """;
+    width = 17;
+    //is_signed = true;
+  }
+
+  define (reg=RES) {
+    """
+    Internal Signal:
+    ALU Result value before saturating
+    """;
+    width = 18;
+  }
+
+  define (reg=SAT) {
+    """
+    Internal Signal:
+    ALU Result value after saturating
+    """;
+    width = 16;
+  }
+
+  define (reg=RES32) {
+    """
+    Internal Signal:
+    Result from multiplier
+    """;
+    width = 33;
+  }
+
+  // ***********************************************************************
+  // Instructions
+  // ***********************************************************************
+
+  // mov *****************************
+  define (instr=movi) {
+    """
+    Move constant to registers
+
+    R[DEST] = IM16
+
+    Condition code flags modified: none
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(1),OPCD(0),DEST,IM16);
+    syntax = ("mov %f,%f",DEST,IM16);
+    //syntax = ("mov d%f,%f",DEST,IM16);
+    action = {
+      salu(SALU_OP_MOV,IM16,IM16); // 2nd operand not needed
+      R(DEST)=RES;
+    };
+  }
+
+  define (instr=mov) {
+    """
+    Copy register to register
+
+    R[DEST] = R[IN]
+
+    Condition code flags modified: none
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(2),OPCD(0),DEST,IN2);
+    syntax = ("mov %f,%f",DEST,IN2);
+    action = {
+      salu(SALU_OP_MOV, R(IN2), R(IN2)); // 2nd operand not needed
+      R(DEST)=RES;
+    };
+  }
+
+  // add *****************************
+  define (instr=addi) {
+    """
+    Adds the two source operands using binary addition and stores the result in
+    in the destination register.
+
+    R[DEST] = Saturate(R[DEST] + IM16)
+
+    Condition code flags modified: carry, overflow, negative, zero
+
+    Saturate depends on result, CONFALU.SAT and CONFALU.SGN
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(1),OPCD(1),DEST,IM16);
+    syntax = ("add %f,%f",DEST,IM16);
+    action = {
+      salu(SALU_OP_ADD, R(DEST), IM16);
+      R(DEST)=SAT;
+    };
+  }
+
+  define (instr=add) {
+    """
+    Add two register values
+
+    R[DEST] = Saturate(R[IN1] + R[IN2])
+
+    Condition code flags modified: carry, overflow, negative, zero
+
+    Saturate depends on result, CONFALU.SAT and CONFALU.SGN
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(2),OPCD(1),DEST,IN1,IN2);
+    syntax = ("add %f,%f,%f",DEST,IN1,IN2);
+    action = {
+      salu(SALU_OP_ADD, R(IN1), R(IN2));
+      R(DEST)=SAT;
+    };
+  }
+
+  // sub *****************************
+  define (instr=subi) {
+    """
+    Subtract a value from a registers
+
+    R[DEST] = Saturate(R[DEST] - IM16)
+
+    Condition code flags modified: carry, overflow, negative, zero
+
+    Saturate depends on result, CONFALU.SAT and CONFALU.SGN
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(1),OPCD(2),DEST,IM16);
+    syntax = ("sub %f,%f",DEST,IM16);
+    action = {
+      salu(SALU_OP_SUB, R(DEST), IM16);
+      R(DEST)=SAT(15,0);
+    };
+  }
+
+  define (instr=sub) {
+    """
+    Subtract two register values
+
+    R[DEST] = Saturate(R[IN1] - R[IN2])
+
+    Condition code flags modified: carry, overflow, negative, zero
+
+    Saturate depends on result, CONFALU.SAT and CONFALU.SGN
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(2),OPCD(2),DEST,IN1,IN2);
+    syntax = ("sub %f,%f,%f",DEST,IN1,IN2);
+    action = {
+      salu(SALU_OP_SUB, R(IN1), R(IN2));
+      R(DEST)=SAT(15,0);
+    };
+  }
+
+  // abd *****************************
+  define (instr=adbi) {
+    """
+    Absolute difference of value and a registers
+
+    R[DEST] = abs(R[DEST] - IM16)
+
+    Condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(1),OPCD(3),DEST,IM16);
+    syntax = ("abd %f,%f",DEST,IM16);
+    action = {
+      salu(SALU_OP_ABSDIFF, R(DEST), IM16);
+      R(DEST)=RES(15,0);
+    };
+  }
+
+  define (instr=abd) {
+    """
+    Absolute difference between two registers
+
+    R[DEST] = abs (R[IN1] - R[IN2])
+
+    Condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(2),OPCD(3),DEST,IN1,IN2);
+    syntax = ("abd %f,%f,%f",DEST,IN1,IN2);
+    action = {
+      salu(SALU_OP_ABSDIFF, R(IN1), R(IN2));
+      R(DEST)=RES(15,0);
+    };
+  }
+
+  // mulh *****************************
+  define (instr=mulhi) {
+    """
+    multiply a register by a value according to CONFALU and
+    scale to fixed point
+
+    R[DEST] = Saturate( (R[DEST] * IM16) >> CONFSHR)
+
+    Condition code flags modified: none
+
+    Saturate depends on result, CONFALU.SAT and CONFALU.SGN
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(1),OPCD(4),DEST,IM16);
+    syntax = ("mulh %f,%f",DEST,IM16);
+    action = {
+      salu(SALU_OP_MULH, R(DEST), IM16);
+      R(DEST)=SAT(15,0);
+    };
+  }
+
+  define (instr=mulh) {
+    """
+    multiply a register by a value according to CONFALU and
+    scale to fixed point and
+
+    R[DEST] = Saturate( ((R[IN1] * R[IN2]) >> CONFSHR)
+
+    Condition code flags modified: none
+
+    Saturate depends on result, CONFALU.SAT and CONFALU.SGN
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(2),OPCD(4),DEST,IN1,IN2);
+    syntax = ("mulh %f,%f,%f",DEST,IN1,IN2);
+    action = {
+      salu(SALU_OP_MULH, R(IN1), R(IN2));
+      R(DEST)=SAT(15,0);
+    };
+  }
+
+  // mull *****************************
+  define (instr=mulli) {
+    """
+    multiply a register by a value and take lower 16 bits
+
+    R[DEST] = (R[DEST] * IM16) & 0xFFFF
+
+    Condition code flags modified: none
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(1),OPCD(5),DEST,IM16);
+    syntax = ("mull %f,%f",DEST,IM16);
+    action = {
+      salu(SALU_OP_MULL, R(DEST), IM16);
+      R(DEST)=RES(15,0);
+    };
+  }
+
+  define (instr=mull) {
+    """
+    multiply two registers and take lower 16 bits
+
+    R[DEST] = (R[IN1] * R[IN2]) & 0xFFFF
+
+    Condition code flags modified: none
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(2),OPCD(5),DEST,IN1,IN2);
+    syntax = ("mull %f,%f,%f",DEST,IN1,IN2);
+    action = {
+      salu(SALU_OP_MULL, R(IN1), R(IN2));
+      R(DEST)=RES(15,0);
+    };
+  }
+
+  // and *****************************
+  define (instr=andi) {
+    """
+    Logic AND  of a value to a registers
+
+    R[DEST] = R[DEST] & IM16
+
+    Condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(1),OPCD(7),DEST,IM16);
+    syntax = ("and %f,%f",DEST,IM16);
+    action = {
+      salu(SALU_OP_AND, R(DEST), IM16);
+      R(DEST)=RES(15,0);
+    };
+  }
+
+  define (instr=and) {
+    """
+    Logic AND of two register values
+
+    R[DEST] = R[IN1] & R[IN2]
+
+    Condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(2),OPCD(7),DEST,IN1,IN2);
+    syntax = ("and %f,%f,%f",DEST,IN1,IN2);
+    action = {
+      salu(SALU_OP_AND, R(IN1),R(IN2));
+      R(DEST)=RES(15,0);
+    };
+  }
+
+  // or *****************************
+  define (instr=ori) {
+    """
+    Logic OR  of a value to a registers
+
+    R[DEST] = R[DEST] | IM16
+
+    Condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(1),OPCD(8),DEST,IM16);
+    syntax = ("or %f,%f",DEST,IM16);
+    action = {
+      salu(SALU_OP_OR, R(DEST), IM16);
+      R(DEST)=RES(15,0);
+    };
+  }
+
+  define (instr=or) {
+    """
+    Logic OR of two register values
+
+    R[DEST] = R[IN1] | R[IN2]
+
+    Condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(2),OPCD(8),DEST,IN1,IN2);
+    syntax = ("or %f,%f,%f",DEST,IN1,IN2);
+    action = {
+      salu(SALU_OP_OR, R(IN1), R(IN2));
+      R(DEST)=RES(15,0);
+    };
+  }
+
+  // xor *****************************
+  define (instr=xori) {
+    """
+    Logic OR  of a value to a registers
+
+    R[DEST] = R[DEST] ^ IM16
+
+    Condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(1),OPCD(9),DEST,IM16);
+    syntax = ("xor %f,%f",DEST,IM16);
+    action = {
+      salu(SALU_OP_XOR, R(DEST), IM16);
+      R(DEST)=RES(15,0);
+    };
+  }
+
+  define (instr=xor) {
+    """
+    Logic OR of two register values
+
+    R[DEST] = R[IN1] ^ R[IN2]
+
+    Condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(2),OPCD(9),DEST,IN1,IN2);
+    syntax = ("xor %f,%f,%f",DEST,IN1,IN2);
+    action = {
+      salu(SALU_OP_XOR, R(IN1), R(IN2));
+      R(DEST)=RES(15,0);
+    };
+  }
+
+  // min *****************************
+  define (instr=mini) {
+    """
+    Minimum of a value to a registers
+
+    R[DEST] = min(R[DEST] , IM16)
+
+    Condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(1),OPCD(0xA),DEST,IM16);
+    syntax = ("min %f,%f",DEST,IM16);
+    action = {
+      salu(SALU_OP_MIN, R(DEST),IM16);
+      R(DEST)=RES(15,0);
+    };
+  }
+
+  define (instr=min) {
+    """
+    Minimum of two register values
+
+    R[DEST] = min (R[IN1] , R[IN2])
+
+    Condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(2),OPCD(0xA),DEST,IN1,IN2);
+    syntax = ("min %f,%f,%f",DEST,IN1,IN2);
+    action = {
+      salu(SALU_OP_MIN, R(IN1), R(IN2));
+      R(DEST)=RES(15,0);
+    };
+  }
+
+
+  // max *****************************
+  define (instr=maxi) {
+    """
+    Maximum of a value to a registers
+
+    R[DEST] = max (R[DEST] , IM16)
+
+    Condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(1),OPCD(0xB),DEST,IM16);
+    syntax = ("max %f,%f",DEST,IM16);
+    action = {
+      salu(SALU_OP_MAX, R(DEST), IM16);
+      R(DEST)=RES(15,0);
+    };
+  }
+
+  define (instr=max) {
+    """
+    Maximum of two register values
+
+    R[DEST] = max (R[IN1] , R[IN2])
+
+    Condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(2),OPCD(0xB),DEST,IN1,IN2);
+    syntax = ("max %f,%f,%f",DEST,IN1,IN2);
+    action = {
+      salu(SALU_OP_MAX, R(IN1), R(IN2));
+      R(DEST)=RES(15,0);
+    };
+  }
+
+  // asr *****************************
+  define (instr=asri) {
+    """
+    Shift a register value down by a value positions
+
+    R[DEST] = ((signed)R[IN1]) >> IM4
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(1),OPCD(0xC),DEST,IN1,IM4);
+    syntax = ("asr %f,%f,%f",DEST,IN1,IM4);
+    action = {
+      salu(SALU_OP_ASR, R(IN1), concat((bits<12>)0,IM4));
+      R(DEST)=RES(15,0);
+    };
+  }
+
+  define (instr=asr) {
+    """
+    Shift a register value down by another register value positions
+
+    R[DEST] = ((signed)R[IN1]) >> (R[IN2] & 0xF)
+
+    Condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(2),OPCD(0xC),DEST,IN1,IN2);
+    syntax = ("asr %f,%f,%f",DEST,IN1,IN2);
+    action = {
+      salu(SALU_OP_ASR, R(IN1), R(IN2));
+      R(DEST)=RES(15,0);
+    };
+  }
+
+  // lsr *****************************
+  define (instr=lsri) {
+    """
+    Shift a register bit wise down by a value positions
+
+    R[DEST] = ((unsigned)R[IN1]) >> IM4
+
+    Condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(1),OPCD(0xD),DEST,IN1,IM4);
+    syntax = ("lsr %f,%f,%f",DEST,IN1,IM4);
+    action = {
+      salu(SALU_OP_LSR, R(IN1), concat((bits<12>)0,IM4));
+      R(DEST)=RES(15,0);
+    };
+  }
+
+  define (instr=lsr) {
+    """
+    Shift a register bit wise down by another register value positions
+
+    R[DEST] = ((unsigned)R[IN1]) >> (R[IN2] & 0xF)
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(2),OPCD(0xD),DEST,IN1,IN2);
+    syntax = ("lsr %f,%f,%f",DEST,IN1,IN2);
+    action = {
+      salu(SALU_OP_LSR, R(IN1), R(IN2));
+      R(DEST)=RES(15,0);
+    };
+  }
+
+  // shl *****************************
+  define (instr=asli) {
+    """
+    Shift a register bit wise up by a value positions.
+    Depending on CONFSAT and CONFSGN the result is saturated
+
+    R[DEST] = Saturate(R[IN1] << IM4)
+
+    Condition code flags modified: negative, zero
+
+    Saturate depends on result, CONFALU.SAT and CONFALU.SGN
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(1),OPCD(0xE),DEST,IN1,IM4);
+    syntax = ("asl %f,%f,%f",DEST,IN1,IM4);
+    action = {
+      salu(SALU_OP_ASL, R(IN1), concat((bits<12>)0,IM4));
+      R(DEST)=SAT(15,0);
+    };
+  }
+
+  define (instr=asl) {
+    """
+    Shift a register bit wise up by another register value positions.
+    Depending on CONFSAT and CONFSGN the result is saturated
+
+    R[DEST] = Saturate(R[IN1] << (R[IN2] & 0xF))
+
+    Condition code flags modified: negative, zero
+
+    Saturate depends on result, CONFALU.SAT and CONFALU.SGN
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(2),OPCD(0xE),DEST,IN1,IN2);
+    syntax = ("asl %f,%f,%f",DEST,IN1,IN2);
+    action = {
+      salu(SALU_OP_ASL, R(IN1), R(IN2));
+      R(DEST)=SAT(15,0);
+    };
+  }
+
+  // clz *****************************
+  define (instr=clz) {
+    """
+    Count leading "0" of a register value
+
+    R[DEST] = clz (R[IN1])
+
+    Condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(1),OPCD(0xF),DEST,IN1,CLZBITS(1));
+    syntax = ("clz %f,%f",DEST,IN1);
+    action = {
+      salu(SALU_OP_CLZ, R(IN1), R(IN1));  // 2nd operand not needed
+      R(DEST)=RES(15,0);
+    };
+  }
+
+  // lsli *****************************
+  define (instr=lsli) {
+    """
+    Bit shift left by a value.
+    The result is masked to the lower 16 bits and
+    no saturation is applied
+
+    R[DEST] = (R[IN1] << IM4) & 0xFFFF
+
+    Condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(1),OPCD(0xF),DEST,IN1,CLZBITS(0),IM4);
+    syntax = ("lsl %f,%f,%f",DEST,IN1,IM4);
+    action = {
+      salu(SALU_OP_ASL, R(IN1), concat((bits<12>)0,IM4));
+      R(DEST)=RES(15,0);
+    };
+  }
+
+  define (instr=lsl) {  // bit shift left
+    """
+    Bit shift left by a register value.
+    The result is masked to the lower 16 bits and
+    no saturation is applied
+
+    R[DEST] = (R[IN1] << (R[IN2] & 0xF)) & 0xFFFF
+
+    Condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(2),OPCD(0xF),DEST,IN1,IN2);
+    syntax = ("lsl %f,%f,%f",DEST,IN1,IN2);
+    action = {
+      salu(SALU_OP_ASL, R(IN1),R(IN2));
+      R(DEST)=RES(15,0);
+    };
+  }
+
+  // abs *****************************
+  // use abd DEST,IN,ZERO instead
+  //define (instr=abs) {
+  //  """
+  //  absolute of a register value
+  //
+  //  R[DEST] = abs ((signed)R[IN1])
+  //  """;
+  //  fields=(TYPE(2),OPCD(0xF),DEST,IN2);
+  //  syntax = ("abs %f,%f",DEST,IN2);
+  //  action = {
+  //    salu(SALU_OP_ABSDIFF, R(IN2), 0);  // 2nd operand not needed
+  //    R(DEST)=SAT(15,0);
+  //  };
+  //}
+
+  //// sqd *****************************
+  //define (instr=sqd) {
+  //  """
+  //  Square difference between two registers
+  //
+  //  R[DEST] = (R[IN1] - R[IN2])^2
+  //  """;
+  //  fields=(TYPE(1),OPCD(6),DEST,IN1,IN2);
+  //  syntax = ("sqd %f,%f,%f",DEST,IN1,IN2);
+  //  action = {
+  //    salu(SALU_OP_SQD, R(IN1), R(IN2));
+  //    R(DEST)=SAT(15,0);
+  //  };
+  //}
+}

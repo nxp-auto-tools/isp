@@ -1,0 +1,217 @@
+// *-*- c -*-******************************************************************
+// *
+// *  Copyright Freescale 2013, All rights reserved.
+// *  Copyright NXP 2017, All rights reserved.
+// * 
+// *  SPDX-License-Identifier: BSD-3-Clause
+// *
+// ****************************************************************************
+// ** \addtogroup IPUS_Matrix
+// *  @{
+// ****************************************************************************
+// ** 
+// *  
+// *  \file      IPUV_Accelerators.adl
+// *  \author    Stephan Herrmann
+// *  \date      \$Date: 2006/09/15 10:50:49 $
+// *
+// *  \internal
+// *   language  ADL
+// *   $Id: fsl_header.el,v 1.1 2006/09/15 10:50:49 norberts Exp $
+// ****************************************************************************
+
+#include "IPUV_Defines.h"
+
+define (arch = IPUV_Accelerators) {
+
+
+
+  // ***********************************************************************
+  // Registers
+  // ***********************************************************************
+
+#ifdef HASABSANGLE
+
+  define (reg=CONFAAG) {
+    """
+    Core Register:
+    Configuration register for ABS_ANGLE Accelerartor
+    """;
+    width = 2;
+    reset = 1;
+    define (field= SGN) {
+      """
+      Inputs are in signed or unsigned logic
+
+      + 0: unsigned
+      + 1: signed
+      """;
+      bits = (0,0);
+    };
+    define (field= HALF) {
+      """
+      genrate angle in (0-15) << 12 (0-360°) or (0-8) << 12 (0-180°)
+
+      + 0: 0-360°
+      + 1: 0-180°
+      """;
+      bits = (1,1);
+    };
+#ifdef LOG_MORE
+    define (write) {
+      action = func (bits<2> val) {
+        CONFAAG=val;
+        if (val(0) == 1) {info(1,"signed");} else {info(1,"unsigned");};
+        if (val(1) == 1) {info(1,"half (0-180°)");} else {info(1,"full (0-360°)");};
+      };
+    }
+#endif
+  }
+
+
+  define (regfile=ABS) {
+    """
+    Core registers:
+    Absolute Value Result of the Abs Angle Acceleration (read only)
+
+    Approximated with using a max between (S)ACC(ix) and (S)ACC(ix+4)
+    """;
+    size = 4;
+    width=16;
+#ifndef MAKEDOC
+    define (read) {
+      action = func(unsigned ix) {
+        int op1, op2;
+
+        if (CONFAAG.SGN == 1) {
+          op1=SACC(ix  ).int32();
+          if (op1<0) op1 = -op1;
+          op2=SACC(ix+4).int32();
+          if (op2<0) op2 = -op2;
+        }
+        else {
+          op1=ACC(ix  ).uint32();
+          op2=ACC(ix+4).uint32();
+        }
+        info(1,"reading ABS(",ix,"):",op1,":",op2);
+        return (op1 > op2)? op1: op2;
+      };
+    }
+    define (write) {
+      action = func(unsigned ix, bits<16> val) {
+        error(1,
+              "\n********************\n",
+              "ERROR: Writing to read only register ABS(",ix,
+              ")\n********************\n");
+      };
+    }
+#endif
+  }
+
+  define (regfile=ANGLE) {
+    """
+    Core registers:
+    Angle Value Result of the Abs Angle Acceleration (read only)
+
+    Angle approximates arc_tan(ACC(ix),ACC(ix+4)).
+    For the gardients this assumes, e.g., the X-gradient being stored
+       in ACC0 and the Y-gradient in ACC(4).
+    The Angle value is quantized to 16 directions signed mode or
+    4 diretcion in usnigned mode
+    """;
+    size = 4;
+    width=16;
+#ifndef MAKEDOC
+    define (read) {
+      action = func(unsigned ix) {
+        static int field2angle[24]= {
+          0,8,8,0,
+          4,4,12,12,
+          1,7,9,15,
+          3,5,11,13,
+          2,6,10,14,
+          2,6,10,14
+        };
+        int op1, op2;
+        int aop1,aop2;
+        int max,min;
+        int field=0;
+
+        if (CONFAAG.SGN == 1) {
+          op1=SACC(ix  ).int32();
+          op2=SACC(ix+4).int32();
+        }
+        else {
+          op1=ACC(ix  ).uint32();
+          op2=ACC(ix+4).uint32();
+        }
+        info(1,"reading ANGLE(",ix,"):",op1,":",op2);
+
+        // quadrant
+        if (op1<0) {
+          field+=1;
+          aop1=-op1;
+        }
+        else {
+          aop1=op1;
+        }
+        if (op2<0) {
+          field ^= 1; //invert lower quadrant bit 
+          if (CONFAAG.HALF==0) {
+            field+=2;
+          }
+          aop2=-op2;
+        }
+        else {
+          aop2=op2;
+        }
+
+        // half quadrand
+        if (aop1<aop2) {
+          field +=4;
+          max=aop2;
+          min=aop1;
+        }
+        else {
+          max=aop1;
+          min=aop2;
+        }
+
+        // sector in half quadrant
+        if ((max<<1) < ((min<<1) + min)) { // (min*1,5 > max):
+                                      // cos(33,75°)/sin(33,75°)= 1.497
+          field += 16;
+        }
+        else if (max <= (min + (min<<2))) { // (min*5 > max):
+                                      // cos(11,25°)/sin(11,25°)= 5.027
+          field += 8;
+        }
+        //info(1,"reading ANGLE(",ix,"):",aop1,":",aop2);
+        return field2angle[field]<<12;
+      };
+    }
+    define (write) {
+      action = func(unsigned ix, bits<16> val) {
+        error(1,
+              "\n********************\n",
+              "ERROR: Writing to read only register ANGLE(",ix,
+              ")\n********************\n");
+      };
+    }
+#endif
+  }
+
+#endif  // HASABSANGLE
+
+
+  // scalar registers ****************************
+  defmod (regfile=R) {
+    //size  = 256;
+    //width = 16;
+#ifdef HASABSANGLE
+    define (entry=  0x8)  { reg = CONFAAG; }
+    define (entry= 0xa0)   { reg = ABS; };   // to 0xa3
+    define (entry= 0xa4)   { reg = ANGLE; }; // to 0xa7
+#endif
+  }
+}

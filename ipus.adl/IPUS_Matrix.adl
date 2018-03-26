@@ -1,0 +1,1273 @@
+// *-*- c -*-******************************************************************
+// *
+// *  Copyright Freescale 2013, All rights reserved.
+// *  Copyright NXP 2017, All rights reserved.
+// * 
+// *  SPDX-License-Identifier: BSD-3-Clause
+// *
+// ****************************************************************************
+// ** \addtogroup IPUS_Matrix
+// *  @{
+// ****************************************************************************
+// ** 
+// *  
+// *  \file      IPUS_Matrix.adl
+// *  \author    Stephan Herrmann
+// *  \date      \$Date: 2006/09/15 10:50:49 $
+// *
+// *  \internal
+// *   language  ADL
+// *   $Id: fsl_header.el,v 1.1 2006/09/15 10:50:49 norberts Exp $
+// ****************************************************************************
+
+#include "IPUS_Defines.h"
+
+define (arch = IPUS_Matrix) {
+
+  // update Matrix Flags
+  bits<9> flag_ways(bits<9> flag_registers, bits<9> new_flags, bits<9> mask) {
+    return (flag_registers & ~mask) | (new_flags & mask);
+  }
+
+  // get condition code functions *********
+  int cc_get_N(bits<16> res) {
+#ifndef MAKEDOC
+    if (res(15) == 1) return 1;
+    return 0;
+#endif // MAKEDOC
+  }
+
+  int cc_get_Z(sbits<16> res) {
+#ifndef MAKEDOC
+    if (res(15,0)==0) return 1;
+    return 0;
+#endif // MAKEDOC
+  }
+
+  int cc_get_C (malu_op_t alu_op,sbits<16> res, 
+                        sbits<16> op1,sbits<16> op2) {
+#ifndef MAKEDOC
+    if (alu_op == MALU_OP_SUB) {
+      if (( op1>=0 && op2<0) ||
+           ((op1>=0 || op2<0) && res<0)) {
+        return 1;
+      }
+      else {
+        return 0;
+      }
+    }
+    else { // not MALU_OP_SUB
+      if (( op1<0 && op2<0) ||
+          ((op1<0 || op2<0) && res>=0)) {
+        return 1;
+      }
+      else {
+        return 0;
+      }
+    }
+#endif // MAKEDOC
+  }
+
+  int cc_get_O (malu_op_t alu_op,sbits<16> res, 
+                        sbits<16> op1,sbits<16> op2) {
+#ifndef MAKEDOC
+    if (alu_op == MALU_OP_SUB) {
+      if (( op1>=0  && op2<0 && res<0 ) ||
+          ( op1<0 && op2>=0  && res>=0 )) {
+        return 1;
+      }
+      else {
+        return 0;
+      }
+    }
+    else { // not MALU_OP_SUB
+      if (( op1>=0 && op2>=0 && res<0 ) ||
+          ( op1<0  && op2<0  && res>=0)) {
+        return 1;
+      }
+      else {
+        return 0;
+      }
+    }
+#endif // MAKEDOC
+  }
+
+  // Matrix ALU.
+  void malu(malu_op_t malu_op,
+            bits<3> idx1, sbits<16> op1,
+            bits<3> idx2, sbits<16> op2) {
+
+    int32_t sop1[9],sop2[9];
+
+    int i;
+    //    bits<18> res0, res1, res2, res3;
+    bits<9> z,n,c,o;
+
+    //MOP1(idx1)=op1;
+    //MOP2(idx2)=op2;
+#ifndef MAKEDOC
+    set_mop1(idx1.uint32(),op1);
+    set_mop2(idx2.uint32(),op2);
+#endif // MAKEDOC
+
+
+    if (CONFALU.SGN==1) {
+      for (i=0; i<9; i++) {
+        sop1[i]=MOP1(i).int32();
+        sop2[i]=MOP2(i).int32();
+      }
+    }
+    else {
+      for (i=0; i<9; i++) {
+        sop1[i]=MOP1(i).uint32();
+        sop2[i]=MOP2(i).uint32();
+      }
+    }
+
+    c=MFLAG_C;
+    o=MFLAG_O;
+
+    switch (malu_op) {
+    case MALU_OP_ADD: // add
+      for (i=0; i<9; i++) {
+        MRES(i)=sop1[i] + sop2[i];
+        z(i,i)=cc_get_Z(MRES(i));
+        n(i,i)=cc_get_N(MRES(i));
+        c(i,i)=cc_get_C(malu_op,MRES(i),MOP1(i),MOP2(i));
+        o(i,i)=cc_get_O(malu_op,MRES(i),MOP1(i),MOP2(i));
+      }
+      break;
+    case MALU_OP_SUB: // sub
+      for (i=0; i<9; i++) {
+        MRES(i)=sop1[i] - sop2[i];
+        z(i,i)=cc_get_Z(MRES(i));
+        n(i,i)=cc_get_N(MRES(i));
+        c(i,i)=cc_get_C(malu_op,MRES(i),MOP1(i),MOP2(i));
+        o(i,i)=cc_get_O(malu_op,MRES(i),MOP1(i),MOP2(i));
+      }
+      break;
+    case MALU_OP_ABSDIFF: // absdiff
+      for (i=0; i<9; i++) {
+        MRES(i)=(sop1[i]>sop2[i])?(sop1[i]-sop2[i]) : (sop2[i]-sop1[i]);
+        z(i,i)=cc_get_Z(MRES(i));
+        n(i,i)=cc_get_N(MRES(i));
+      }
+      break;
+    case MALU_OP_THF: // threshold filter
+      for (i=0; i<9; i++) {
+        MRES(i)=(sop1[i]<sop2[i])? 0:MOP1(i);
+        z(i,i)=cc_get_Z(MRES(i));
+        n(i,i)=cc_get_N(MRES(i));
+      }
+      break;
+    case MALU_OP_THM: // threshold to max
+      for (i=0; i<9; i++) {
+        MRES(i)=(sop1[i]<sop2[i])? 0:0xFFFF;
+        z(i,i)=cc_get_Z(MRES(i));
+        n(i,i)=cc_get_N(MRES(i));
+      }
+      break;
+#ifdef MAKEDOC
+    case MALU_OP_AND: // and
+      for (i=0; i<9; i++) {
+        MRES(i)=sop1[i] & sop2[i];
+        z(i,i)=cc_get_Z(MRES(i));
+        n(i,i)=cc_get_N(MRES(i));
+      }
+      break;
+    case MALU_OP_OR: // or
+      for (i=0; i<9; i++) {
+        MRES(i)=sop1[i] | sop2[i];
+        z(i,i)=cc_get_Z(MRES(i));
+        n(i,i)=cc_get_N(MRES(i));
+      }
+      break;
+    case MALU_OP_XOR: // xor
+      for (i=0; i<9; i++) {
+        MRES(i)=sop1[i] | sop2[i];
+        z(i,i)=cc_get_Z(MRES(i));
+        n(i,i)=cc_get_N(MRES(i));
+      }
+      break;
+    case MALU_OP_MIN: // min
+      for (i=0; i<9; i++) {
+        MRES(i)=(sop1[i] < sop2[i])? sop1[i] : sop2[i];
+        z(i,i)=cc_get_Z(MRES(i));
+        n(i,i)=cc_get_N(MRES(i));
+      }
+      break;
+    case MALU_OP_MAX: // max
+      for (i=0; i<9; i++) {
+        MRES(i)=(sop1[i] > sop2[i])? sop1[i] : sop2[i];
+        z(i,i)=cc_get_Z(MRES(i));
+        n(i,i)=cc_get_N(MRES(i));
+      }
+      break;
+#endif // MAKEDOC
+    case MALU_OP_ASR: // shift right
+      for (i=0; i<9; i++) {
+        MRES(i)=MOP1(i).int32() >> (sop2[i] & 0xf);
+        z(i,i)=cc_get_Z(MRES(i));
+        n(i,i)=cc_get_N(MRES(i));
+      }
+      break;
+    case MALU_OP_LSR: // logical shift right
+      for (i=0; i<9; i++) {
+        MRES(i)=(sop1[i] & 0xffff) >> (sop2[i] & 0xf);
+        z(i,i)=cc_get_Z(MRES(i));
+        n(i,i)=cc_get_N(MRES(i));
+      }
+      break;
+    case MALU_OP_ASL: // shift left
+      for (i=0; i<9; i++) {
+        int32_t sres;
+        sres=sop1[i]<<(sop2[i] & 0xf);
+        if (sop1[i]<0) { // negative result
+          MRES(i)=
+            0x20000 |
+            (((sres & 0x7fff0000) == 0x7fff0000)? 0x10000:0) |
+            (sres & 0xffff);
+        }
+        else {  // positive result
+          MRES(i)=
+            (((sres & 0x7fff0000) ==0)? 0: 0x10000) |
+            (sres & 0xffff);
+        }
+        z(i,i)=cc_get_Z(MRES(i));
+        n(i,i)=cc_get_N(MRES(i));
+      }
+      break;
+    case MALU_OP_CLZ: // shift left
+      for (i=0; i<9; i++) {
+        int m;
+
+        m=0;
+        while(m<16 && ((sop1[i] & 0x8000)==0)){
+          ++m;
+          sop1[i]<<=1;
+        }
+        if (m==16) m|=0xfff0; // replicate bit[4] to bit[15:4] and set N flag
+        MRES(i)=m;
+        z(i,i)=cc_get_Z(MRES(i));
+        n(i,i)=cc_get_N(MRES(i));
+      }
+      break;
+
+      //case MALU_OP_SWP: // swap
+      //case MALU_OP_MOV: // mov
+    default:  //mov / swp
+      for (i=0; i<9; i++) {
+        MRES(i)=MOP2(i);
+        //z(i,i)=cc_get_Z(MRES(i));
+        //n(i,i)=cc_get_N(MRES(i));
+      }
+      break;
+    }
+    I_MFLAG_Z=z;
+    I_MFLAG_N=n;
+    I_MFLAG_C=c;
+    I_MFLAG_O=o;
+
+    // process saturation
+    for (i=0; i<9; i++) {
+      if (CONFALU.SAT==1) {
+        if (CONFALU.SGN==1) {
+          if (MRES(i).int32() < SMIN16) {   // negative overflow
+            MSAT(i)=SMIN16;
+          }
+          else if (MRES(i).int32() > SMAX16) { // positive overflow
+            MSAT(i)=SMAX16;
+          }
+          else {
+            MSAT(i)=(MRES(i))(15,0);
+            //MSAT(i)=MRES(i).uint32() & 0xffff;
+          }
+        }
+        else {             // unsigned logic
+          if (MRES(i).int32() < UMIN16) {   // negative overflow
+            MSAT(i)=UMIN16;
+          }
+          else if (MRES(i).uint32() > UMAX16) { // positive overflow
+            MSAT(i)=UMAX16;
+          }
+          else {
+            MSAT(i)=(MRES(i))(15,0);
+          }
+        }
+      }
+      else {
+        MSAT(i)=(MRES(i))(15,0);
+      }
+    }
+  }
+
+#ifndef MAKEDOC
+  void set_mop1(unsigned index, bits<16> val) {
+
+    int i;
+    switch (index) {
+    case 0:  for (i=0; i<9; i++) { MOP1(i) = W(i);  } break;
+    case 1:  for (i=0; i<9; i++) { MOP1(i) = INA(i);} break;
+    case 2:  for (i=0; i<9; i++) { MOP1(i) = WW(i); } break;
+    case 3:  for (i=0; i<9; i++) {
+#ifdef HASINB
+        MOP1(i) = INB(i);
+#else
+        MOP1(i) = 0;
+#endif
+      } break;
+    case 4:  for (i=0; i<9; i++) { MOP1(i) = 0;     } break;
+    default: for (i=0; i<9; i++) { MOP1(i) = val;   } break;
+    }
+  }
+
+  void set_mop2(unsigned index, bits<16> val) {
+
+    int i;
+    switch (index) {
+    case 0:  for (i=0; i<9; i++) { MOP2(i) = W(i);  } break;
+    case 1:  for (i=0; i<9; i++) { MOP2(i) = INA(i);} break;
+    case 2:  for (i=0; i<9; i++) { MOP2(i) = WW(i); } break;
+    case 3:  for (i=0; i<9; i++) {
+#ifdef HASINB
+        MOP2(i) = INB(i);
+#else
+        MOP2(i) = 0;
+#endif
+      } break;
+    case 4:  for (i=0; i<9; i++) { MOP2(i) = 0;     } break;
+    default: for (i=0; i<9; i++) { MOP2(i) = val;   } break;
+    }
+  }
+#endif // MAKEDOC
+
+
+
+  // Attributes
+  //attrs = (load,store,privileged);
+
+  // ***********************************************************************
+  // Registers
+  // ***********************************************************************
+
+  // Internal Registers
+  define (regfile=MOP1) {
+    """
+    Internal Signal: 3x3 Matrix Operand 1 Input to Matrix ALU
+    """;
+    width = 16;
+    size  = 9;
+  }
+
+  define (regfile=MOP2) {
+    """
+    Internal Signal: 3x3 Matrix Operand 2 Input to Matrix ALU
+    """;
+    width = 16;
+    size  = 9;
+  }
+
+  define (regfile=MRES) {
+    """
+    Internal Signal: 3x3 Matrix result of Matrix ALU before saturation
+    """;
+    width = 18;
+    size  = 9;
+  }
+
+  define (regfile=MSAT) {
+    """
+    Internal Signal: 3x3 Matrix result of Matrix ALU after saturation
+    """;
+    width = 16;
+    size  = 9;
+  }
+
+  define (reg=I_MFLAG_O) {
+    """
+    Internal Signal:
+    3x3 Matrix ALU Overflow Flags
+    """;
+    width = 9;
+  }
+
+  define (reg=I_MFLAG_C) {
+    """
+    Internal Signal:
+    3x3 Matrix ALU Carry Flags
+    """;
+    width = 9;
+  }
+
+  define (reg=I_MFLAG_N) {
+    """
+    Internal Signal:
+    3x3 Matrix ALU Negative Flags
+    """;
+    width = 9;
+  }
+
+  define (reg=I_MFLAG_Z) {
+    """
+    Internal Signal:
+    3x3 Matrix ALU Zero Flags
+    """;
+    width = 9;
+  }
+
+  // ***********************************************************************
+  // Instruction Fields
+  // ***********************************************************************
+  define (instrfield=MIN1) {
+    """
+    Matrix Operator 1 register
+    """;
+    bits = (18,16);
+    //display = dec;
+    enumerated = ("w","ina","ww","inb","mzero");
+  }
+
+  define (instrfield=MIN2) {
+    """
+    Matrix Operator 2 register
+    """;
+    bits = (1,0);
+    display = dec;
+    enumerated = ("w","ina","ww","inb");
+  }
+
+
+  // ***********************************************************************
+  // Instruction
+  // ***********************************************************************
+  // mov, *****************************
+  define (instr=mov_M_MxI) {
+    """
+    Copy a constant value to all register of the working register matrix (W)
+
+    W[i] = IM16
+
+    Matrix condition code flags modified: none
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(5),OPCD(0),IM16);
+#ifndef MATRIX_INSTR_EXPLICIT_W
+    syntax = ("mov %f",IM16);
+#else
+    syntax = ("mov w,%f",IM16);
+#endif
+    action = {
+      int i;
+      malu(MALU_OP_MOV, 5, IM16, 5, IM16);
+      for (i=0; i<9; i++) { if (MASK(i) == 1) W(i) = MRES(i); };
+    };
+  }
+
+  define (instr=mov_M_MxS) {
+    """
+    Copy a register value to all register of the working register matrix (W)
+
+    W[i] = R[IN2]
+
+    Matrix condition code flags modified: none
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(6),OPCD(0),IN2);
+#ifndef MATRIX_INSTR_EXPLICIT_W
+    syntax = ("mov %f",IN2);
+#else
+    syntax = ("mov w,%f",IN2);
+#endif
+    action = {
+      int i;
+      malu(MALU_OP_MOV, 5, IN2, 5, R(IN2));
+      for (i=0; i<9; i++) { if (MASK(i) == 1) W(i) = MRES(i); };
+    };
+  }
+
+  define (instr=mov_M_MxM) {
+    """
+    Copy a matrix register to the woring register matrix (W)
+
+    W[i] = MIN2[i]
+
+    Matrix condition code flags modified: none
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(7),OPCD(0),MIN2);
+#ifndef MATRIX_INSTR_EXPLICIT_W
+    syntax = ("mov %f",MIN2);
+#else
+    syntax = ("mov w,%f",MIN2);
+#endif
+    action = {
+      int i;
+      malu(MALU_OP_MOV, MIN2, 0, MIN2, 0);
+      for (i=0; i<9; i++) { if (MASK(i) == 1) W(i) = MRES(i); };
+    };
+  }
+
+  // add *****************************
+  define (instr=add_M_MxI) {
+    """
+    Add a constant value to a matrix register and store the result
+    in the working matrix register (W)
+
+    W[i] = Saturate(MIN1[i] + IM16)
+
+    Matrix condition code flags modified: carry, overflow, negative, zero
+
+    Saturate depends on result, CONFALU.SAT and CONFALU.SGN
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(5),OPCD(1),MIN1,IM16);
+#ifndef MATRIX_INSTR_EXPLICIT_W
+    syntax = ("add %f,%f",MIN1,IM16);
+#else
+    syntax = ("add w,%f,%f",MIN1,IM16);
+#endif
+    action = {
+      int i;
+      malu(MALU_OP_ADD, MIN1, 0, 5, IM16);
+      for (i=0; i<9; i++) { if (MASK(i) == 1) W(i) = MSAT(i); };
+      MFLAG_N=flag_ways(MFLAG_N,I_MFLAG_N,MASKV);
+      MFLAG_Z=flag_ways(MFLAG_Z,I_MFLAG_Z,MASKV);
+      MFLAG_O=flag_ways(MFLAG_O,I_MFLAG_O,MASKV);
+      MFLAG_C=flag_ways(MFLAG_C,I_MFLAG_C,MASKV);
+     };
+  }
+
+  define (instr=add_M_MxS) {
+    """
+    Add a register value to a matrix register and store the result
+    in the working matrix register (W) 
+
+    W[i] = Saturate(MIN1[i] + R[IN2])
+
+    Matrix condition code flags modified: carry, overflow, negative, zero
+
+    Saturate depends on result, CONFALU.SAT and CONFALU.SGN
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(6),OPCD(1),MIN1,IN2);
+#ifndef MATRIX_INSTR_EXPLICIT_W
+    syntax = ("add %f,%f",MIN1,IN2);
+#else
+    syntax = ("add w,%f,%f",MIN1,IN2);
+#endif
+    action = {
+      int i;
+      malu(MALU_OP_ADD, MIN1, 0, 5, R(IN2));
+      for (i=0; i<9; i++) { if (MASK(i) == 1) W(i) = MSAT(i); };
+      MFLAG_N=flag_ways(MFLAG_N,I_MFLAG_N,MASKV);
+      MFLAG_Z=flag_ways(MFLAG_Z,I_MFLAG_Z,MASKV);
+      MFLAG_O=flag_ways(MFLAG_O,I_MFLAG_O,MASKV);
+      MFLAG_C=flag_ways(MFLAG_C,I_MFLAG_C,MASKV);
+    };
+  }
+
+  define (instr=add_M_MxM) {
+    """
+    Add two matrix registers to and store the result in the working matrix (W)
+
+    W[i] = Saturate(MIN1[i] + MIN2[i])
+
+    Matrix condition code flags modified: carry, overflow, negative, zero
+
+    Saturate depends on result, CONFALU.SAT and CONFALU.SGN
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(7),OPCD(1),MIN1,MIN2);
+#ifndef MATRIX_INSTR_EXPLICIT_W
+    syntax = ("add %f,%f",MIN1,MIN2);
+#else
+    syntax = ("add w,%f,%f",MIN1,MIN2);
+#endif
+    action = {
+      int i;
+      malu(MALU_OP_ADD, MIN1, 0, MIN2, 0);
+      for (i=0; i<9; i++) { if (MASK(i) == 1) W(i) = MSAT(i); };
+      MFLAG_N=flag_ways(MFLAG_N,I_MFLAG_N,MASKV);
+      MFLAG_Z=flag_ways(MFLAG_Z,I_MFLAG_Z,MASKV);
+      MFLAG_O=flag_ways(MFLAG_O,I_MFLAG_O,MASKV);
+      MFLAG_C=flag_ways(MFLAG_C,I_MFLAG_C,MASKV);
+    };
+  }
+
+  // sub *****************************
+  define (instr=sub_M_MxI) {
+    """
+    Subtract a constant value from a matrix register and store the result
+    in the working matrix register (W)
+
+    W[i] = Saturate(MIN1[i] - IM16)
+
+    Matrix condition code flags modified: carry, overflow, negative, zero
+
+    Saturate depends on result, CONFALU.SAT and CONFALU.SGN
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(5),OPCD(2),MIN1,IM16);
+#ifndef MATRIX_INSTR_EXPLICIT_W
+    syntax = ("sub %f,%f",MIN1,IM16);
+#else
+    syntax = ("sub w,%f,%f",MIN1,IM16);
+#endif
+    action = {
+      int i;
+      malu(MALU_OP_SUB, MIN1, 0, 5, IM16);
+      for (i=0; i<9; i++) { if (MASK(i) == 1) W(i) = MSAT(i); };
+      MFLAG_N=flag_ways(MFLAG_N,I_MFLAG_N,MASKV);
+      MFLAG_Z=flag_ways(MFLAG_Z,I_MFLAG_Z,MASKV);
+      MFLAG_O=flag_ways(MFLAG_O,I_MFLAG_O,MASKV);
+      MFLAG_C=flag_ways(MFLAG_C,I_MFLAG_C,MASKV);
+    };
+  }
+
+  define (instr=sub_M_MxS) {
+    """
+    Subtract a register value from a matrix register and store the result
+    in the working matrix register (W)
+
+    W[i] = Saturate(MIN1[i] - R[IN2])
+
+    Matrix condition code flags modified: carry, overflow, negative, zero
+
+    Saturate depends on result, CONFALU.SAT and CONFALU.SGN
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(6),OPCD(2),MIN1,IN2);
+#ifndef MATRIX_INSTR_EXPLICIT_W
+    syntax = ("sub %f,%f",MIN1,IN2);
+#else
+    syntax = ("sub w,%f,%f",MIN1,IN2);
+#endif
+    action = {
+      int i;
+      malu(MALU_OP_SUB, MIN1, 0, 5, R(IN2));
+      for (i=0; i<9; i++) { if (MASK(i) == 1) W(i) = MSAT(i); };
+      MFLAG_N=flag_ways(MFLAG_N,I_MFLAG_N,MASKV);
+      MFLAG_Z=flag_ways(MFLAG_Z,I_MFLAG_Z,MASKV);
+      MFLAG_O=flag_ways(MFLAG_O,I_MFLAG_O,MASKV);
+      MFLAG_C=flag_ways(MFLAG_C,I_MFLAG_C,MASKV);
+    };
+  }
+
+  define (instr=sub_M_MxM) {
+    """
+    Subtract two matrix registers and store the result in the working matrix (W)
+
+    W[i] = Saturate(MIN1[i] - MIN2[i])
+
+    Matrix condition code flags modified: carry, overflow, negative, zero
+
+    Saturate depends on result, CONFALU.SAT and CONFALU.SGN
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(7),OPCD(2),MIN1,MIN2);
+#ifndef MATRIX_INSTR_EXPLICIT_W
+    syntax = ("sub %f,%f",MIN1,MIN2);
+#else
+    syntax = ("sub w,%f,%f",MIN1,MIN2);
+#endif
+    action = {
+      int i;
+      malu(MALU_OP_SUB, MIN1, 0, MIN2, 0);
+      for (i=0; i<9; i++) { if (MASK(i) == 1) W(i) = MSAT(i); };
+      MFLAG_N=flag_ways(MFLAG_N,I_MFLAG_N,MASKV);
+      MFLAG_Z=flag_ways(MFLAG_Z,I_MFLAG_Z,MASKV);
+      MFLAG_O=flag_ways(MFLAG_O,I_MFLAG_O,MASKV);
+      MFLAG_C=flag_ways(MFLAG_C,I_MFLAG_C,MASKV);
+    };
+  }
+
+  // absdiff *****************************
+  define (instr=absdiff_M_MxI) {
+    """
+    Absolute difference between a matrix register and a constant value and
+    store the result in the working matrix register (W)
+
+    Matrix condition code flags modified: negative, zero
+
+    W[i] = absdiff(MIN1[i] - IM16)
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(5),OPCD(3),MIN1,IM16);
+#ifndef MATRIX_INSTR_EXPLICIT_W
+    syntax = ("absdiff %f,%f",MIN1,IM16);
+#else
+    syntax = ("absdiff w,%f,%f",MIN1,IM16);
+#endif
+    action = {
+      int i;
+      malu(MALU_OP_ABSDIFF, MIN1, 0, 5, IM16);
+      for (i=0; i<9; i++) { if (MASK(i) == 1) W(i) = MRES(i); };
+      MFLAG_N=flag_ways(MFLAG_N,I_MFLAG_N,MASKV);
+      MFLAG_Z=flag_ways(MFLAG_Z,I_MFLAG_Z,MASKV);
+    };
+  }
+
+  define (instr=absdiff_M_MxS) {
+    """
+    Absolute difference between a matrix register and a register value and
+    store the result in the working matrix register (W)
+
+    W[i] = absdiff(MIN1[i] - R[IN2])
+
+    Matrix condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(6),OPCD(3),MIN1,IN2);
+#ifndef MATRIX_INSTR_EXPLICIT_W
+    syntax = ("absdiff %f,%f",MIN1,IN2);
+#else
+    syntax = ("absdiff w,%f,%f",MIN1,IN2);
+#endif
+    action = {
+      int i;
+      malu(MALU_OP_ABSDIFF, MIN1, 0, 5, R(IN2));
+      for (i=0; i<9; i++) { if (MASK(i) == 1) W(i) = MRES(i); };
+      MFLAG_N=flag_ways(MFLAG_N,I_MFLAG_N,MASKV);
+      MFLAG_Z=flag_ways(MFLAG_Z,I_MFLAG_Z,MASKV);
+    };
+  }
+
+  define (instr=absdiff_M_MxM) {
+    """
+    Absolute difference between two matrix registers and
+    store the result in the working matrix register (W)
+
+    W[i] = absdiff(MIN1[i] - MIN2[i])
+
+    Matrix condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(7),OPCD(3),MIN1,MIN2);
+#ifndef MATRIX_INSTR_EXPLICIT_W
+    syntax = ("absdiff %f,%f",MIN1,MIN2);
+#else
+    syntax = ("absdiff w,%f,%f",MIN1,MIN2);
+#endif
+    action = {
+      int i;
+      malu(MALU_OP_ABSDIFF, MIN1, 0, MIN2, 0);
+      for (i=0; i<9; i++) { if (MASK(i) == 1) W(i) = MRES(i); };
+      MFLAG_N=flag_ways(MFLAG_N,I_MFLAG_N,MASKV);
+      MFLAG_Z=flag_ways(MFLAG_Z,I_MFLAG_Z,MASKV);
+    };
+  }
+
+  // thf *****************************
+  define (instr=thf_M_MxI) {
+    """
+    Threshold Filter: threshold a matrix register with a constant value and
+    keep the remaining values in the working matrix register (W)
+
+    W[i] = (MIN1[i] < IM16)? 0: MIN1[i] 
+
+    Matrix condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(5),OPCD(4),MIN1,IM16);
+#ifndef MATRIX_INSTR_EXPLICIT_W
+    syntax = ("thf %f,%f",MIN1,IM16);
+#else
+    syntax = ("thf w,%f,%f",MIN1,IM16);
+#endif
+    action = {
+      int i;
+      malu(MALU_OP_THF, MIN1, 0, 5, IM16);
+      for (i=0; i<9; i++) { if (MASK(i) == 1) W(i) = MRES(i); };
+      MFLAG_N=flag_ways(MFLAG_N,I_MFLAG_N,MASKV);
+      MFLAG_Z=flag_ways(MFLAG_Z,I_MFLAG_Z,MASKV);
+    };
+  }
+
+  define (instr=thf_M_MxS) {
+    """
+    Threshold Filter: threshold a matrix register with a register value and
+    keep the remaining values in the working matrix register (W)
+
+    W[i] = (MIN1[i] < R[IN2])? 0: MIN1[i] 
+
+    Matrix condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(6),OPCD(4),MIN1,IN2);
+#ifndef MATRIX_INSTR_EXPLICIT_W
+    syntax = ("thf %f,%f",MIN1,IN2);
+#else
+    syntax = ("thf w,%f,%f",MIN1,IN2);
+#endif
+    action = {
+      int i;
+      malu(MALU_OP_THF, MIN1, 0, 5, R(IN2));
+      for (i=0; i<9; i++) { if (MASK(i) == 1) W(i) = MRES(i); };
+      MFLAG_N=flag_ways(MFLAG_N,I_MFLAG_N,MASKV);
+      MFLAG_Z=flag_ways(MFLAG_Z,I_MFLAG_Z,MASKV);
+    };
+  }
+
+  define (instr=thf_M_MxM) {
+    """
+    Threshold Filter: threshold a matrix register with a matrix register and
+    keep the remaining values in the working matrix register (W)
+
+    W[i] = (MIN1[i] < MIN2[i])? 0: MIN1[i] 
+
+    Matrix condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(7),OPCD(4),MIN1,MIN2);
+#ifndef MATRIX_INSTR_EXPLICIT_W
+    syntax = ("thf %f,%f",MIN1,MIN2);
+#else
+    syntax = ("thf w,%f,%f",MIN1,MIN2);
+#endif
+    action = {
+      int i;
+      malu(MALU_OP_THF, MIN1, 0, MIN2, 0);
+      for (i=0; i<9; i++) { if (MASK(i) == 1) W(i) = MRES(i); };
+      MFLAG_N=flag_ways(MFLAG_N,I_MFLAG_N,MASKV);
+      MFLAG_Z=flag_ways(MFLAG_Z,I_MFLAG_Z,MASKV);
+    };
+  }
+
+  // thm *****************************
+  define (instr=thm_M_MxI) {
+    """
+    Threshold to Max: threshold a matrix register with a constant value and
+    store MAX for the remaining values in the working matrix register (W)
+
+    W[i] = (MIN1[i] < IM16)? 0: 0xFFFF 
+
+    Matrix condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(5),OPCD(5),MIN1,IM16);
+#ifndef MATRIX_INSTR_EXPLICIT_W
+    syntax = ("thm %f,%f",MIN1,IM16);
+#else
+    syntax = ("thm w,%f,%f",MIN1,IM16);
+#endif
+    action = {
+      int i;
+      malu(MALU_OP_THM, MIN1, 0, 5, IM16);
+      for (i=0; i<9; i++) { if (MASK(i) == 1) W(i) = MRES(i); };
+      MFLAG_N=flag_ways(MFLAG_N,I_MFLAG_N,MASKV);
+      MFLAG_Z=flag_ways(MFLAG_Z,I_MFLAG_Z,MASKV);
+    };
+  }
+
+  define (instr=thm_M_MxS) {
+    """
+    Threshold to Max: threshold a matrix register with a register value and
+    store MAX for the remaining values in the working matrix register (W)
+
+    W[i] = (MIN1[i] < R[IN2])? 0: 0xFFFF
+
+    Matrix condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(6),OPCD(5),MIN1,IN2);
+#ifndef MATRIX_INSTR_EXPLICIT_W
+    syntax = ("thm %f,%f",MIN1,IN2);
+#else
+    syntax = ("thm w,%f,%f",MIN1,IN2);
+#endif
+    action = {
+      int i;
+      malu(MALU_OP_THM, MIN1, 0, 5, R(IN2));
+      for (i=0; i<9; i++) { if (MASK(i) == 1) W(i) = MRES(i); };
+      MFLAG_N=flag_ways(MFLAG_N,I_MFLAG_N,MASKV);
+      MFLAG_Z=flag_ways(MFLAG_Z,I_MFLAG_Z,MASKV);
+    };
+  }
+
+  define (instr=thm_M_MxM) {
+    """
+    Threshold to Max: threshold a matrix register with a matrix register and
+    store MAX for the remaining values in the working matrix register (W)
+
+    W[i] = (MIN1[i] < MIN2[i])? 0: 0xFFFF
+
+    Matrix condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(7),OPCD(5),MIN1,MIN2);
+#ifndef MATRIX_INSTR_EXPLICIT_W
+    syntax = ("thm %f,%f",MIN1,MIN2);
+#else
+    syntax = ("thm w,%f,%f",MIN1,MIN2);
+#endif
+    action = {
+      int i;
+      malu(MALU_OP_THM, MIN1, 0, MIN2, 0);
+      for (i=0; i<9; i++) { if (MASK(i) == 1) W(i) = MRES(i); };
+      MFLAG_N=flag_ways(MFLAG_N,I_MFLAG_N,MASKV);
+      MFLAG_Z=flag_ways(MFLAG_Z,I_MFLAG_Z,MASKV);
+    };
+  }
+
+  // asr *****************************
+  define (instr=asr_M_MxI) {
+    """
+    Arithmetic shift right of a  matrix registers by a constant value and
+    store the result in the working matrix (W)
+
+    W[i] = ((signed)MIN1[i]) >> IM4
+
+    Matrix condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(5),OPCD(12),MIN1,IM4);
+#ifndef MATRIX_INSTR_EXPLICIT_W
+    syntax = ("asr %f,%f",MIN1,IM4);
+#else
+    syntax = ("asr w,%f,%f",MIN1,IM4);
+#endif
+    action = {
+      int i;
+      malu(MALU_OP_ASR, MIN1, 0, 5, IM4);
+      for (i=0; i<9; i++) { if (MASK(i) == 1) W(i) = MRES(i); };
+      MFLAG_N=flag_ways(MFLAG_N,I_MFLAG_N,MASKV);
+      MFLAG_Z=flag_ways(MFLAG_Z,I_MFLAG_Z,MASKV);
+    };
+  }
+
+  define (instr=asr_M_MxS) {
+    """
+    Arithmetic shift right of a  matrix registers by a register value and
+    store the result in the working matrix (W)
+
+    W[i] = ((signed)MIN1[i]) >> (R[IN2] % 0xF)
+
+    Matrix condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(6),OPCD(12),MIN1,IN2);
+#ifndef MATRIX_INSTR_EXPLICIT_W
+    syntax = ("asr %f,%f",MIN1,IN2);
+#else
+    syntax = ("asr w,%f,%f",MIN1,IN2);
+#endif
+    action = {
+      int i;
+      malu(MALU_OP_ASR, MIN1, 0, 5, R(IN2));
+      for (i=0; i<9; i++) { if (MASK(i) == 1) W(i) = MRES(i); };
+      MFLAG_N=flag_ways(MFLAG_N,I_MFLAG_N,MASKV);
+      MFLAG_Z=flag_ways(MFLAG_Z,I_MFLAG_Z,MASKV);
+    };
+  }
+
+  define (instr=asr_M_MxM) {
+    """
+    Arithmetic shift right of a  matrix registers by a matrix register and
+    store the result in the working matrix (W)
+
+    W[i] = ((signed)MIN1[i]) >> (MIN2[i] & 0xF)
+
+    Matrix condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(7),OPCD(12),MIN1,MIN2);
+#ifndef MATRIX_INSTR_EXPLICIT_W
+    syntax = ("asr %f,%f",MIN1,MIN2);
+#else
+    syntax = ("asr w, %f,%f",MIN1,MIN2);
+#endif
+    action = {
+      int i;
+      malu(MALU_OP_ASR, MIN1, 0, MIN2, 0);
+      for (i=0; i<9; i++) { if (MASK(i) == 1) W(i) = MRES(i); };
+      MFLAG_N=flag_ways(MFLAG_N,I_MFLAG_N,MASKV);
+      MFLAG_Z=flag_ways(MFLAG_Z,I_MFLAG_Z,MASKV);
+    };
+  }
+
+  // lsr *****************************
+  define (instr=lsr_M_MxI) {
+    """
+    Logic shift right of a  matrix registers by a constant value and
+    store the result in the working matrix (W)
+
+    W[i] = ((unsigned)MIN1[i]) >> IM4
+
+    Matrix condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(5),OPCD(13),MIN1,IM4);
+#ifndef MATRIX_INSTR_EXPLICIT_W
+    syntax = ("lsr %f,%f",MIN1,IM4);
+#else
+    syntax = ("lsr w,%f,%f",MIN1,IM4);
+#endif
+    action = {
+      int i;
+      malu(MALU_OP_LSR, MIN1, 0, 5, IM4);
+      for (i=0; i<9; i++) { if (MASK(i) == 1) W(i) = MRES(i); };
+      MFLAG_N=flag_ways(MFLAG_N,I_MFLAG_N,MASKV);
+      MFLAG_Z=flag_ways(MFLAG_Z,I_MFLAG_Z,MASKV);
+    };
+  }
+
+  define (instr=lsr_M_MxS) {
+    """
+    Logic shift right of a  matrix registers by a register value and
+    store the result in the working matrix (W)
+
+    W[i] = ((unsigned)MIN1[i]) >> (R[IN2] & 0xF)
+
+    Matrix condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(6),OPCD(13),MIN1,IN2);
+#ifndef MATRIX_INSTR_EXPLICIT_W
+    syntax = ("lsr %f,%f",MIN1,IN2);
+#else
+    syntax = ("lsr w,%f,%f",MIN1,IN2);
+#endif
+    action = {
+      int i;
+      malu(MALU_OP_LSR, MIN1, 0, 5, R(IN2));
+      for (i=0; i<9; i++) { if (MASK(i) == 1) W(i) = MRES(i); };
+      MFLAG_N=flag_ways(MFLAG_N,I_MFLAG_N,MASKV);
+      MFLAG_Z=flag_ways(MFLAG_Z,I_MFLAG_Z,MASKV);
+    };
+  }
+
+  define (instr=lsr_M_MxM) {
+    """
+    Logic shift right of a  matrix registers by a matrix register and
+    store the result in the working matrix (W)
+
+    W[i] = ((unsigned)MIN1[i]) >> (MIN2[i] & 0xF)
+
+    Matrix condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(7),OPCD(13),MIN1,MIN2);
+#ifndef MATRIX_INSTR_EXPLICIT_W
+    syntax = ("lsr %f,%f",MIN1,MIN2);
+#else
+    syntax = ("lsr w,%f,%f",MIN1,MIN2);
+#endif
+    action = {
+      int i;
+      malu(MALU_OP_LSR, MIN1, 0, MIN2, 0);
+      for (i=0; i<9; i++) { if (MASK(i) == 1) W(i) = MRES(i); };
+      MFLAG_N=flag_ways(MFLAG_N,I_MFLAG_N,MASKV);
+      MFLAG_Z=flag_ways(MFLAG_Z,I_MFLAG_Z,MASKV);
+    };
+  }
+
+  // asl *****************************
+  define (instr=asl_M_MxI) {
+    """
+    Shift left of a  matrix registers by a constant value and
+    store the result in the working matrix (W).
+    Depending on CONFALU.SGN and CONFALU.SAT the result is saturated
+
+
+    W[i] = Saturate(MIN1[i] << IM4)
+
+    Matrix condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(5),OPCD(14),MIN1,IM4);
+#ifndef MATRIX_INSTR_EXPLICIT_W
+    syntax = ("asl %f,%f",MIN1,IM4);
+#else
+    syntax = ("asl w,%f,%f",MIN1,IM4);
+#endif
+    action = {
+      int i;
+      malu(MALU_OP_ASL, MIN1, 0, 5, IM4);
+      for (i=0; i<9; i++) { if (MASK(i) == 1) W(i) = MSAT(i); };
+      MFLAG_N=flag_ways(MFLAG_N,I_MFLAG_N,MASKV);
+      MFLAG_Z=flag_ways(MFLAG_Z,I_MFLAG_Z,MASKV);
+    };
+  }
+
+  define (instr=asl_M_MxS) {
+    """
+    Shift left of a  matrix registers by a register value and
+    store the result in the working matrix (W).
+    Depending on CONFALU.SGN and CONFALU.SAT the result is saturated
+
+    W[i] = Saturate(MIN1[i] << (R[IN2] % 0xF))
+
+    Matrix condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(6),OPCD(14),MIN1,IN2);
+#ifndef MATRIX_INSTR_EXPLICIT_W
+    syntax = ("asl %f,%f",MIN1,IN2);
+#else
+    syntax = ("asl w,%f,%f",MIN1,IN2);
+#endif
+    action = {
+      int i;
+      malu(MALU_OP_ASL, MIN1, 0, 5, R(IN2));
+      for (i=0; i<9; i++) { if (MASK(i) == 1) W(i) = MSAT(i); };
+      MFLAG_N=flag_ways(MFLAG_N,I_MFLAG_N,MASKV);
+      MFLAG_Z=flag_ways(MFLAG_Z,I_MFLAG_Z,MASKV);
+    };
+  }
+
+  define (instr=asl_M_MxM) {
+    """
+    Shift left of a  matrix registers by a matrix register and
+    store the result in the working matrix (W).
+    Depending on CONFALU.SGN and CONFALU.SAT the result is saturated
+
+    W[i] = Saturate(MIN1[i] << (MIN2[i]) & 0xF)
+
+    Matrix condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(7),OPCD(14),MIN1,MIN2);
+#ifndef MATRIX_INSTR_EXPLICIT_W
+    syntax = ("asl %f,%f",MIN1,MIN2);
+#else
+    syntax = ("asl w,%f,%f",MIN1,MIN2);
+#endif
+    action = {
+      int i;
+      malu(MALU_OP_ASL, MIN1, 0, MIN2, 0);
+      for (i=0; i<9; i++) { if (MASK(i) == 1) W(i) = MSAT(i); };
+      MFLAG_N=flag_ways(MFLAG_N,I_MFLAG_N,MASKV);
+      MFLAG_Z=flag_ways(MFLAG_Z,I_MFLAG_Z,MASKV);
+    };
+  }
+
+
+  // swap *****************************
+  define (instr=swp) {
+    """
+    Swap W and WW
+
+    tmp[i] = WW[i]
+
+    WW[i] = W[i]
+
+    W[i]  = tmp[i]
+
+    Matrix condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(7),OPCD(6));
+    syntax = ("swp");
+    action = {
+      int i;
+      malu(MALU_OP_SWP, 2, 0, 2, 0);
+      for (i=0; i<9; i++) { WW(i) = W(i); };
+      for (i=0; i<9; i++) { W(i) = MRES(i); };
+    };
+  }
+
+  // clz *****************************
+  define (instr=clz_M_M) {
+    """
+    Shift left of a  matrix registers by a constant value and
+    store the result in the working matrix (W).
+    Depending on CONFALU.SGN and CONFALU.SAT the result is saturated
+
+
+    W[i] = clz MIN1[i])
+
+    Matrix condition code flags modified: none
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(5),OPCD(15),MIN1,CLZBIT(1));
+#ifndef MATRIX_INSTR_EXPLICIT_W
+    syntax = ("clz %f",MIN1);
+#else
+    syntax = ("clz w,%f",MIN1);
+#endif
+    action = {
+      int i;
+      malu(MALU_OP_CLZ, MIN1, 0, 5, 0);
+      for (i=0; i<9; i++) { if (MASK(i) == 1) W(i) = MRES(i); };
+      MFLAG_N=flag_ways(MFLAG_N,I_MFLAG_N,MASKV);
+      MFLAG_Z=flag_ways(MFLAG_Z,I_MFLAG_Z,MASKV);
+    };
+  }
+
+  // lsl *****************************
+  define (instr=lsl_M_MxI) {
+    """
+    Bit shift left of a  matrix registers by a constant value and
+    store the result in the working matrix (W).
+
+    W[i] = (MIN1[i]) << IM4) & 0xFFFF
+
+    Matrix condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(5),OPCD(15),MIN1,CLZBIT(0),IM4);
+#ifndef MATRIX_INSTR_EXPLICIT_W
+    syntax = ("lsl %f,%f",MIN1,IM4);
+#else
+    syntax = ("lsl w,%f,%f",MIN1,IM4);
+#endif
+    action = {
+      int i;
+      malu(MALU_OP_ASL, MIN1, 0, 5, IM4);
+      for (i=0; i<9; i++) { if (MASK(i) == 1) W(i) = MRES(i); };
+      MFLAG_N=flag_ways(MFLAG_N,I_MFLAG_N,MASKV);
+      MFLAG_Z=flag_ways(MFLAG_Z,I_MFLAG_Z,MASKV);
+    };
+  }
+
+  define (instr=lsl_M_MxS) {
+    """
+    Bit shift left of a  matrix registers by a register value and
+    store the result in the working matrix (W). Do not do any saturation
+
+    W[i] = (MIN1[i]) << (R[IN2] & 0xF)) & 0xFFFF
+
+    Matrix condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(6),OPCD(15),MIN1,IN2);
+#ifndef MATRIX_INSTR_EXPLICIT_W
+    syntax = ("lsl %f,%f",MIN1,IN2);
+#else
+    syntax = ("lsl w,%f,%f",MIN1,IN2);
+#endif
+    action = {
+      int i;
+      malu(MALU_OP_ASL, MIN1, 0, 5, R(IN2));
+      for (i=0; i<9; i++) { if (MASK(i) == 1) W(i) = MRES(i); };
+      MFLAG_N=flag_ways(MFLAG_N,I_MFLAG_N,MASKV);
+      MFLAG_Z=flag_ways(MFLAG_Z,I_MFLAG_Z,MASKV);
+    };
+  }
+
+  define (instr=lsl_M_MxM) {
+    """
+    Bit shift left of a  matrix registers by a matrix register and
+    store the result in the working matrix (W). Do not do any saturation
+
+    W[i] = (MIN1[i]) << (MIN2[i] & 0xF)) & 0xFFFF
+
+    Matrix condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(7),OPCD(15),MIN1,MIN2);
+#ifndef MATRIX_INSTR_EXPLICIT_W
+    syntax = ("lsl %f,%f",MIN1,MIN2);
+#else
+    syntax = ("lsl w,%f,%f",MIN1,MIN2);
+#endif
+    action = {
+      int i;
+      malu(MALU_OP_ASL, MIN1, 0, MIN2, 0);
+      for (i=0; i<9; i++) { if (MASK(i) == 1) W(i) = MRES(i); };
+      MFLAG_N=flag_ways(MFLAG_N,I_MFLAG_N,MASKV);
+      MFLAG_Z=flag_ways(MFLAG_Z,I_MFLAG_Z,MASKV);
+    };
+  }
+}
+

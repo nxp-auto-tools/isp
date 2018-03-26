@@ -1,0 +1,1423 @@
+// *-*- c -*-******************************************************************
+// *
+// *  Copyright Freescale 2013, All rights reserved.
+// *  Copyright NXP 2017, All rights reserved.
+// * 
+// *  SPDX-License-Identifier: BSD-3-Clause
+// *
+// ***************************************************************************/
+// ** \addtogroup Ipuv
+// *  @{
+// ***************************************************************************/
+// ** 
+// *  
+// *  \file      IPUS.adl
+// *  \author    Stephan Herrmann
+// *  \date      \$Date: 2006/09/15 10:50:49 $
+// *
+// *  \internal
+// *   language  ADL
+
+// *   $Id: fsl_header.el,v 1.1 2006/09/15 10:50:49 norberts Exp $
+// ***************************************************************************/
+
+#include "IPUS_Defines.h"
+#include "IPUS_HostRegs.adl"
+#include "IPUS_Scalar.adl"
+#include "IPUS_Matrix.adl"
+#include "IPUS_Mask.adl"
+#include "IPUS_Accelerators.adl"
+#include "IPUS_Flow.adl"
+#include "IPUS_Done.adl"
+#include "IPUS_StreamDMA.adl"
+
+define (core = IPUS) {
+  archs = (IPUS, IPUS_HostRegs, IPUS_Scalar, IPUS_Matrix, IPUS_Mask, IPUS_Accelerators,
+           IPUS_Flow, IPUS_Done, IPUS_StreamDMA);
+  instr_endianness=little;
+  data_endianness=little;
+  bit_endianness=little;
+  attrs = (isp1,isp2);
+  instrtables = (isp1,isp2);
+
+#ifndef MAKEDOC
+#ifdef PRECYCLE
+  pre_cycle = {
+#ifdef CL_LINE_DONE
+    SIG_LINE_DONE=0; // lets reset from the system C wrapper
+#endif
+#ifndef ACC_UPDATED_ON_READ
+    //tree_recompute();
+    if (I_DELAY_UPDATE==1) {
+      I_DELAY_UPDATE_1=1;
+    }
+    else {
+      if (I_DELAY_UPDATE_1==1) I_DELAY_UPDATE_1=0;
+    }
+    if (I_DELAY_UPDATE==1) I_DELAY_UPDATE=0;
+#endif
+    //return;
+  };
+#endif // PRECYCLE
+
+  post_cycle = {
+    opixa_inc();
+    prng_inc();
+    tree_recompute();  
+    //return;
+  };
+#endif // MAKEDOC
+}
+
+define (arch = IPUS) {
+
+
+#ifndef MAKEDOC
+  bool OPIX_Valid(unsigned reg_no) {
+    const bool opix_valid[256]= {
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,  // INA
+      1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,  // INB
+      1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,  // INALPHA
+      1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,  // W
+      1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,  // WW
+      1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,  // MASK
+      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,  // GPR
+      1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,  // OUT
+      0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,  // ACC/SACC 
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+    };
+    return (bool) opix_valid[reg_no];
+  }
+
+
+  void opixa_inc(void) {
+    const int offset[256]= {
+      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+      1,1,1,1,1,1,1,1,-8,1,1,1,1,1,1,1,   // INA
+      1,1,1,1,1,1,1,1,-8,1,1,1,1,1,1,1,   // INB
+      1,1,1,1,1,1,1,1,-8,1,1,1,1,1,1,1,   // INALPHA
+      1,1,1,1,1,1,1,1,-8,1,1,1,1,1,1,1,   // W
+      1,1,1,1,1,1,1,1,-8,1,1,1,1,1,1,1,   // WW
+      1,1,1,1,1,1,1,1,-8,1,1,1,1,1,1,1,   // MASK
+      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-15,  // GPR
+      1,1,1,-3,1,1,1,1,1,1,1,1,1,1,1,1,   // OUT
+      1,1,1,1,1,1,1,1,1,1,1,-3,1,1,1,-7,  // ACC/SACC 
+      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-255
+    };
+    int opixa;
+    int i;
+    for (i=0; i<2; i++) {
+      //inc=I_OPIXA_INC(i).int32();
+      if (I_OPIXA_INC(i).int32() != 0) {
+        opixa=OPIXA(i).uint32();
+        OPIXA(i)=opixa + offset[opixa];
+        //I_OPIXA_INC(i) = 0 ;  // done now while writing to OPIXA
+      }
+    }
+  }
+
+  void prng_inc(void) {
+    if (I_PRNG_INC==0) {
+      I_PRNG_INC=1;
+    }
+  }
+#endif // MAKEDOC
+
+  // The real-address size is fixed.
+  define (ea_mask) {
+    value = 0xffffffff;
+  }
+
+  // The real-address size is fixed.
+  define (ra_mask) {
+    value = 0xffffffff;
+  }
+
+  // ***********************************************************************
+  // Registers
+  // ***********************************************************************
+
+  // output signal
+  define (reg=SIG_LINE_DONE) {
+    """
+    Output Signal:
+    Line Done. Asserts for one cycle when a line is done
+    """;
+    width = 1;
+
+    // add a callback to this signal
+    // in RTL:
+    // in case of output channels:
+    //    asserted once the last word was written to the SRAM
+    // in case of no output channel:
+    //    asserted once the last pixel was processes (last pipeline stage)
+  }
+
+  // Internal Registers
+  define (reg=NIA) {
+    """
+    Internal Signal:
+    Next instruction byte address. The two LSBs are alway zero.
+    """;
+    attrs = nia;
+    width = 8;
+    offset = 2;
+  }
+
+  define (reg=CC_ZNCO) {
+    """
+    Internal Register:
+    The condition coder register:
+    """;
+    width = 4;
+    define (field=O) {
+      """
+      Overflow flag: signed arithmetic's produced an value overflow
+      """;
+      bits = (0,0);
+    }
+    define (field=C) {
+      """
+      Carry flag: unsigned arithmetic's produced an value overflow
+      """;
+      bits = (1,1);
+    }
+    define (field=N) {
+      """
+      Negative flag: result is negative (bit[15] is set)
+      """;
+      bits = (2,2);
+    }
+    define (field=Z) {
+      """
+      Zero flag: result is 0
+      """;
+      bits = (3,3);
+    }
+  }
+
+  // core registers
+  //define (reg=IADDR) {
+  //  """
+  //  Core Register:
+  //  Read register for instruction address (read only).
+  //  """;
+  //  width = 8;
+  //  define (read) {
+  //    action = { return CIA; };
+  //  }
+  //  define (write) {
+  //    action = func(bits<8> val) { return; };
+  //  }
+  //}
+
+  define (reg=IADDR) {
+    """
+    Core Register:
+    Current instruction byte address. The two LSBs are alway zero.
+    """;
+    attrs = cia;
+    width = 8;
+    offset = 2;
+  }
+
+#ifdef LOOPCNT_B
+  define (reg=LOOPCNT1) {
+    """
+    Core Register:
+    2nd Loop counter
+    """;
+    width = 16;
+  }
+#endif
+
+  define (reg=LOOPCNT) {
+    """
+    Core Register:
+    Loop counter
+    """;
+    width = 16;
+  }
+
+  define (reg=XPOS) {
+    """
+    Core Register:
+    X position counter
+    This is updated by a Done type of instruction
+    """;
+    width=16;
+
+#ifndef MAKEDOC
+    define(write) {
+      action = func (bits<16> val) {
+        XPOS=val;
+        if (XPOS>=I_XSIZE) End_Of_Line();
+      };
+    }
+#endif // MAKEDOC
+  }
+
+  define (reg=YPOS) {
+    """
+    Core and Host Register:
+    Y position register
+    This is set by the host CPU
+    """;
+    width = 16;
+  }
+
+  define (reg=CONFALU) {
+    """
+    Core Register:
+    Configuration register for arithmentic's in ALU
+    """;
+#ifdef SELAUTOINC
+    width = 14;
+#else
+#ifdef ACC24
+    width = 12;
+#else
+    width = 9;
+#endif
+#endif
+    reset = 0x2;
+    define (field= SGN) {
+      """
+      ALU uses signed or unsigned logic
+
+      + 0: unsigned
+      + 1: signed
+      """;
+      bits = (0,0);
+    };
+    reset = 0x2;
+    define (field= SAT) {
+      """
+      ALU results are saturated according to signed/unsigned or overflow
+
+      + 0: overflow
+      + 1: saturate
+      """;
+      bits = (1,1);
+    };
+#ifndef MAKEDOC
+    define (field= Dummy_RW_RES) {
+      """
+      ALU results are saturated according to signed/unsigned or overflow
+
+      """;
+      bits = (3,2);
+    };
+#endif
+    define (field= SHR) {
+      """
+      MULH 32 bit result is shifted right by CONFALU.SHR bits to implement fixed point arithmetic's. The result after shift is 16 bit wide. The valid value range is from 0 to 16.
+      """;
+      bits = (8,4);
+    };
+#ifdef ACC24
+    define (field= ACCSHR) {
+      """
+      ACC 24 bit result is shifted right by CONFALU.ACCSHR bits to implement fixed point arithmetic's. The result after shift is 16 bit wide. The valid value range is from 0 to 7.
+      """;
+      bits = (11,9);
+    };
+#endif
+#ifdef SELAUTOINC
+    define (field= OPIX0AUTOINC) {
+      """
+      Perform no automatic increment of OPIXA0 when OPIX0 is accessed for reading or writing (0=autoinc 1=no autoinc)
+      """;
+      bits = (13,13);
+    };
+    define (field= OPIX1AUTOINC) {
+      """
+      Perform no automatic increment of OPIXA1 when OPIX1 is accessed for reading or writing (0=autoinc 1=no autoinc)
+      """;
+      bits = (12,12);
+    };
+#endif
+
+#ifdef LOG_MORE
+    define (write) {
+#ifdef SELAUTOINC
+      action = func (bits<14> val) {
+#else
+#ifdef ACC24
+      action = func (bits<12> val) {
+#else
+      action = func (bits<9> val) {
+#endif
+#endif
+        CONFALU=val;
+        if (val(0) == 1) {info(1,"signed");} else {info(1,"unsigned");};
+        if (val(1) == 1) {info(1,"saturate");} else {info(1,"overflow");};
+        //info(1,(val(1) == 1)?"saturate":"overflow");
+        info(1,"mulh shift right = ",val(8,4));
+#ifdef ACC24
+        info(1,"accumulator shift right = ",val(11,9));
+#endif
+#ifdef SELAUTOINC
+        info(1,"opixa0 autoinc disable = ",val(12,12));
+        info(1,"opixa1 autoinc disable = ",val(13,13));
+#endif
+      };
+    }
+#endif
+  }
+
+  define (regfile=INA) {
+    """
+    Core Register:
+    Input A matrix register for pixels
+
+    + INA[2] INA[1] INA[0]
+    + INA[5] INA[4] INA[3]
+    + INA[8] INA[7] INA[6]
+    + (numbering for scan from left to right)
+    """;
+    size = 9;
+    width = 16;
+#ifndef  MAKEDOC
+#ifndef ACC_UPDATED_ON_READ
+    define (write) {
+      action = func (unsigned index, bits<16> val) {
+        INA(index)=val;
+        
+        if (I_ACC_CHANGED(1) == 0) I_ACC_CHANGED(1,1)=1;
+      };
+    }
+#endif
+#endif // MAKEDOC
+  }
+
+#ifdef HASINB
+  define (regfile=INB) {
+    """
+    Core Register:
+    Input A 3x3 matrix register for pixels
+
+    + INB[2] INB[1] INB[0]
+    + INB[5] INB[4] INB[3]
+    + INB[8] INB[7] INB[6]
+    + (numbering for scan from left to right)
+    """;
+    size = 9;
+    width = 16;
+#ifndef  MAKEDOC
+#ifndef ACC_UPDATED_ON_READ
+    define (write) {
+      action = func (unsigned index, bits<16> val) {
+        INB(index)=val;
+        
+        if (I_ACC_CHANGED(3) == 0) I_ACC_CHANGED(3,3)=1;
+      };
+    }
+#endif
+#endif // MAKEDOC
+  }
+#endif
+
+#ifdef HASINALPHA
+  define (regfile=INALPHA) {
+    """
+    Core Register:
+    Input A 3x3 matrix register for pixels
+
+    + INALPHA[2] INALPHA[1] INALPHA[0]
+    + INALPHA[5] INALPHA[4] INALPHA[3]
+    + INALPHA[8] INALPHA[7] INALPHA[6]
+    + (numbering for scan from left to right)
+    """;
+    size = 9;
+    width = 16;
+  }
+#endif
+
+  define (regfile=W) {
+    """
+    Core Register:
+    Working 3x3 matrix register for pixels
+    """;
+    size = 9;
+    width = 16;
+#ifndef  MAKEDOC
+#ifndef ACC_UPDATED_ON_READ
+    define (write) {
+      action = func (unsigned index, bits<16> val) {
+        W(index)=val;
+
+        if (I_ACC_CHANGED(0) == 0) I_ACC_CHANGED(0,0)=1;
+      };
+    }
+#endif
+#endif // MAKEDOC
+  }
+
+  define (regfile=WW) {
+    """
+    Core Register:
+    Working 3x3 matrix 2 register for pixels
+    """;
+    size = 9;
+    width = 16;
+#ifndef  MAKEDOC
+#ifndef ACC_UPDATED_ON_READ
+    define (write) {
+      action = func (unsigned index, bits<16> val) {
+        WW(index)=val;
+
+        if (I_ACC_CHANGED(2) == 0) I_ACC_CHANGED(2,2)=1;
+      };
+    }
+#endif
+#endif // MAKEDOC
+  }
+
+  define (regfile=MASK) {
+    """
+    Core Register:
+    Mask 3x3 matrix register for pixels
+    """;
+    size  = 9;
+    width = 1;
+    reset = 1;
+#ifndef  MAKEDOC
+#ifndef ACC_UPDATED_ON_READ
+    define (write) {
+      action = func (unsigned index, bits<1> val) {
+        MASK(index)=val;
+        
+        if (I_ACC_CHANGED(4) == 0) I_ACC_CHANGED(4,4)=1;
+      };
+    }
+#endif
+#endif // MAKEDOC
+  }
+
+  define (reg=MASKV) {
+    """
+    Core Register:
+    Mask 3x3 matrix register vector (MASK(i) is equal to MASKV[i])
+    """;
+    width = 9;
+   // pseudo=true;
+    reset=0x1FF;
+#ifndef  MAKEDOC
+    define (read) {
+      action = {
+#ifdef TESTBENCH
+        I_TB_MASKV_FLAG = 1;
+#endif
+        return concat(MASK(8),MASK(7),MASK(6),MASK(5),MASK(4),
+                      MASK(3),MASK(2),MASK(1),MASK(0)); };
+    }
+    define (write) {
+      action = func(bits<9> val) {
+        MASK(0)=val(0);
+        MASK(1)=val(1);
+        MASK(2)=val(2);
+        MASK(3)=val(3);
+        MASK(4)=val(4);
+        MASK(5)=val(5);
+        MASK(6)=val(6);
+        MASK(7)=val(7);
+        MASK(8)=val(8);
+      };
+    }
+#endif // MAKEDOC
+  }
+
+#ifdef TESTBENCH
+  define (reg=I_TB_MASKV_FLAG) {
+    """
+    Internal registers:
+    Used for TB , to flag read action performed by current command
+
+    + bit 0: no read performed 
+
+    + bit 1: read performed 
+    """;
+    width=1;
+    reset=0x0;
+    define (read) {
+      action =   {
+        bits<1> flag_return ;
+
+        flag_return =  I_TB_MASKV_FLAG;
+
+        //auto clear the flag to zero 
+        I_TB_MASKV_FLAG = 0; 
+
+        return flag_return;
+      };
+    }
+    define (write) {
+      action = func( bits<1> val) {
+        I_TB_MASKV_FLAG = val ;
+      };
+    }
+  }
+#endif
+
+  define (reg=NHOOD) {
+    """
+    Core Register:
+    9 bit vector to mask out Mask ALU results for special neighborhood, e.g.:
+
+    + CON_4  = 0b 010101010
+    + CON_8  = 0b 111111111
+    + CON H2 = 0b 000111000
+    + CON V2 = 0b 010010010
+    """;
+    width = 9;
+    reset  = 0x1FF;
+  }
+
+  define (reg=MFLAG_O) {
+    """
+    Core Register:
+    3x3 Matrix ALU Overflow Flags
+    """;
+    width = 9;
+  }
+
+  define (reg=MFLAG_C) {
+    """
+    Core Register:
+    3x3 Matrix ALU Carry Flags
+    """;
+    width = 9;
+  }
+
+  define (reg=MFLAG_N) {
+    """
+    Core Register:
+    3x3 Matrix ALU Negative Flags
+    """;
+    width = 9;
+  }
+
+  define (reg=MFLAG_Z) {
+    """
+    Core Register:
+    3x3 Matrix ALU Zero Flags
+    """;
+    width = 9;
+  }
+
+  define (regfile=OUT) {
+    """
+    Core Register:
+    Output pixel registers.
+    """;
+    size = 4;
+    width = 16;
+    //prefix = out;
+  }
+
+  define (regfile=GPR) {
+    """
+    Core Register:
+    General purpose registers
+    """;
+    size = 16; 
+    width = 16;
+    //prefix = gpr;
+  }
+
+  define (regfile=ACC) {
+    """
+    Core Register:
+    Accumulator registers.
+    Writing accumulates to the registers according to CONFALU.SGN.
+    Reading returns the unsigned value according to CONFALU.SAT and
+    CONFALU.ACCSHR.
+    """;
+    size = 4;  //# 16?
+    width = 16;
+    //prefix = acc;
+    //readable = true;
+    //writable = true;
+#ifndef  MAKEDOC
+    pseudo = true;
+    define (read) {
+      action = func(unsigned ix) {
+#ifdef TESTBENCH
+      I_TB_ACC_FLAG(ix) = 1;
+#endif
+#ifdef ACC24
+        int acc;
+
+        if (CONFALU.SGN==1) {  // signed arithmetics
+          acc=IACC(ix).int32() >> CONFALU.ACCSHR.uint32();
+        }
+        else { // unsigned accumulate
+          acc=IACC(ix).uint32() >> CONFALU.ACCSHR.uint32();
+        }
+
+        // saturate if required, always unsigned mode
+        if (CONFALU.SAT==1) {
+          if (acc > UMAX16) acc=UMAX16;
+          else if (acc < UMIN16) acc=UMIN16;
+        }
+        else { // wrap
+          acc=acc & 0xffff;
+        }
+        return acc;
+#else // ACC16
+        return IACC(ix);
+#endif
+      };
+    }
+    define (write) {
+      action = func(unsigned ix, bits<16> val) {
+        int acc,in;
+        if (CONFALU.SGN==1) {
+          //in=RES.int32();          // no clipped result
+          in=val.int32();
+          acc=IACC(ix).int32();
+          acc+=in;
+          if (CONFALU.SAT==1) {
+            if (acc< SMINACC) acc=SMINACC;
+            else if (acc> SMAXACC) acc=SMAXACC;
+          }
+        }
+        else {
+          //in=RES.uint32();          // no clipped result
+          in=val.uint32();
+          acc=IACC(ix).uint32();
+          acc+=in;
+          if (CONFALU.SAT==1) {
+            if (acc> UMAXACC) acc=UMAXACC;
+            //else if (acc < UMINACC) acc=UMINACC;
+          }
+        }
+        IACC(ix) = acc;
+      };
+    }
+#endif // MAKEDOC
+  }
+
+#ifdef TESTBENCH
+  define (regfile=I_TB_ACC_FLAG) {
+    """
+    Internal registers:
+    Used for TB , to flag read action performed by current command
+
+    + bit 0: no read performed 
+
+    + bit 1: read performed 
+    """;
+    width=1;
+    reset=0x0;
+    size  = 4;
+    define (read) {
+      action =  func(unsigned ix) {
+        bits<1> flag_return;
+
+        flag_return =  I_TB_ACC_FLAG(ix);
+
+        //auto clear the flag to zero 
+        I_TB_ACC_FLAG(ix) = 0; 
+
+        return flag_return;
+      };
+    }
+    define (write) {
+      action = func(unsigned ix, bits<1> val) {
+        I_TB_ACC_FLAG(ix) = val;
+      };
+    }
+  }
+#endif
+
+  define (regfile=SACC) {
+    """
+    Core Register:
+    Set accumulator registers
+    Writing sets the corresponding ACC registers (according to CONFALU.SGN.
+    Reading returns the unsigned value according to CONFALU.SAT and
+    CONFALU.ACCSHR.
+    """;
+    size = 4;
+    width = 16;
+#ifndef  MAKEDOC
+    pseudo = true;
+    define (read) {
+      action = func(unsigned ix) {
+#ifdef TESTBENCH
+        I_TB_SACC_FLAG(ix) = 1;
+#endif
+#ifdef ACC24
+        int acc;
+
+        // always read signed
+        //if (CONFALU.SGN==1) {  // signed arithmetics
+          acc=IACC(ix).int32() >> CONFALU.ACCSHR.uint32();
+        //}
+        //else { // unsigned accumulate
+        //  acc=IACC(ix).uint32() >> CONFALU.ACCSHR.uint32();
+        //}
+
+        // saturate if required
+        if (CONFALU.SAT==1) {
+          if (acc > SMAX16) acc=SMAX16;
+          else if (acc < SMIN16) acc=SMIN16;
+        }
+        else { // wrap
+          acc=acc & 0xffff;
+        }
+
+        return acc;
+#else // ACC16
+        return IACC(ix);
+#endif
+      };
+    }
+    define (write) {
+      action = func(unsigned ix,  bits<16> val) {
+        int in;
+        if (CONFALU.SGN==1) {
+          //in=RES.int32();          // no clipped result
+          in=val.int32();
+          //if (CONFALU.SAT==1) {    // setting will not require clipping
+          //  if (in< SMIN24) in=SMIN24;
+          //  else if (in> SMAX24) in=SMAX24;
+          //}
+        }
+        else {
+          //in=RES.uint32();          // no clipped result
+          in=val.uint32();
+          //if (CONFALU.SAT==1) {    // setting will not require clipping
+          //  if (in> UMAX24) in=UMAX24;
+          //  //else if (acc < UMIN24) acc=UMIN24;
+          //}
+        }
+        IACC(ix) = in;
+      };
+    }
+#endif // MAKEDOC
+  }
+
+#ifdef TESTBENCH
+  define (regfile=I_TB_SACC_FLAG) {
+    """
+    Internal registers:
+    Used for TB , to flag read action performed by current command
+
+    + bit 0: no read performed 
+
+    + bit 1: read performed 
+    """;
+    width=1;
+    reset=0x0;
+    size  = 4;
+    define (read) {
+      action =  func(unsigned ix) {
+        bits<1> flag_return ;
+
+        flag_return =  I_TB_SACC_FLAG(ix);
+
+        //auto clear the flag to zero 
+        I_TB_SACC_FLAG(ix) = 0; 
+
+        return flag_return;
+      };
+    }
+    define (write) {
+      action = func(unsigned ix, bits<1> val) {
+        I_TB_SACC_FLAG(ix) = val;
+      };
+    }
+  }
+#endif
+
+#ifndef  MAKEDOC
+  define (regfile=IACC) {
+    """
+    Internal Register:
+    24 bit accumulator registers, can be read/write accessed via 16 bit
+    Core Registers ACC and SACC
+    """;
+    size = 4;
+#ifdef ACC24
+    width = 24;
+#else
+    width = 16;
+#endif
+  }
+#endif // MAKEDOC
+
+  define (regfile=OPIXA) {
+    """
+    Core Register:
+    Indirect operand address register.
+    """;
+    width = 8;
+    size  = 2;
+
+#ifndef  MAKEDOC
+    define (write) {
+      action = func(unsigned index, bits<8> val) {
+        OPIXA(index)= val ;
+        if (I_OPIXA_INC(index)==1) I_OPIXA_INC(index)=0;
+      };
+    }
+#endif // MAKEDOC
+  }
+
+#ifndef  MAKEDOC
+  define (regfile=I_OPIXA_INC) {
+    """
+    Internal Signal:
+    Indicating that OPIXA needs to be incremented.
+    """;
+    width = 1;
+    size  = 2;
+  }
+#endif // MAKEDOC
+
+  define (regfile=OPIX) {
+    """
+    Core Register:
+    Indirect operand register.
+    """;
+    width = 16;
+    size  = 2;
+
+#ifndef  MAKEDOC
+    define (read) {
+
+      action = func (unsigned index) {
+        int doinc;
+
+        // do not increment when read via DREGD!!
+        if (I_DREGDACCESS == 1) {
+          doinc = 0;
+        }
+        else {
+#ifdef SELAUTOINC
+          doinc=(CONFALU(index+12)==1)? 0:1;
+#else
+          doinc=1;
+#endif
+        }
+
+#ifdef LOG_MORE
+        info(1,"OPIXA(",index,")=",OPIXA(index));//, " d(" , OPIXA(index),")" );
+#endif
+
+        var opix=(OPIX_Valid(OPIXA(index).uint32()))? R(OPIXA(index)):0;
+        //OPIXA(index)=OPIXA(index)+doinc;
+        if (doinc && (I_OPIXA_INC(index)==0)) I_OPIXA_INC(index)=1;
+        return opix;
+      };
+    }
+    define (write) {
+      action = func(unsigned index, bits<16> val) {
+        int doinc;
+
+        // do not increment when read via DREGD!!
+        if (I_DREGDACCESS == 1) {
+          doinc = 0;
+        }
+        else {
+#ifdef SELAUTOINC
+          doinc=(CONFALU(index+12)==1)? 0:1;
+#else
+          doinc=1;
+#endif
+        }
+
+#ifdef LOG_MORE
+        info(1,"OPIXA(",index,")=",OPIXA(index));//, " d(" , OPIXA(index),")" );
+#endif
+
+        if (OPIX_Valid(OPIXA(index).uint32())) R(OPIXA(index))=val;
+        //OPIXA(index)=OPIXA(index)+doinc;
+        if (doinc && (I_OPIXA_INC(index)==0)) I_OPIXA_INC(index)=1;
+      };
+    }
+#endif // MAKEDOC
+  }
+
+#ifdef HASPRNG
+  define (reg=PRNG) {
+    """
+    Core Register:
+    Pseudo Random Noise Value (16 LSB's of the internal PRNG)
+    """;
+    width = 16;
+    //readable = true;
+    //writable = false; 
+#ifndef  MAKEDOC
+    define (read) {
+      action = { return I_PRNG(15,0); };
+    }
+    define (write) {
+      action = func(bits<16> val) { I_PRNG = val; };  // do nothing
+    }
+#endif // MAKEDOC
+  }
+
+#ifndef  MAKEDOC
+  define (reg=I_PRNG_INC) {
+    """
+    internal Signal:
+    Indicate if Pseudo Random Noise Value needs to incremented before read
+    """;
+    width = 1;
+    reset=1;
+  }
+
+  define (reg=I_PRNG) {
+    """
+    Core Register:
+    Internal Pseudo Random Noise Generator with 64 bits
+    """;
+    width = 64;
+    //readable = true;
+    //writable = false; 
+    define (read) {
+      action = {
+        int i;
+        //long long prng;
+        //int b63,b60,b33,b8;
+        //prng=I_PRNG;
+        if (I_PRNG_INC == 1) {
+          for (i=0; i < 64; i++) {
+            //  b63=prng>>63;
+            //  b60=prng>>60;
+            //  b33=prng>>33;
+            //  b8 =prng>>8;
+            //  prng<<=1;
+            //  prng|=(b63 ^ b60 ^ b33 ^b8) & 0x1;
+            I_PRNG=concat(I_PRNG(62,0),I_PRNG(63) ^ I_PRNG(60) ^ I_PRNG(33) ^ I_PRNG(8));
+            I_PRNG_INC=0;
+          }
+        }
+        //I_PRNG=prng;
+        return I_PRNG;
+      };
+    }
+    define (write) {
+      action = func(bits<64> val) {
+        I_PRNG=val;
+      };
+    }
+  }
+#endif // MAKEDOC
+#endif
+
+  define (reg=LOCK) {
+    """
+    Core Register:
+    Lock Data Registers for read out via Host register interface (and debug).
+    This is a security feature. The idea is that the kernel itself controls
+    which registers contain result global data to be read by the application
+    SW.
+    All bits of this registers are asserted when a new line is started for
+    processing.
+    """;
+    width = 13;
+    reset = 0x1fff;
+    define (field=GPR0TO3) {
+      """
+      Lock status for GPR0-GPR3
+
+      + 0: allow read access to GPR0-GPR3
+      + 1: allow read access to GPR2-GPR3
+      + 2: allow read access to GPR0
+      + 3: allow read access to none of the registers GPR0-GPR3 (default)
+      """;
+      bits = (1,0);
+    }
+    define (field=GPR4TO7) {
+      """
+      Lock status for GPR4-GPR7
+
+
+      + 0: allow read access to GPR4-GPR7
+      + 1: allow read access to GPR6-GPR7
+      + 2: allow read access to GPR4
+      + 3: allow read access to none of the registers GPR4-GPR7 (default)
+      """;
+      bits = (3,2);
+    }
+    define (field=GPR8TO11) {
+      """
+      Lock status for GPR8-GPR11
+
+      + 0: allow read access to GPR8 -GPR11
+      + 1: allow read access to GPR10-GPR11
+      + 2: allow read access to GPR8
+      + 3: allow read access to none of the registers GPR8-GPR11 (default)
+      """;
+      bits = (5,4);
+    }
+    define (field=GPR12TO15) {
+      """
+      Lock status for GPR12-GPR15
+
+      + 0: allow read access to GPR12-GPR15
+      + 1: allow read access to GPR14-GPR15
+      + 2: allow read access to GPR12
+      + 3: allow read access to none of the registers GPR4-GPR7 (default)
+      """;
+      bits = (7,6);
+    }
+    define (field=OUT) {
+      """
+      Lock status for OUT0-OUT3
+
+      + 0: allow read access to Out
+      + 1: deny
+      """;
+      bits = (8,8);
+    }
+    define (field=HIST) {
+      """
+      Lock status for H_HISTA and H_HISTD
+
+      + 0: allow read access to Histogram host registers
+      + 1: deny
+      """;
+      bits = (9,9);
+    }
+    define (field=STAT) {
+      """
+      Lock status for H_STATA and H_STATD
+
+      + 0: allow read access to Statistic's host registers
+      + 1: deny
+      """;
+      bits = (10,10);
+    }
+    define (field=BEST5OFN) {
+      """
+      Lock status for SOF0-4 and SOFA0-5 via the H_DREGD register
+
+      + 0: allow read access
+      + 1: deny
+      """;
+      bits = (11,11);
+    }
+    define (field=LUT) {
+      """
+      Lock status for H_LUTA and H_LUTD
+
+      + 0: allow read access to Look Up Table host registers
+      + 1: deny
+      """;
+      bits = (12,12);
+    }
+  }
+
+  define (reg=ONE) {
+    """
+    Core Register:
+    -1 constant, read only
+    """;
+    width = 16;
+    reset = 0xffff;
+    //readable = true;
+    //writable = false; 
+#ifndef  MAKEDOC
+    define (read) {
+      action = { return 0xffff;};
+    }
+    define (write) {
+      action = func(bits<16> val) { return; };  // do nothing
+    }
+#endif // MAKEDOC
+  }
+
+  define (reg=ZERO) {
+    """
+    Core Register:
+    0 constant, read only
+    """;
+    width = 16;
+    //readable = true;
+    //writable = false; 
+#ifndef  MAKEDOC
+    define (read) {
+      action = { return 0;};
+    }
+    define (write) {
+      action = func(bits<16> val) { return; };  // do nothing
+    }
+#endif // MAKEDOC
+  }
+
+  // aliases to the registers ********************
+  // scalar registers ****************************
+  define (regfile=R) {
+    """
+    Core Register:
+    All registers
+    """;
+    size  = 256;
+    width = 16;
+#ifdef IGNORE_UNKNOWN_REG
+    invalid_entry_read = func (unsigned ix) {
+      return 0;
+    };
+    invalid_entry_write = func (unsigned ix, bits<16> value) {
+    };
+#endif
+#ifdef LOOPCNT_B
+    define (entry=  0x0)  { reg = LOOPCNT1; }
+#endif
+    define (entry=  0x1)  { reg = LOOPCNT; }
+    define (entry=  0x2)  { reg = XPOS; }
+    define (entry=  0x3)  { reg = YPOS; }
+    define (entry=  0x4)  { reg = CONFALU; }
+    define (entry= 0x10)  { reg = INA; } // - 0x18
+#ifdef HASINB
+    define (entry= 0x20)  { reg = INB; } // - 0x28
+#endif
+#ifdef HASINALPHA
+    define (entry= 0x30)  { reg = INALPHA; }  // -0x38
+#endif
+    define (entry= 0x40)  { reg = W; }   // - 0x48
+    define (entry= 0x50)  { reg = WW; }  // - 0x58
+    define (entry= 0x60)  { reg = MASK; }// - 0x68
+    define (entry= 0x69)  { reg = MASKV; }
+    define (entry= 0x6a)  { reg = NHOOD; };
+    define (entry= 0x6c)  { reg = MFLAG_O; };
+    define (entry= 0x6d)  { reg = MFLAG_C; };
+    define (entry= 0x6e)  { reg = MFLAG_N; };
+    define (entry= 0x6f)  { reg = MFLAG_Z; };
+    define (entry= 0x70)  { reg = GPR; } // - 0x7f
+    define (entry= 0x80)  { reg = OUT; } // - 0x83
+    define (entry= 0x90)  { reg = OPIXA(0); }
+    define (entry= 0x91)  { reg = OPIX(0); }
+    define (entry= 0x92)  { reg = OPIXA(1); }
+    define (entry= 0x93)  { reg = OPIX(1); }
+    define (entry= 0x98)  { reg = ACC; }  // - 0x8b
+    define (entry= 0x9C)  { reg = SACC; } // - 0x8f
+    define (entry= 0xfc)  { reg = LOCK; } 
+#ifdef HASPRNG
+    define (entry= 0xfd)  { reg = PRNG; } 
+#endif
+    define (entry= 0xfe)  { reg = ONE; }
+    define (entry= 0xff)  { reg = ZERO; }
+    //prefix = r;
+  }
+
+
+  // ***********************************************************************
+  // Instruction Fields
+  // ***********************************************************************
+
+  define (instrfield=TYPE) {
+    """
+    Primary instruction type
+    """;
+    bits = (31,28);
+    enumerated = ("Reserved8", "Reserved7", "Reserved6", "Reserved5",
+                  "Reserved4", "Reserved3", "Reserved2", "Reserved1",
+                  "Flow", "S=SxI", "S=SxS", "MASKI",
+                  "MASK", "M=MxI", "M=MxS", "M=MxM");
+    display = dec;
+  }
+
+  define (instrfield=OPCD) {
+    """
+    Extended opcode
+    """;
+    bits = (27,24);
+  }
+
+  define (instrfield=DEST) {
+    """
+    Scalar destination register
+    """;
+    bits = (23,16);
+    display = dec;
+#include "IPUS_Registers.h"
+  }
+
+  define (instrfield=IN1) {
+    """
+    Operator 1 register
+    """;
+    bits = (15,8);
+    display = dec;
+#include "IPUS_Registers.h"
+  }
+
+  define (instrfield=IN2) {
+    """
+    Operator 2 register
+    """;
+    bits = (7,0);
+    display = dec;
+#include "IPUS_Registers.h"
+  }
+
+  define (instrfield=IM16) {
+    """
+    Operator 2 immediate 16 bits
+    """;
+    bits = (15,0);
+  }
+
+  define (instrfield=CLZBIT) {
+    """
+    CLZ vs. LSL bit
+    """;
+    bits = (4);
+    //display = dec;
+    is_signed=false;
+  }
+
+  define (instrfield=IM4) {
+    """
+    Operator 2 immediate 4 bits
+    """;
+    bits = (3,0);
+    display = dec;
+    is_signed=false;
+  }
+
+  define (instrfield=IXO) {
+    """
+    Increment input, xposition, output
+    """;
+    bits = (2,0);
+    enumerated = ("-", "o", "x", "xo", "i", "io", "ix", "ixo");
+  }
+
+  define (instrfield=RELADDR) {
+    """
+    Relative branch target address
+    """;
+    bits = (15,8);
+    addr = pc;
+    shift = 2;
+    display = hex;
+    is_signed=true;
+  };
+
+#ifdef LOOPCNT_B
+  define (instrfield=LCNT) {
+    """
+    Loop counter selection
+    """;
+    bits = (3,3);
+    enumerated = ("loopcnt1", "loopcnt");
+  };
+#endif
+
+  // ***********************************************************************
+  // Instructions
+  // ***********************************************************************
+
+  // *** nop
+  define (instr=nop) {
+    """
+    No OPeration
+    """;
+    width = 32;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0),OPCD(0),IM16(0));
+    syntax=("nop");
+    action = {
+      return;
+    };
+  }
+
+  // *** nop - halt
+  define (instr=halt) {
+    """
+    halt: terminate line immediatly
+    """;
+    width = 32;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0),OPCD(0),IM16(1));
+    syntax=("halt");
+    action = {
+#ifndef MAKEDOC
+      tree_recompute();
+#endif // MAKEDOC
+      End_Of_Line();
+      //halt(); // done in End_Of_Line
+    };
+  }
+
+  // *** nop - debug
+  define (instr=dbg) {
+    """
+    dbg: enter debug mode
+    """;
+    width = 32;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0),OPCD(0),IM16(2));
+    syntax=("dbg");
+    action = {
+      halt(); // give back control to simulator
+    };
+  }
+
+  // loop
+  define (instr=loop) {
+    """
+    loop, check LOOPCNT > 1 and if yes then jump back to loop start.
+    The loop counter LOOPCNT gives how often we will go through the loop,
+    thus, LOOPCNT == 2 will jump back once to iterate twice
+    """;
+    width = 32;
+    attrs=(isp1,isp2);
+#ifdef LOOPCNT_B
+    fields=(TYPE(0),OPCD(6),LCNT(0),RELADDR);
+#else
+    fields=(TYPE(0),OPCD(6),RELADDR);
+#endif
+    syntax=("loop %f", RELADDR);
+    action = {
+      if (LOOPCNT>1) {
+        NIA=RELADDR;
+      }
+      if (LOOPCNT!=0) {
+        LOOPCNT=LOOPCNT-1;
+      }
+    };
+  }
+
+#ifdef LOOPCNT_B
+  define (instr=loop1) {
+    """
+    loop1, check LOOPCNT1 > 1 and if yes then jump back to loop start.
+    The loop counter LOOPCNT1 gives how often we will go through the loop,
+    thus, LOOPCNT1 == 2 will jump back once to iterate twice
+    """;
+    width = 32;
+    attrs=(isp2);
+    fields=(TYPE(0),OPCD(6),LCNT(1),RELADDR);
+    syntax=("loop1 %f", RELADDR);
+    action = {
+      if (LOOPCNT1>1) {
+        NIA=RELADDR;
+      }
+      if (LOOPCNT1!=0) {
+        LOOPCNT1=LOOPCNT1-1;
+      }
+    };
+  }
+#endif
+
+}

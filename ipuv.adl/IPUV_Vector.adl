@@ -1,0 +1,2892 @@
+// *-*- c -*-******************************************************************
+// *
+// *  Copyright Freescale 2013, All rights reserved.
+// *  Copyright NXP 2017, All rights reserved.
+// * 
+// *  SPDX-License-Identifier: BSD-3-Clause
+// *
+// ****************************************************************************
+// ** \addtogroup IPUV_Vector
+// *  @{
+// ****************************************************************************
+// ** 
+// *  
+// *  \file      IPUV_Vector.adl
+// *  \author    Stephan Herrmann
+// *  \date      \$Date: 2006/09/15 10:50:49 $
+// *
+// *  \internal
+// *   language  ADL
+// *   $Id: fsl_header.el,v 1.1 2006/09/15 10:50:49 norberts Exp $
+// ****************************************************************************
+
+define (arch = IPUV_Vector) {
+
+  //int test_function(void) {
+  //  return 0;
+  //}
+
+  // update Vector Flags
+  bits<4> flag_ways(bits<4> flag_registers, bits<4> new_flags, bits<4> mask) {
+    return (flag_registers & ~mask) | (new_flags & mask);
+  }
+
+  int cc_get_C(valu_op_t alu_op,short res, 
+                        short op1,short op2) {
+#ifndef MAKEDOC
+    if (alu_op == VALU_OP_SUB) {
+      if (( op1>=0 && op2<0) ||
+           ((op1>=0 || op2<0) && res<0)) {
+        return 1;
+      }
+      else {
+        return 0;
+      }
+    }
+    else { // not VALU_OP_SUB
+      if (( op1<0 && op2<0) ||
+          ((op1<0 || op2<0) && res>=0)) {
+        return 1;
+      }
+      else {
+        return 0;
+      }
+    }
+#endif // MAKEDOC
+  }
+
+  int cc_get_O(valu_op_t alu_op, short res, 
+                short op1, short op2) {
+#ifndef MAKEDOC
+    if (alu_op == VALU_OP_SUB) {
+      if (( op1>=0  && op2<0 && res<0 ) ||
+          ( op1<0 && op2>=0  && res>=0 )) {
+        return 1;
+      }
+      else {
+        return 0;
+      }
+    }
+    else { // not VALU_OP_SUB
+      if (( op1>=0 && op2>=0 && res<0 ) ||
+          ( op1<0  && op2<0  && res>=0)) {
+        return 1;
+      }
+      else {
+        return 0;
+      }
+    }
+#endif // MAKEDOC
+  }
+
+  // Vector ALU
+  void valu(valu_op_t valu_op, bits<1> force_unsigned,
+            bits<64> vop1, bits<64> vop2) {
+
+    //int i;
+    int sop10, sop11,sop12, sop13;   // 17 bit in RTL; to distinguish between signed and unsigned
+    int sop20, sop21,sop22, sop23;
+    int res0, res1, res2, res3;      // 18 bits
+    int res320, res321,res322, res323;
+    int minint,maxint;
+    int check_nz;
+    int check_co;
+    int check_clip;
+    int saturate;
+
+    bits<16> op10, op11,op12, op13;
+    bits<16> op20, op21,op22, op23;
+    bits<16> bres0, bres1, bres2, bres3;  // 16 bit results for cancatenation
+
+    op10=vop1(63,48);
+    op11=vop1(47,32);
+    op12=vop1(31,16);
+    op13=vop1(15, 0);
+
+    op20=vop2(63,48);
+    op21=vop2(47,32);
+    op22=vop2(31,16);
+    op23=vop2(15, 0);
+
+    if (CONFALU.SGN==1) {
+      //&& !(force_unsigned && valu_op==VALU_OP_ASL))  // exclude LSL 
+      sop10=op10.int32();
+      sop11=op11.int32();
+      sop12=op12.int32();
+      sop13=op13.int32();
+
+      sop20=op20.int32();
+      sop21=op21.int32();
+      sop22=op22.int32();
+      sop23=op23.int32();
+    }
+    else {
+      sop10=op10.uint32();
+      sop11=op11.uint32();
+      sop12=op12.uint32();
+      sop13=op13.uint32();
+
+      sop20=op20.uint32();
+      sop21=op21.uint32();
+      sop22=op22.uint32();
+      sop23=op23.uint32();
+    }
+
+    // for clipping (force unsigned for absdiff and lsl
+    if ((CONFALU.SGN==1) &&       // (CONFSGN==1) signed
+        (force_unsigned==0)) {
+      minint=SMIN16;
+      maxint=SMAX16;
+    }
+    else {
+      minint=UMIN16;
+      maxint=UMAX16;
+    }
+
+    // default no flag checks
+    check_nz=0;
+    check_co=0;
+    //check_co=test_function();
+    check_clip=0;
+    saturate=CONFALU(1).uint32();       // CONFSAT
+
+    VOP1=vop1;  // for logging in list file
+    VOP2=vop2;
+
+
+    switch (valu_op) {
+    case VALU_OP_MOV:  // mov
+      res0=sop10;
+      res1=sop11;
+      res2=sop12;
+      res3=sop13;
+      SRES=
+        ((MASKV(0)==1)?res0:0) +
+        ((MASKV(1)==1)?res1:0) +
+        ((MASKV(2)==1)?res2:0) +
+        ((MASKV(3)==1)?res3:0);
+      break;
+    case VALU_OP_ADD: // add
+      check_nz=1;
+      check_co=1;
+      check_clip=1;
+
+      res0=sop10+sop20;
+      res1=sop11+sop21;
+      res2=sop12+sop22;
+      res3=sop13+sop23;
+      SRES=
+        ((MASKV(0)==1)?res0:0) +
+        ((MASKV(1)==1)?res1:0) +
+        ((MASKV(2)==1)?res2:0) +
+        ((MASKV(3)==1)?res3:0);
+      break;
+    case VALU_OP_SUB: // sub
+      check_nz=1;
+      check_co=1;
+      check_clip=1;
+
+      res0=sop10-sop20;
+      res1=sop11-sop21;
+      res2=sop12-sop22;
+      res3=sop13-sop23;
+      SRES=
+        ((MASKV(0)==1)?res0:0) +
+        ((MASKV(1)==1)?res1:0) +
+        ((MASKV(2)==1)?res2:0) +
+        ((MASKV(3)==1)?res3:0);
+      break;
+    case VALU_OP_ABSDIFF: // absdiff
+      check_nz=1;
+      //check_clip=1;
+
+      res0=(sop10>sop20)?(sop10-sop20) : (sop20-sop10);
+      res1=(sop11>sop21)?(sop11-sop21) : (sop21-sop11);
+      res2=(sop12>sop22)?(sop12-sop22) : (sop22-sop12);
+      res3=(sop13>sop23)?(sop13-sop23) : (sop23-sop13);
+      SRES=
+        ((MASKV(0)==1)?res0:0) +
+        ((MASKV(1)==1)?res1:0) +
+        ((MASKV(2)==1)?res2:0) +
+        ((MASKV(3)==1)?res3:0);
+      break;
+    case VALU_OP_MULH: // mulh
+      int sign0,sign1,sign2,sign3;
+      int shr;
+
+      shr=CONFALU.SHR.uint32();
+      //if (shr==0) shr=16;
+
+      //check_nz=0;
+      //check_co=0;
+      check_clip=1;
+      
+      if(CONFALU.SGN==1) {
+       res320=(sop10*sop20)>>shr;
+       res321=(sop11*sop21)>>shr;
+       res322=(sop12*sop22)>>shr;
+       res323=(sop13*sop23)>>shr;
+      }
+      else {
+       res320=((unsigned int)(sop10*sop20))>>shr;
+       res321=((unsigned int)(sop11*sop21))>>shr;
+       res322=((unsigned int)(sop12*sop22))>>shr;
+       res323=((unsigned int)(sop13*sop23))>>shr;
+      }
+
+      // sign extend
+      sign0=sign1=sign2=sign3=0;
+
+      res0 = res320 & 0xffff;
+      if((sop10!=0) && (sop20!=0)) {
+        if (sop10<0) sign0++;
+        if (sop20<0) sign0++;
+      }
+      if (sign0==1) { // negative result
+        res0 |= 0xfffe0000;
+        if ((res320 & 0x7fff8000) == 0x7fff8000) res0 |= 0x10000;
+        //concat((bits<1>) 1,
+        //       ((res320 & 0x7fff0000)==0x7fff0000)? (bits<1>)1:(bits<1>)0,
+        //       (bits<16>)(res320 & 0xffff));
+      }
+      else {  // positive result
+        if (CONFALU(0)==1) {         // (CONFSGN==1) signed
+          if ((res320 & 0x7fff8000) != 0) res0 |= 0x10000;
+        }
+        else {
+          if ((res320 & 0xffff0000) != 0) res0 |= 0x10000;
+        }
+        //concat((bits<1>) 0,
+        //       ((res320 & 0x7fff0000)==0)? (bits<1>)0:(bits<1>)1,
+        //       (bits<16>)(res320 & 0xffff));
+      }
+
+      res1 = res321 & 0xffff;
+      if((sop11!=0) && (sop21!=0)) {
+        if (sop11<0) sign1++;
+        if (sop21<0) sign1++;
+      }
+      if (sign1==1) { // negative result
+        res1 |= 0xfffe0000;
+        if ((res321 & 0x7fff8000) == 0x7fff8000) res1 |= 0x10000;
+      }
+      else {  // positive result
+        if (CONFALU(0)==1) {         // (CONFSGN==1) signed
+          if ((res321 & 0x7fff8000) != 0) res1 |= 0x10000;
+        }
+        else {
+          if ((res321 & 0xffff0000) != 0) res1 |= 0x10000;
+        }
+      }
+
+      res2 = res322 & 0xffff;
+      if((sop12!=0) && (sop22!=0)) {
+        if (sop12<0) sign2++;
+        if (sop22<0) sign2++;
+      }
+      if (sign2==1) { // negative result
+        res2 |= 0xfffe0000;
+        if ((res322 & 0x7fff8000) == 0x7fff8000) res2 |= 0x10000;
+      }
+      else {  // positive result
+        if (CONFALU.SGN==1) {
+          if ((res322 & 0x7fff8000) != 0) res2 |= 0x10000;
+        }
+        else {
+          if ((res322 & 0xffff0000) != 0) res2 |= 0x10000;
+        }
+      }
+
+      res3 = res323 & 0xffff;
+      if((sop13!=0) && (sop23!=0)) {
+        if (sop13<0) sign3++;
+        if (sop23<0) sign3++;
+      }
+      if (sign3==1) { // negative result
+        res3 |= 0xfffe0000;
+        if ((res323 & 0x7fff8000) == 0x7fff8000) res3 |= 0x10000;
+      }
+      else {  // positive result
+        if (CONFALU.SGN==1) {         // signed
+          if ((res323 & 0x7fff8000) != 0) res3 |= 0x10000;
+        }
+        else {
+          if ((res323 & 0xffff0000) != 0) res3 |= 0x10000;
+        }
+      }
+
+      SRES=
+        ((MASKV(0)==1)?res0:0) +
+        ((MASKV(1)==1)?res1:0) +
+        ((MASKV(2)==1)?res2:0) +
+        ((MASKV(3)==1)?res3:0);
+      break ;
+    case VALU_OP_MULL: // mull
+      //check_nz=1;
+
+      res320=sop10*sop20;  // sth check sign extension
+      res321=sop11*sop21;
+      res322=sop12*sop22;
+      res323=sop13*sop23;
+
+      res0=(res320 & 0xffff);
+      res1=(res321 & 0xffff);
+      res2=(res322 & 0xffff);
+      res3=(res323 & 0xffff);
+
+      SRES=
+        ((MASKV(0)==1)?res0:0) +
+        ((MASKV(1)==1)?res1:0) +
+        ((MASKV(2)==1)?res2:0) +
+        ((MASKV(3)==1)?res3:0);
+      break ;
+    //case VALU_OP_SQD: // sqd
+    //  //      //flag=0;
+    //  //      RES32=(op1-op2)*(op1-op2);
+    //  //      RES=RES>>CONFALU(7,4); // >>CONFSHR
+    //  /* \fixme: add code for those cases! */
+    //  break;
+    case VALU_OP_AND: // and
+      check_nz=1;
+
+      res0=sop10&sop20;
+      res1=sop11&sop21;
+      res2=sop12&sop22;
+      res3=sop13&sop23;
+      SRES=
+        ((MASKV(0)==1)?res0:0xffff) &
+        ((MASKV(1)==1)?res1:0xffff) &
+        ((MASKV(2)==1)?res2:0xffff) &
+        ((MASKV(3)==1)?res3:0xffff);
+      break;
+    case VALU_OP_OR: // or
+      check_nz=1;
+
+      res0=sop10|sop20;
+      res1=sop11|sop21;
+      res2=sop12|sop22;
+      res3=sop13|sop23;
+      SRES=
+        ((MASKV(0)==1)?res0:0) |
+        ((MASKV(1)==1)?res1:0) |
+        ((MASKV(2)==1)?res2:0) |
+        ((MASKV(3)==1)?res3:0);
+      break;
+    case VALU_OP_XOR: // xor
+      check_nz=1;
+
+      res0=sop10^sop20;
+      res1=sop11^sop21;
+      res2=sop12^sop22;
+      res3=sop13^sop23;
+      SRES=
+        ((MASKV(0)==1)?res0:0) ^
+        ((MASKV(1)==1)?res1:0) ^
+        ((MASKV(2)==1)?res2:0) ^
+        ((MASKV(3)==1)?res3:0);
+      break;
+    case VALU_OP_MIN: // min
+      check_nz=1;
+
+      res0=(sop10<sop20)? sop10: sop20;
+      res1=(sop11<sop21)? sop11: sop21;
+      res2=(sop12<sop22)? sop12: sop22;
+      res3=(sop13<sop23)? sop13: sop23;
+
+      {
+        int mres0,mres1,mres2,mres3, smin1,smin2;
+
+        mres0=(MASKV(0)==1)?res0:maxint;
+        mres1=(MASKV(1)==1)?res1:maxint;
+        mres2=(MASKV(2)==1)?res2:maxint;
+        mres3=(MASKV(3)==1)?res3:maxint;
+        smin1=(mres0<mres1)?mres0:mres1;
+        smin2=(mres2<mres3)?mres2:mres3;
+        SRES= (smin1<smin2)?smin1:smin2;
+      }
+      break;
+    case VALU_OP_MAX: // max
+      check_nz=1;
+
+      //flag=0;
+      res0=(sop10>sop20)? sop10: sop20;
+      res1=(sop11>sop21)? sop11: sop21;
+      res2=(sop12>sop22)? sop12: sop22;
+      res3=(sop13>sop23)? sop13: sop23;
+
+      {
+        int mres0,mres1,mres2,mres3, smax1,smax2;
+
+        mres0=(MASKV(0)==1)?res0:minint;
+        mres1=(MASKV(1)==1)?res1:minint;
+        mres2=(MASKV(2)==1)?res2:minint;
+        mres3=(MASKV(3)==1)?res3:minint;
+        smax1=(mres0>mres1)?mres0:mres1;
+        smax2=(mres2>mres3)?mres2:mres3;
+        SRES= (smax1>smax2)?smax1:smax2;
+      }
+      break;
+    case VALU_OP_ASR: // shift right
+      check_nz=1;
+
+      res0=op10.int32() >> (sop20 & 0xf);
+      res1=op11.int32() >> (sop21 & 0xf);
+      res2=op12.int32() >> (sop22 & 0xf);
+      res3=op13.int32() >> (sop23 & 0xf);
+      SRES=
+        ((MASKV(0)==1)?res0:0) +
+        ((MASKV(1)==1)?res1:0) +
+        ((MASKV(2)==1)?res2:0) +
+        ((MASKV(3)==1)?res3:0);
+      break;
+    case VALU_OP_LSR: // logical shift rightg
+      check_nz=1;
+
+      res0=(sop10 & 0xffff) >> (sop20 & 0xf);
+      res1=(sop11 & 0xffff) >> (sop21 & 0xf);
+      res2=(sop12 & 0xffff) >> (sop22 & 0xf);
+      res3=(sop13 & 0xffff) >> (sop23 & 0xf);
+      SRES=
+        ((MASKV(0)==1)?res0:0) +
+        ((MASKV(1)==1)?res1:0) +
+        ((MASKV(2)==1)?res2:0) +
+        ((MASKV(3)==1)?res3:0);
+      break;
+    case VALU_OP_ASL: // shift left
+      check_nz=1;
+      check_clip=1;
+
+      res320=sop10 << (sop20 & 0xf);
+      res321=sop11 << (sop21 & 0xf);
+      res322=sop12 << (sop22 & 0xf);
+      res323=sop13 << (sop23 & 0xf);
+
+      // lsl uses res, so do it here before saturating
+      if (force_unsigned == 1) {
+        res320 &= 0xffff;
+        res321 &= 0xffff;
+        res322 &= 0xffff;
+        res323 &= 0xffff;
+      }
+
+      res0 = res320 & 0xffff;
+      if ((sop10<0) && (force_unsigned == 0)) { // negative input
+        res0 |= 0xfffe0000;
+        if ((res320 & 0x7fff8000) == 0x7fff8000) res0 |= 0x10000;
+        //concat((bits<1>) 1,
+        //       ((res320 & 0x7fff0000)==0x7fff0000)? (bits<1>)1:(bits<1>)0,
+        //       (bits<16>)(res320 & 0xffff));
+      }
+      else {  // positive input
+        if((CONFALU(0)==1) & (force_unsigned == 0)) {
+          if ((res320 & 0x7fff8000) != 0) res0 |= 0x10000;
+        }
+        else {
+          if ((res320 & 0xffff0000) != 0) res0 |= 0x10000;
+        }
+        //concat((bits<1>) 0,
+        //       ((res320 & 0x7fff0000)==0)? (bits<1>)0:(bits<1>)1,
+        //       (bits<16>)(res320 & 0xffff));
+      }
+
+      res1 = res321 & 0xffff;
+      if ((sop11<0) && (force_unsigned == 0)) { // negative input
+        res1 |= 0xfffe0000;
+        if ((res321 & 0x7fff8000) == 0x7fff8000) res1 |= 0x10000;
+      }
+      else {  // positive input
+        if((CONFALU(0)==1) & (force_unsigned == 0)) {
+          if ((res321 & 0x7fff8000) != 0) res1 |= 0x10000;
+        }
+        else {
+          if ((res321 & 0xffff0000) != 0) res1 |= 0x10000;
+        }
+      }
+
+      res2 = res322 & 0xffff;
+      if ((sop12<0) && (force_unsigned == 0)) { // negative input
+        res2 |= 0xfffe0000;
+        if ((res322 & 0x7fff8000) == 0x7fff8000) res2 |= 0x10000;
+      }
+      else {  // positive input
+        if((CONFALU(0)==1) & (force_unsigned == 0)) {
+          if ((res322 & 0x7fff8000) != 0) res2 |= 0x10000;
+        }
+        else {
+          if ((res322 & 0xffff0000) != 0) res2 |= 0x10000;
+        }
+      }
+
+      res3 = res323 & 0xffff;
+      if ((sop13<0) && (force_unsigned == 0)) { // negative input
+        res3 |= 0xfffe0000;
+        if ((res323 & 0x7fff8000) == 0x7fff8000) res3 |= 0x10000;
+      }
+      else {  // positive input
+        if((CONFALU(0)==1) & (force_unsigned == 0)) {
+          if ((res323 & 0x7fff8000) != 0) res3 |= 0x10000;
+        }
+        else {
+          if ((res323 & 0xffff0000) != 0) res3 |= 0x10000;
+        }
+      }
+
+      SRES=
+        ((MASKV(0)==1)?res0:0) +
+        ((MASKV(1)==1)?res1:0) +
+        ((MASKV(2)==1)?res2:0) +
+        ((MASKV(3)==1)?res3:0);
+      break;
+
+    case VALU_OP_CLZ: // clz
+      int m;
+
+      check_nz=1;
+
+      m=0;
+      while(m<16 && ((sop20 & 0x8000)==0)){// RTL: implement as binary tree
+        ++m;
+        sop20<<=1;
+      }
+      if (m==16) m|=0xfff0; // replicate bit[4] to bit[15:4] and set N flag
+      res0=m;
+
+      m=0;
+      while(m<16 && ((sop21 & 0x8000)==0)){// RTL: implement as binary tree
+        ++m;
+        sop21<<=1;
+      }
+      if (m==16) m|=0xfff0; // replicate bit[4] to bit[15:4] and set N flag
+      res1=m;
+
+      m=0;
+      while(m<16 && ((sop22 & 0x8000)==0)){// RTL: implement as binary tree
+        ++m;
+        sop22<<=1;
+      }
+      if (m==16) m|=0xfff0; // replicate bit[4] to bit[15:4] and set N flag
+      res2=m;
+
+      m=0;
+      while(m<16 && ((sop23 & 0x8000)==0)){// RTL: implement as binary tree
+        ++m;
+        sop23<<=1;
+      }
+      if (m==16) m|=0xfff0; // replicate bit[4] to bit[15:4] and set N flag
+      res3=m;
+
+
+      {
+        int mres0,mres1,mres2,mres3, smin1,smin2;
+
+        //res0=(sop10<sop20)? sop10: sop20;
+        //res1=(sop11<sop21)? sop11: sop21;
+        //res2=(sop12<sop22)? sop12: sop22;
+        //res3=(sop13<sop23)? sop13: sop23;
+
+        mres0=(MASKV(0)==1)?res0 : 0xfff0;
+        mres1=(MASKV(1)==1)?res1 : 0xfff0;
+        mres2=(MASKV(2)==1)?res2 : 0xfff0;
+        mres3=(MASKV(3)==1)?res3 : 0xfff0;
+        smin1=(mres0<mres1)?mres0:mres1;
+        smin2=(mres2<mres3)?mres2:mres3;
+        SRES= (smin1<smin2)?smin1:smin2;
+      }
+      break;
+    }
+
+    bres0=res0;
+    bres1=res1;
+    bres2=res2;
+    bres3=res3;
+
+    VRES=concat(MASKV,bres0,bres1,bres2,bres3);
+
+    if (check_nz==1) {
+      int z=0,n=0;
+      if ((res0 & 0xffff) == 0) z =1;
+      if ((res1 & 0xffff) == 0) z|=2;
+      if ((res2 & 0xffff) == 0) z|=4;
+      if ((res3 & 0xffff) == 0) z|=8;
+      I_VFLAG_Z=z;
+      if (res0 & 0x8000) n =1;
+      if (res1 & 0x8000) n|=2;
+      if (res2 & 0x8000) n|=4;
+      if (res3 & 0x8000) n|=8;
+      I_VFLAG_N=n;
+    }
+
+    if (check_co==1) {
+      int c,o;
+      c=0;
+      c = cc_get_C (valu_op, (short) res0, (short) sop10, (short) sop20);
+      c |= cc_get_C (valu_op, (short) res1, (short) sop11, (short) sop21) <<1;
+      c |= cc_get_C (valu_op, (short) res2, (short) sop12, (short) sop22) <<2;
+      c |= cc_get_C (valu_op, (short) res3, (short) sop13, (short) sop23) <<3;
+      I_VFLAG_C=c;
+      o = cc_get_O (valu_op, (short) res0, (short) sop10, (short) sop20);
+      o |= cc_get_O (valu_op, (short) res1, (short) sop11, (short) sop21) <<1;
+      o |= cc_get_O (valu_op, (short) res2, (short) sop12, (short) sop22) <<2;
+      o |= cc_get_O (valu_op, (short) res3, (short) sop13, (short) sop23) <<3;
+      I_VFLAG_O=o;
+    }
+
+    if (check_clip==1) {
+      int u=0, l=0;
+      if (res0 < minint) {
+        l =1;
+        if (saturate) res0=minint;
+      }
+      else if (res0 > maxint) {
+        u =1;
+        if (saturate) res0=maxint;
+      }
+      if (res1 < minint) {
+        l|=2;
+        if (saturate) res1=minint;
+      }
+      else if (res1 > maxint) {
+        u|=2;
+        if (saturate) res1=maxint;
+      }
+      if (res2 < minint) {
+        l|=4;
+        if (saturate) res2=minint;
+      }
+      else if (res2 > maxint) {
+        u|=1;
+        if (saturate) res2=maxint;
+      }
+      if (res3 < minint) {
+        l|=8;
+        if (saturate) res3=minint;
+      }
+      else if (res3 > maxint) {
+        u|=8;
+        if (saturate) res3=maxint;
+      }
+      I_VFLAG_L=l;
+      I_VFLAG_U=u;
+    }
+    
+    bres0=res0;
+    bres1=res1;
+    bres2=res2;
+    bres3=res3;
+
+    VSAT=concat(MASKV,bres0,bres1,bres2,bres3);
+
+    // process scalar saturation
+    if (CONFALU.SAT==1) {
+      //if (CONFALU.SGN==1) {
+        if (SRES.int32() < minint) {   // negative overflow
+          SSAT=minint;
+        }
+        else if (SRES.int32() > maxint) { // positive overflow
+          SSAT=maxint;
+        }
+        else {
+          SSAT=SRES(15,0);
+        }
+      //}
+      //else {             // unsigned logic
+      //  if (SRES.int32() < UMIN16) {   // negative overflow
+      //    SSAT=0x0000;
+      //  }
+      //  else if (SRES.uint32() > UMAX16) { // positive overflow
+      //    SSAT=UMAX16;
+      //  }
+      //  else {
+      //    SSAT=SRES(15,0);
+      //  }
+      //}
+
+      //// unsigned result saturation (lsr and abd)
+      //if (SRES.int32() < UMIN16) {   // negative overflow
+      //  SUSAT=0x0000;
+      //}
+      //else if (SRES.uint32() > UMAX16) { // positive overflow
+      //  SUSAT=UMAX16;
+      //}
+      //else {
+      //  SUSAT=SRES(15,0);
+      //}
+    }
+    else {
+      SSAT =SRES(15,0);
+      //SUSAT=SRES(15,0);
+    }
+  }
+
+
+
+  // Attributes
+  //attrs = (load,store,privileged);
+
+  // ***********************************************************************
+  // Registers
+  // ***********************************************************************
+
+  // Internal Registers
+  define (reg=VOP1) {
+    """
+    Internal Signal: Vector operand 1 input to 4-way SIMND ALU
+    """;
+    width = 64;
+    //#include "IPUV_VRegisters.h"
+  }
+
+  define (reg=VOP2) {
+    """
+    Internal Signal: Vector operand 2 input to 4-way SIMND ALU
+    """;
+    width = 64;
+    //#include "IPUV_VRegisters.h"
+  }
+
+  define (reg=VRES) {
+    """
+    Internal Signal: Vector result of 4-way SIMD ALU before saturation
+    """;
+    width = 68;
+    //#include "IPUV_VRegisters.h"
+  }
+
+  define (reg=VSAT) {
+    """
+    Internal Signal: Vector result of 4-way SIMD ALU after saturation
+    """;
+    width = 68;
+  }
+
+  define (reg=SRES) {
+    """
+    Internal Signal: Scalar result of 4-way SIMD ALU before saturation
+    """;
+    width = 20;
+  }
+
+  define (reg=SSAT) {
+    """
+    Internal Signal: Scalar result of 4-way SIMD ALU after saturation
+    """;
+    width = 16;
+  }
+
+  //define (reg=SUSAT) {
+  //  """
+  //  Internal Signal: Scalar result of 4-way SIMD ALU after saturation
+  //  for unsigned results (lsr and abd)
+  //  """;
+  //  width = 16;
+  //}
+
+  define (reg=MASKV) {
+    """
+    Core Register:
+    Mask for Enabling the way of 4-way SIMD ALU (write only)
+
+    + MASK(i) = 1: enable storing result for way i of the 4-way SIMD ALU instruction; default is 1 set at the beginning of a line
+    """;
+    width = 4;
+    reset = 0xf;
+  }
+
+  define (reg=MASKVQ) {
+    """
+    Core Register:
+    Mask for enabling the way of 4-way SIMD ALU (write only; inverted MASKV)
+
+    + MASK(i) = 0: enable storing result for way i of the 4-way SIMD ALU instruction
+    """;
+#ifndef MAKEDOC
+    width = 4;
+    define (read) {
+      action = { return 0; };
+    }
+    define (write) {
+      action = func(bits<4> val) {
+        MASKV=~val;
+      };
+    }
+#endif // MAKEDOC
+  }
+
+  //define (reg=VFLAG_L) {
+  //  """
+  //  Core Register:
+  //  4-way SIMD ALU Clip Lower Boundary Flags
+  //  """;
+  //  width = 4;
+  //}
+  //
+  //define (reg=VFLAG_U) {
+  //  """
+  //  Core Register:
+  //  4-way SIMD ALU Clip Upper Boundary Flags
+  //  """;
+  //  width = 4;
+  //}
+
+  define (reg=VFLAG_O) {
+    """
+    Core Register:
+    4-way SIMD ALU Overflow Flags
+    """;
+    width = 4;
+    //define (write) {
+    //  action = func (bits<4> val) {
+    //     VFLAG_O=val ;
+    //  };
+    //}
+  }
+
+  define (reg=VFLAG_C) {
+    """
+    Core Register:
+    4-way SIMD ALU Carry Flags
+    """;
+    width = 4;
+  }
+
+  define (reg=VFLAG_N) {
+    """
+    Core Register:
+    4-way SIMD ALU Negative Flags
+    """;
+    width = 4;
+    //define (write) {
+    //  action = func (bits<4> val) {
+    //     VFLAG_N=val ;
+    //  };
+    //}
+  }
+
+  define (reg=VFLAG_Z) {
+    """
+    Core Register:
+    4-way SIMD ALU Zero Flags
+    """;
+    width = 4;
+    //define (write) {
+    //  action = func (bits<4> val) {
+    //    VFLAG_Z=val ;
+    //  };
+    //}
+  }
+
+  define (reg=I_VFLAG_L) {
+    """
+    Internal Combinatorial Signal:
+    4-way SIMD ALU Clip Lower Boundary Flags
+    """;
+    width = 4;
+  }
+
+  define (reg=I_VFLAG_U) {
+    """
+    Internal Combinatorial Signal:
+    4-way SIMD ALU Clip Upper Boundary Flags
+    """;
+    width = 4;
+  }
+
+  define (reg=I_VFLAG_O) {
+    """
+    Internal Combinatorial Signal:
+    4-way SIMD ALU Overflow Flags
+    """;
+    width = 4;
+  }
+
+  define (reg=I_VFLAG_C) {
+    """
+    Internal Combinatorial Signal:
+    4-way SIMD ALU Carry Flags
+    """;
+    width = 4;
+  }
+
+  define (reg=I_VFLAG_N) {
+    """
+    Internal Combinatorial Signal:
+    4-way SIMD ALU Negative Flags
+    """;
+    width = 4;
+  }
+
+  define (reg=I_VFLAG_Z) {
+    """
+    Internal Combinatorial Signal:
+    4-way SIMD ALU Zero Flags
+    """;
+    width = 4;
+  }
+
+  // aliases to the registers 
+  // vector registers 
+  define (regfile=VV) {
+    """
+    Core Register:
+    Vertical vector registers point to IN registers
+
+    e.g., VV[11] = (IN[11],IN[19],IN[27],IN[35])
+
+    +  VV[7]  VV[6]  VV[5]  VV[4]  VV[3]  VV[2]  VV[1]  VV[0]
+    + VV[15] VV[14] VV[13] VV[12] VV[11] VV[10]  VV[9]  VV[8]
+    +      -      -      -     -       -      -      -      -
+    +      -      -      -     -       -      -      -      -
+    +      -      -      -     -       -      -      -      -
+    + (numbering for scan from left to right)
+    """;
+    width = 68;
+    size=16;
+#ifndef MAKEDOC
+    pseudo=true;
+    define (read) {
+      action = func(unsigned ix) {
+        bits<64> retvalue;
+        retvalue(63,48)=IN(ix);
+        retvalue(47,32)=IN(ix+8);
+        retvalue(31,16)=IN(ix+16);
+        retvalue(15, 0)=IN(ix+24);
+        return retvalue;
+      };
+    }
+    define (write) {
+      action = func(unsigned ix, bits<68> x) {
+        if (x(64)==1) IN(ix   )=x(63,48);
+        if (x(65)==1) IN(ix+ 8)=x(47,32);
+        if (x(66)==1) IN(ix+16)=x(31,16);
+        if (x(67)==1) IN(ix+24)=x(15, 0);
+      };
+    }
+#endif // MAKEDOC
+  }
+
+  define (regfile=VH) {
+    """
+    Core Register:
+    Horizontal vector registers pointing to IN registers
+
+    e.g., VH[10] = (IN[19],IN[18],IN[17],IN[18])
+
+    +     -      -      -  VH[4]  VH[3]  VH[2]  VH[1]  VH[0]
+    +     -      -      -  VH[9]  VH[8]  VH[7]  VH[6]  VH[5]
+    +     -      -      - VH[14] VH[13] VH[12] VH[11] VH[10]
+    +     -      -      - VH[19] VH[18] VH[17] VH[16] VH[15]
+    +     -      -      - VH[24] VH[23] VH[22] VH[21] VH[20]
+    + (numbering for scan from left to right)
+    """;
+    width = 68;
+    size=25;
+#ifndef MAKEDOC
+    pseudo=true;
+    define (read) {
+      action = func(unsigned ix) {
+        unsigned ix2rno[25] = {
+          0, 1, 2, 3, 4,
+          8, 9,10,11,12,
+          16,17,18,19,20,
+          24,25,26,27,28,
+          32,33,34,35,36};
+        unsigned rno=ix2rno[ix];
+        bits<64> retvalue;
+
+        //rno=ix2rno[ix];
+        retvalue(63,48)=IN(rno);
+        retvalue(47,32)=IN(rno+1);
+        retvalue(31,16)=IN(rno+2);
+        retvalue(15, 0)=IN(rno+3);
+        return retvalue;
+      };
+    }
+    define (write) {
+      action = func(unsigned ix, bits<68> x) {
+        unsigned ix2rno[25] = {
+          0, 1, 2, 3, 4,
+          8, 9,10,11,12,
+          16,17,18,19,20,
+          24,25,26,27,28,
+          32,33,34,35,36};
+        unsigned rno=ix2rno[ix];
+	
+        if (x(64)==1) IN(rno   )=x(63,48);
+        if (x(65)==1) IN(rno+1)=x(47,32);
+        if (x(66)==1) IN(rno+2)=x(31,16);
+        if (x(67)==1) IN(rno+3)=x(15, 0);
+      };
+    }
+#endif // MAKEDOC
+  }
+
+  // aliases to the registers
+  define (regfile=VOUT) {
+    """
+    Core Register:
+    Output vector registers pointing to OUT registers
+
+    + VOUT[0] = (OUT[0],OUT[1],OUT[2] ,OUT[3])
+    + VOUT[1] = (OUT[4],OUT[5],OUT[6] ,OUT[7])
+    + VOUT[2] = (OUT[8],OUT[9],OUT[10],OUT[11])
+    """;
+    width = 68;
+    size=OUTPUT_STREAMS;
+#ifndef MAKEDOC
+    pseudo = true;
+    define (read) {
+      action = func(unsigned ix) {
+        bits<64> retvalue;
+        retvalue(63,48) = OUT(ix*4  );
+        retvalue(47,32) = OUT(ix*4+1);
+        retvalue(31,16) = OUT(ix*4+2);
+        retvalue(15, 0) = OUT(ix*4+3);
+        return retvalue;
+      };
+    }
+    define (write) {
+      action = func (unsigned ix, bits<68> x) {
+        if (x(64)==1) OUT(ix*4  ) = x(63,48);
+        if (x(65)==1) OUT(ix*4+1) = x(47,32);
+        if (x(66)==1) OUT(ix*4+2) = x(31,16);
+        if (x(67)==1) OUT(ix*4+3) = x(15, 0);
+      };
+    }
+#endif // MAKEDOC
+  }
+
+  // aliases to the registers
+  define (regfile=VGPR) {
+    """
+    Core Register:
+    General purpose vector registers pointing to GPR registers
+
+    + VGPR[0] = (GPR[0] ,GPR[1] ,GPR[2] ,GPR[3])
+    + VGPR[1] = (GPR[4] ,GPR[5] ,GPR[6] ,GPR[7])
+    + VGPR[2] = (GPR[8] ,GPR[9] ,GPR[10],GPR[11])
+    + VGPR[3] = (GPR[12],GPR[13],GPR[14],GPR[15])
+    + VGPR[4] = (GPR[16],GPR[17],GPR[18],GPR[19])
+    + VGPR[5] = (GPR[20],GPR[21],GPR[22],GPR[23])
+    + VGPR[6] = (GPR[24],GPR[25],GPR[26],GPR[27])
+    + VGPR[7] = (GPR[28],GPR[29],GPR[30],GPR[31])
+    """;
+    width = 68;
+    size=8;
+#ifndef MAKEDOC
+    pseudo = true;
+    define (read) {
+      action = func(unsigned ix) {
+        //bits<32> high;
+        //bits<32> low;
+        //high(31,16) = GPR(ix*4  );
+        //high(15, 0) = GPR(ix*4+1);
+        //low (31,16) = GPR(ix*4+2);
+        //low (15, 0) = GPR(ix*4+3);
+        //return concat(low,high);
+        //bits<64> retvalue;
+        //retvalue(63,48) = GPR(ix*4  );
+        //retvalue(47,32) = GPR(ix*4+1);
+        //retvalue(31,16) = GPR(ix*4+2);
+        //retvalue(15, 0) = GPR(ix*4+3);
+        //return retvalue;
+        return concat(GPR(ix*4),GPR(ix*4+1),GPR(ix*4+2),GPR(ix*4+3));
+      };
+    }
+    define (write) {
+      action = func (unsigned ix, bits<68> x) {
+        if (x(64)==1) GPR(ix*4  ) = x(63,48);
+        if (x(65)==1) GPR(ix*4+1) = x(47,32);
+        if (x(66)==1) GPR(ix*4+2) = x(31,16);
+        if (x(67)==1) GPR(ix*4+3) = x(15, 0);
+      };
+    }
+#endif // MAKEDOC
+  }
+
+  // aliases to the registers
+  define (regfile=VACC) {
+    """
+    Core Register:
+    Accumulator vector registers pinting to ACC registers
+
+    + VACC[0] = (ACC[0] ,ACC[1] ,ACC[2] ,ACC[3])
+    + VACC[1] = (ACC[4] ,ACC[5] ,ACC[6] ,ACC[7])
+    """;
+    width = 68;
+    size=2;
+#ifndef MAKEDOC
+    pseudo = true;
+    define (read) {
+      action = func(unsigned ix) {
+        bits<64> retvalue;
+        retvalue(63,48) = ACC(ix*4  );
+        retvalue(47,32) = ACC(ix*4+1);
+        retvalue(31,16) = ACC(ix*4+2);
+        retvalue(15, 0) = ACC(ix*4+3);
+        return retvalue;
+      };
+    }
+    define (write) {
+      action = func (unsigned ix, bits<68> x) {
+        //int acc1 ,acc2,acc3,acc4 , in1 ,in2 ,in3 ,in4 ,minint ,maxint; 
+
+        if (x(64)==1) ACC(ix*4  )= x(63,48);
+        if (x(65)==1) ACC(ix*4+1)= x(47,32);
+        if (x(66)==1) ACC(ix*4+2)= x(31,16);
+        if (x(67)==1) ACC(ix*4+3)= x(15, 0);
+        //if (CONFALU(0)==1) {         // (CONFSGN==1) signed
+        //  in1= x(63,48).int32();
+        //  in2= x(47,32).int32();
+        //  in3= x(31,16).int32();
+        //  in4= x(15, 0).int32();
+        //  acc1=SACC(ix*4  ).int32();
+        //  acc2=SACC(ix*4+1).int32();
+        //  acc3=SACC(ix*4+2).int32();
+        //  acc4=SACC(ix*4+3).int32();
+        //  acc1+=in1;
+        //  acc2+=in2;
+        //  acc3+=in3;
+        //  acc4+=in4;
+        //  minint = SMIN16;
+        //  maxint = SMAX16;
+        //}
+        //else {
+        //  in1= x(63,48).uint32();
+        //  in2= x(47,32).uint32();
+        //  in3= x(31,16).uint32();
+        //  in4= x(15, 0).uint32();
+        //  acc1=SACC(ix*4  ).uint32();
+        //  acc2=SACC(ix*4+1).uint32();
+        //  acc3=SACC(ix*4+2).uint32();
+        //  acc4=SACC(ix*4+3).uint32();
+        //  acc1+=in1;
+        //  acc2+=in2;
+        //  acc3+=in3;
+        //  acc4+=in4;
+        //  minint =  UMIN16;
+        //  maxint =  UMAX16;
+        //}
+        //
+        //if (CONFALU(1)==1) {       // (CONFSAT==1)
+        //  if (acc1< minint) acc1=minint;
+        //  if (acc2< minint) acc2=minint;
+        //  if (acc3< minint) acc3=minint;
+        //  if (acc4< minint) acc4=minint;
+        //  if (acc1> maxint) acc1=maxint;
+        //  if (acc2> maxint) acc2=maxint;
+        //  if (acc3> maxint) acc3=maxint;
+        //  if (acc4> maxint) acc4=maxint;
+        //}
+        //
+        //if (x(64)==1) SACC(ix*4  ) =acc1;
+        //if (x(65)==1) SACC(ix*4+1) =acc2;
+        //if (x(66)==1) SACC(ix*4+2) =acc3;
+        //if (x(67)==1) SACC(ix*4+3) =acc4;
+      };
+    }
+#endif // MAKEDOC
+  }
+
+  // aliases to the registers
+  define (regfile=VSACC) {
+    """
+    Core Register:
+    Set accumulator vector register pointing to ACC registers
+
+    + VSACC[0] = (SACC[0] ,SACC[1] ,SACC[2] ,SACC[3])
+    + VSACC[1] = (SACC[4] ,SACC[5] ,SACC[6] ,SACC[7])
+    """;
+    width = 68;
+    size=2;
+#ifndef MAKEDOC
+    pseudo = true;
+    define (read) {
+      action = func(unsigned ix) {
+        bits<64> retvalue;
+        retvalue(63,48) = SACC(ix*4  );
+        retvalue(47,32) = SACC(ix*4+1);
+        retvalue(31,16) = SACC(ix*4+2);
+        retvalue(15, 0) = SACC(ix*4+3);
+        return retvalue;
+      };
+    }
+    define (write) {
+      action = func (unsigned ix, bits<68> x) {
+        if (x(64)==1) SACC(ix*4  ) = x(63,48);
+        if (x(65)==1) SACC(ix*4+1) = x(47,32);
+        if (x(66)==1) SACC(ix*4+2) = x(31,16);
+        if (x(67)==1) SACC(ix*4+3) = x(15, 0);
+      };
+    }
+#endif // MAKEDOC
+  }
+
+#ifdef HASABSANGLE
+  define (regfile=VABS) {
+    """
+    Core Register:
+    Absolute vector register pointing to ABS registers
+
+    + VABS = (ABS[0] ,ABS[1] ,ABS[2] ,ABS[3])
+    """;
+    width = 68;
+    size=1;
+#ifndef MAKEDOC
+    pseudo = true;
+    define (read) {
+      action = func(unsigned ix) {
+        bits<64> retvalue;
+        retvalue(63,48) = ABS(ix*4  );
+        retvalue(47,32) = ABS(ix*4+1);
+        retvalue(31,16) = ABS(ix*4+2);
+        retvalue(15, 0) = ABS(ix*4+3);
+        return retvalue;
+      };
+    }
+    define (write) {
+      action = func (unsigned ix, bits<68> x) {
+        error(1,
+              "\n********************\n",
+              "ERROR: Writing to read only register VABS",
+              ")\n********************\n");
+        //if (x(64)==1) ABS(ix*4+3) = x(15, 0);
+        //if (x(65)==1) ABS(ix*4+1) = x(47,32);
+        //if (x(66)==1) ABS(ix*4+2) = x(31,16);
+        //if (x(67)==1) ABS(ix*4+3) = x(15, 0);
+      };
+    }
+#endif // MAKEDOC
+  }
+
+  define (regfile=VANGLE) {
+    """
+    Core Register:
+    Angle vector register pointing to ANGLE registers (read only)
+
+    + VANGLE = (ANGLE[0] ,ANGLE[1] ,ANGLE[2] ,ANGLE[3])
+    """;
+    width = 68;
+    size=1;
+#ifndef MAKEDOC
+    pseudo = true;
+    define (read) {
+      action = func(unsigned ix) {
+        bits<64> retvalue;
+        retvalue(63,48) = ANGLE(ix*4  );
+        retvalue(47,32) = ANGLE(ix*4+1);
+        retvalue(31,16) = ANGLE(ix*4+2);
+        retvalue(15, 0) = ANGLE(ix*4+3);
+        return retvalue;
+      };
+    }
+    define (write) {
+      action = func (unsigned ix, bits<68> x) {
+        error(1,
+              "\n********************\n",
+              "ERROR: Writing to read only register VANGLE",
+              ")\n********************\n");
+        //if (x(64)==1) ANGLE(ix*4) = x(15, 0);
+        //if (x(65)==1) ANGLE(ix*4+1) = x(47,32);
+        //if (x(66)==1) ANGLE(ix*4+2) = x(31,16);
+        //if (x(67)==1) ANGLE(ix*4+3) = x(15, 0);
+      };
+    }
+#endif // MAKEDOC
+  }
+#endif // HASABSANGLE
+
+  // aliases to the registers
+  define (reg=VONE) {
+    """
+    Core Register:
+    -1 read vector register
+    """;
+    width = 64;
+    //size=1;
+    //pseudo = true;
+    reset = 0xFFFFFFFFFFFFFFFF;
+#ifndef MAKEDOC
+    define (read) {
+      action = {
+        return 0xFFFFFFFFFFFFFFFF;
+      };
+    }
+    define (write) {
+      action = func(bits<64> RES) {
+        return;
+      };
+    }
+#endif // MAKEDOC
+  }
+
+  define (reg=VZERO) {
+    """
+    Core Register:
+    Zero read vector register
+    """;
+    width = 64;
+    //size=1;
+    //pseudo = true;
+    reset = 0;
+#ifndef MAKEDOC
+    define (read) {
+      action = {
+        return 0;
+      };
+    }
+    define (write) {
+      action = func(bits<64> RES) {
+        return;
+      };
+    }
+#endif // MAKEDOC
+  }
+
+  define (regfile=VR) {
+    """
+    Core Register:
+    All vector registers
+    """;
+    width=68;
+    size=256;
+#ifdef IGNORE_UNKNOWN_REG
+    invalid_entry_read = func (unsigned ix) {
+      return 0;
+    };
+    invalid_entry_write = func (unsigned ix, bits<68> value) {
+    };
+#endif
+    define (entry=  0)  { reg = VV; }    // 0-15
+    define (entry= 16)  { reg = VH; }    // 16-41
+    define (entry= 45)  { reg = VOUT; }  // 45-47
+    define (entry= 48)  { reg = VGPR; }  // 48-57
+    define (entry= 56)  { reg = VACC; }  // 56-57
+    define (entry= 58)  { reg = VSACC; } // 58-59
+#ifdef HASABSANGLE
+    define (entry= 60)  { reg = VABS; }  // 60
+    define (entry= 61)  { reg = VANGLE; }// 61
+#endif
+    //define (entry= 60)  { reg = VONE; }
+    //define (entry= 61)  { reg = VZERO; }
+    define (entry=254)  { reg = VONE; }
+    define (entry=255)  { reg = VZERO; }
+  }
+
+
+  // ***********************************************************************
+  // Instruction Fields
+  // ***********************************************************************
+
+
+  define (instrfield=VDEST) {
+    """
+    Vector destination register
+    """;
+    bits = (23,16);
+    display = dec;
+#include "IPUV_VRegisters.h"
+  }
+
+  define (instrfield=VIN1) {
+    """
+    Vector Operator 1 register
+    """;
+    bits = (15,8);
+    display = dec;
+#include "IPUV_VRegisters.h"
+  }
+
+  define (instrfield=VIN2) {
+    """
+    Vector Operator 2 register
+    """;
+    bits = (7,0);
+    display = dec;
+#include "IPUV_VRegisters.h"
+  }
+
+
+  // ***********************************************************************
+  // Instruction
+  // ***********************************************************************
+  // mov, cp *****************************
+  define (instr=mov_S_V) {
+    """
+    Move the sum of a vector register to a scalar register
+
+    VOP = VR[VIN]
+
+    R[DEST] = SUM(VOP);
+
+    Vector condition code flags modified: none
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x5),OPCD(0),DEST,VIN2);
+    syntax = ("mov %f,%f",DEST,VIN2);
+    action = {
+      valu(VALU_OP_MOV, 0, VR(VIN2), VR(VIN2));
+      R(DEST) = SRES;
+    };
+  }
+
+  define (instr=mov_V_S) {
+    """
+    Move a scalar register value to a vector register
+
+    VOP = (R[IN], R[IN], R[IN], R[IN]);
+
+    VR[VDEST] = VOP,
+
+    Vector condition code flags modified: none
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x6),OPCD(0),VDEST,IN2);
+    syntax = ("mov %f,%f",VDEST,IN2);
+    action = {
+      //VOP2=concat(R(IN2),R(IN2),R(IN2),R(IN2));
+      
+      valu(VALU_OP_MOV,  0, concat(R(IN2),R(IN2),R(IN2),R(IN2)), concat(R(IN2),R(IN2),R(IN2),R(IN2)));
+      VR(VDEST) = VRES;
+    };
+  }
+
+  define (instr=cp_V_V) {
+    """
+    Copy a vector register to another vector register
+
+    VR[DEST] = VR[VOP]
+
+    Vector condition code flags modified: none
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x7),OPCD(0),VDEST,VIN2);
+    //syntax = ("cp %f,%f",VDEST,VIN1);
+    syntax = ("mov %f,%f",VDEST,VIN2);
+    action = {
+      valu(VALU_OP_MOV,  0, VR(VIN2), VR(VIN2));
+      VR(VDEST) = VRES;
+    };
+  }
+
+  // add *****************************
+  define (instr=add_S_VxS) {
+    """
+    Adds a register value to vector register values and store the sum
+
+    VOP1 = VR[VIN1]
+
+    VOP2 = (R[IN2], R[IN2], R[IN2], R[IN2]);
+
+    R[DEST] = SUM(VOP1 + VOP2);
+
+    Vector condition code flags modified: carry, overflow, negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x4),OPCD(1),DEST,VIN1,IN2);
+    syntax = ("add %f,%f,%f",DEST,VIN1,IN2);
+    action = {
+      valu(VALU_OP_ADD,  0, VR(VIN1), concat(R(IN2),R(IN2),R(IN2),R(IN2)));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      VFLAG_C=flag_ways(VFLAG_C,I_VFLAG_C,MASKV);
+      VFLAG_O=flag_ways(VFLAG_O,I_VFLAG_O,MASKV);
+      //VFLAG_U=flag_ways(VFLAG_U,I_VFLAG_U,MASKV);
+      //VFLAG_L=flag_ways(VFLAG_L,I_VFLAG_L,MASKV);
+      R(DEST) = SSAT;
+    };
+  }
+
+  define (instr=add_S_VxV) {
+    """
+    Adds two vector register value and store the sum
+
+    R[DEST] = SUM(VOP1 + VOP2);
+
+    Vector condition code flags modified: carry, overflow, negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x5),OPCD(1),DEST,VIN1,VIN2);
+    syntax = ("add %f,%f,%f",DEST,VIN1,VIN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=VR(VIN2);
+      
+      valu(VALU_OP_ADD,  0, VR(VIN1), VR(VIN2));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      VFLAG_C=flag_ways(VFLAG_C,I_VFLAG_C,MASKV);
+      VFLAG_O=flag_ways(VFLAG_O,I_VFLAG_O,MASKV);
+      //VFLAG_U=flag_ways(VFLAG_U,I_VFLAG_U,MASKV);
+      //VFLAG_L=flag_ways(VFLAG_L,I_VFLAG_L,MASKV);
+      R(DEST) = SSAT;
+    };
+  }
+
+  define (instr=add_V_VxS) {
+    """
+    Adds a register value to a vector register value
+
+    VOP1 = VR[VIN1];
+
+    VOP2 = (R[IN2], R[IN2], R[IN2], R[IN2]);
+
+    VR[VDEST] = (VOP1 + VOP2);
+
+    Vector condition code flags modified: carry, overflow, negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x6),OPCD(1),VDEST,VIN1,IN2);
+    syntax = ("add %f,%f,%f",VDEST,VIN1,IN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=concat(R(IN2),R(IN2),R(IN2),R(IN2));
+      
+      valu(VALU_OP_ADD,  0, VR(VIN1), concat(R(IN2),R(IN2),R(IN2),R(IN2)));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      VFLAG_C=flag_ways(VFLAG_C,I_VFLAG_C,MASKV);
+      VFLAG_O=flag_ways(VFLAG_O,I_VFLAG_O,MASKV);
+      //VFLAG_U=flag_ways(VFLAG_U,I_VFLAG_U,MASKV);
+      //VFLAG_L=flag_ways(VFLAG_L,I_VFLAG_L,MASKV);
+      VR(VDEST) = VSAT;
+    };
+  }
+
+  define (instr=add_V_VxV) {
+    """
+    Adds two vector register value
+
+    VR[VDEST] = (VOP1 + VOP2);
+
+    Vector condition code flags modified: carry, overflow, negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x7),OPCD(1),VDEST,VIN1,VIN2);
+    syntax = ("add %f,%f,%f",VDEST,VIN1,VIN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=VR(VIN2);
+
+      valu(VALU_OP_ADD,  0, VR(VIN1), VR(VIN2));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      VFLAG_C=flag_ways(VFLAG_C,I_VFLAG_C,MASKV);
+      VFLAG_O=flag_ways(VFLAG_O,I_VFLAG_O,MASKV);
+      //VFLAG_U=flag_ways(VFLAG_U,I_VFLAG_U,MASKV);
+      //VFLAG_L=flag_ways(VFLAG_L,I_VFLAG_L,MASKV);
+      VR(VDEST) = VSAT;
+    };
+  }
+
+  // sub *****************************
+  define (instr=sub_S_VxS) {
+    """
+    Subtracts a register value from a vector register values and store the sum
+
+    VOP1 = VR[VIN1]
+
+    VOP2 = (R[IN2], R[IN2], R[IN2], R[IN2]);
+
+    R[DEST] = SUM(VOP1 - VOP2);
+
+    Vector condition code flags modified: carry, overflow, negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x4),OPCD(2),DEST,VIN1,IN2);
+    syntax = ("sub %f,%f,%f",DEST,VIN1,IN2);
+    action = {
+      valu(VALU_OP_SUB,  0, VR(VIN1), concat(R(IN2),R(IN2),R(IN2),R(IN2)));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      VFLAG_C=flag_ways(VFLAG_C,I_VFLAG_C,MASKV);
+      VFLAG_O=flag_ways(VFLAG_O,I_VFLAG_O,MASKV);
+      //VFLAG_U=flag_ways(VFLAG_U,I_VFLAG_U,MASKV);
+      //VFLAG_L=flag_ways(VFLAG_L,I_VFLAG_L,MASKV);
+      R(DEST) = SSAT;
+    };
+  }
+
+  define (instr=sub_S_VxV) {
+    """
+    Subtracts two vector register value and store the sum
+
+    R[DEST] = SUM(VOP1 - VOP2);
+
+    Vector condition code flags modified: carry, overflow, negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x5),OPCD(2),DEST,VIN1,VIN2);
+    syntax = ("sub %f,%f,%f",DEST,VIN1,VIN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=VR(VIN2);
+      
+      valu(VALU_OP_SUB,  0, VR(VIN1), VR(VIN2));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      VFLAG_C=flag_ways(VFLAG_C,I_VFLAG_C,MASKV);
+      VFLAG_O=flag_ways(VFLAG_O,I_VFLAG_O,MASKV);
+      //VFLAG_U=flag_ways(VFLAG_U,I_VFLAG_U,MASKV);
+      //VFLAG_L=flag_ways(VFLAG_L,I_VFLAG_L,MASKV);
+      R(DEST) = SSAT;
+    };
+  }
+
+  define (instr=sub_V_VxS) {
+    """
+    Subtracts a register value from a vector register value
+
+    VOP1 = VR[VIN1];
+
+    VOP2 = (R[IN2], R[IN2], R[IN2], R[IN2]);
+
+    VR[VDEST] = (VOP1 - VOP2);
+
+    Vector condition code flags modified: carry, overflow, negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x6),OPCD(2),VDEST,VIN1,IN2);
+    syntax = ("sub %f,%f,%f",VDEST,VIN1,IN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=concat(R(IN2),R(IN2),R(IN2),R(IN2));
+      
+      valu(VALU_OP_SUB,  0, VR(VIN1), concat(R(IN2),R(IN2),R(IN2),R(IN2)));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      VFLAG_C=flag_ways(VFLAG_C,I_VFLAG_C,MASKV);
+      VFLAG_O=flag_ways(VFLAG_O,I_VFLAG_O,MASKV);
+      //VFLAG_U=flag_ways(VFLAG_U,I_VFLAG_U,MASKV);
+      //VFLAG_L=flag_ways(VFLAG_L,I_VFLAG_L,MASKV);
+      VR(VDEST) = VSAT;
+    };
+  }
+
+  define (instr=sub_V_VxV) {
+    """
+    Subtracts two vector register value
+
+    VR[VDEST] = (VOP1 - VOP2);
+
+    Vector condition code flags modified: carry, overflow, negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x7),OPCD(2),VDEST,VIN1,VIN2);
+    syntax = ("sub %f,%f,%f",VDEST,VIN1,VIN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=VR(VIN2);
+
+      valu(VALU_OP_SUB,  0, VR(VIN1), VR(VIN2));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      VFLAG_C=flag_ways(VFLAG_C,I_VFLAG_C,MASKV);
+      VFLAG_O=flag_ways(VFLAG_O,I_VFLAG_O,MASKV);
+      //VFLAG_U=flag_ways(VFLAG_U,I_VFLAG_U,MASKV);
+      //VFLAG_L=flag_ways(VFLAG_L,I_VFLAG_L,MASKV);
+      VR(VDEST) = VSAT;
+    };
+  }
+
+  // abd *****************************
+  define (instr=abd_S_VxS) {
+    """
+    Absolute difference between a register value and a vector register values and store the sum
+
+    VOP1 = VR[VIN1]
+
+    VOP2 = (R[IN2], R[IN2], R[IN2], R[IN2]);
+
+    R[DEST] = SUM(ABSDIFF(VOP1 - VOP2));
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x4),OPCD(3),DEST,VIN1,IN2);
+    syntax = ("abd %f,%f,%f",DEST,VIN1,IN2);
+    action = {
+      valu(VALU_OP_ABSDIFF,  1, VR(VIN1), concat(R(IN2),R(IN2),R(IN2),R(IN2)));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      R(DEST) = SSAT;
+    };
+  }
+
+  define (instr=abd_S_VxV) {
+    """
+    Absolute difference between two vector register value and store the sum
+
+    R[DEST] = SUM(ABSDIFF(VOP1 - VOP2));
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x5),OPCD(3),DEST,VIN1,VIN2);
+    syntax = ("abd %f,%f,%f",DEST,VIN1,VIN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=VR(VIN2);
+      
+      valu(VALU_OP_ABSDIFF,  1, VR(VIN1), VR(VIN2));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      R(DEST) = SSAT;
+    };
+  }
+
+  define (instr=abd_V_VxS) {
+    """
+    Absolute difference between a register value and a vector register value
+
+    VOP1 = VR[VIN1];
+
+    VOP2 = (R[IN2], R[IN2], R[IN2], R[IN2]);
+
+    VR[VDEST] = ABSDIFF(VOP1 - VOP2));
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x6),OPCD(3),VDEST,VIN1,IN2);
+    syntax = ("abd %f,%f,%f",VDEST,VIN1,IN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=concat(R(IN2),R(IN2),R(IN2),R(IN2));
+      
+      valu(VALU_OP_ABSDIFF,  1, VR(VIN1), concat(R(IN2),R(IN2),R(IN2),R(IN2)));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      VR(VDEST) = VRES;
+    };
+  }
+
+  define (instr=abd_V_VxV) {
+    """
+    Absolute difference between two vector register value
+
+    VR[VDEST] = ABSDIFF(VOP1 - VOP2));
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x7),OPCD(3),VDEST,VIN1,VIN2);
+    syntax = ("abd %f,%f,%f",VDEST,VIN1,VIN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=VR(VIN2);
+
+      valu(VALU_OP_ABSDIFF,  1, VR(VIN1), VR(VIN2));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      VR(VDEST) = VRES;
+    };
+  }
+
+  // mulh *****************************
+  define (instr=mulh_S_VxS) {
+    """
+    Multiply a register value and vector register values,
+    with sign mode according to CONFSGN,
+    scale to fixpoint according to CONFSHR
+    and store the sum
+
+    VOP1 = VR[VIN1]
+
+    VOP2 = (R[IN2], R[IN2], R[IN2], R[IN2]);
+
+    R[DEST] = (VOP1 * VOP2) >> CONFSHR;
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x4),OPCD(4),DEST,VIN1,IN2);
+    syntax = ("mulh %f,%f,%f",DEST,VIN1,IN2);
+    action = {
+      valu(VALU_OP_MULH,  0, VR(VIN1), concat(R(IN2),R(IN2),R(IN2),R(IN2)));
+      //VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      //VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      //VFLAG_U=flag_ways(VFLAG_U,I_VFLAG_U,MASKV);
+      //VFLAG_L=flag_ways(VFLAG_L,I_VFLAG_L,MASKV);
+      R(DEST) = SSAT;
+    };
+  }
+
+  define (instr=mulh_S_VxV) {
+    """
+    Multiply two vector register value,
+    with sign mode according to CONFSGN,
+    scale to fixpoint according to CONFSHR
+    and store the sum
+
+    R[DEST] = (VOP1 * VOP2) >> CONFSHR;
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x5),OPCD(4),DEST,VIN1,VIN2);
+    syntax = ("mulh %f,%f,%f",DEST,VIN1,VIN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=VR(VIN2);
+      
+      valu(VALU_OP_MULH,  0, VR(VIN1), VR(VIN2));
+      //VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      //VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      //VFLAG_U=flag_ways(VFLAG_U,I_VFLAG_U,MASKV);
+      //VFLAG_L=flag_ways(VFLAG_L,I_VFLAG_L,MASKV);
+      R(DEST) = SSAT;
+    };
+  }
+
+  define (instr=mulh_V_VxS) {
+    """
+    Multiply a register value and vector register values
+    with sign mode according to CONFSGN,
+    scale to fixpoint according to CONFSHR
+
+    VOP1 = VR[VIN1];
+
+    VOP2 = (R[IN2], R[IN2], R[IN2], R[IN2]);
+
+    VR[VDEST] = (VOP1 * VOP2) >> CONFSHR;
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x6),OPCD(4),VDEST,VIN1,IN2);
+    syntax = ("mulh %f,%f,%f",VDEST,VIN1,IN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=concat(R(IN2),R(IN2),R(IN2),R(IN2));
+      
+      valu(VALU_OP_MULH,  0, VR(VIN1), concat(R(IN2),R(IN2),R(IN2),R(IN2)));
+      //VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      //VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      //VFLAG_U=flag_ways(VFLAG_U,I_VFLAG_U,MASKV);
+      //VFLAG_L=flag_ways(VFLAG_L,I_VFLAG_L,MASKV);
+      VR(VDEST) = VSAT;
+    };
+  }
+
+  define (instr=mulh_V_VxV) {
+    """
+    Multiply two vector register value
+    with sign mode according to CONFSGN,
+    and take the lower 16 bit
+
+    VR[VDEST] = (VOP1 * VOP2) >> CONFSHR;
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x7),OPCD(4),VDEST,VIN1,VIN2);
+    syntax = ("mulh %f,%f,%f",VDEST,VIN1,VIN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=VR(VIN2);
+
+      valu(VALU_OP_MULH,  0, VR(VIN1), VR(VIN2));
+      //VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      //VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      //VFLAG_U=flag_ways(VFLAG_U,I_VFLAG_U,MASKV);
+      //VFLAG_L=flag_ways(VFLAG_L,I_VFLAG_L,MASKV);
+      VR(VDEST) = VSAT;
+    };
+  }
+
+  // mull *****************************
+  define (instr=mull_S_VxS) {
+    """
+    Multiply a register value and vector register values,
+    with sign mode according to CONFSGN,
+    scale to fixpoint according to CONFSHR
+    and take the lower 16 bit
+
+    VOP1 = VR[VIN1]
+
+    VOP2 = (R[IN2], R[IN2], R[IN2], R[IN2]);
+
+    R[DEST] = (VOP1 * VOP2) & 0xFFFF;
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x4),OPCD(5),DEST,VIN1,IN2);
+    syntax = ("mull %f,%f,%f",DEST,VIN1,IN2);
+    action = {
+      valu(VALU_OP_MULL,  0, VR(VIN1), concat(R(IN2),R(IN2),R(IN2),R(IN2)));
+      //VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      //VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      R(DEST) = SRES;
+    };
+  }
+
+  define (instr=mull_S_VxV) {
+    """
+    Multiply two vector register value,
+    with sign mode according to CONFSGN,
+    scale to fixpoint according to CONFSHR
+    and take the lower 16 bit
+
+    R[DEST] = (VOP1 * VOP2) & 0xFFFF;
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x5),OPCD(5),DEST,VIN1,VIN2);
+    syntax = ("mull %f,%f,%f",DEST,VIN1,VIN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=VR(VIN2);
+      
+      valu(VALU_OP_MULL,  0, VR(VIN1), VR(VIN2));
+      //VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      //VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      R(DEST) = SRES;
+    };
+  }
+
+  define (instr=mull_V_VxS) {
+    """
+    Multiply a register value and vector register values
+    with sign mode according to CONFSGN,
+    and take the lower 16 bit
+
+    VOP1 = VR[VIN1];
+
+    VOP2 = (R[IN2], R[IN2], R[IN2], R[IN2]);
+
+    VR[VDEST] = (VOP1 * VOP2) & 0xFFFF;
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x6),OPCD(5),VDEST,VIN1,IN2);
+    syntax = ("mull %f,%f,%f",VDEST,VIN1,IN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=concat(R(IN2),R(IN2),R(IN2),R(IN2));
+      
+      valu(VALU_OP_MULL,  0, VR(VIN1), concat(R(IN2),R(IN2),R(IN2),R(IN2)));
+      //VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      //VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      VR(VDEST) = VRES;
+    };
+  }
+
+  define (instr=mull_V_VxV) {
+    """
+    Multiply two vector register value
+    with sign mode according to CONFSGN,
+    and take the lower 16 bit
+
+    VR[VDEST] = (VOP1 * VOP2) & 0xFFFF;
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x7),OPCD(5),VDEST,VIN1,VIN2);
+    syntax = ("mull %f,%f,%f",VDEST,VIN1,VIN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=VR(VIN2);
+
+      valu(VALU_OP_MULL,  0, VR(VIN1), VR(VIN2));
+      //VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      //VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      VR(VDEST) = VRES;
+    };
+  }
+
+  // and *****************************
+  define (instr=and_S_VxS) {
+    """
+    Logical AND between a register value and vector register values,
+
+    VOP1 = VR[VIN1]
+
+    VOP2 = (R[IN2], R[IN2], R[IN2], R[IN2]);
+
+    R[DEST] = (VOP1 & VOP2),
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x4),OPCD(7),DEST,VIN1,IN2);
+    syntax = ("and %f,%f,%f",DEST,VIN1,IN2);
+    action = {
+      valu(VALU_OP_AND,  0, VR(VIN1), concat(R(IN2),R(IN2),R(IN2),R(IN2)));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      R(DEST) = SRES;
+    };
+  }
+
+  define (instr=and_S_VxV) {
+    """
+    Logical AND between two vector register value,
+
+    R[DEST] = (VOP1 & VOP2)
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x5),OPCD(7),DEST,VIN1,VIN2);
+    syntax = ("and %f,%f,%f",DEST,VIN1,VIN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=VR(VIN2);
+      
+      valu(VALU_OP_AND,  0, VR(VIN1), VR(VIN2));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      R(DEST) = SRES;
+    };
+  }
+
+  define (instr=and_V_VxS) {
+    """
+    Logical AND between a register value and vector register values
+
+    VOP1 = VR[VIN1];
+
+    VOP2 = (R[IN2], R[IN2], R[IN2], R[IN2]);
+
+    VR[VDEST] = (VOP1 & VOP2)
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x6),OPCD(7),VDEST,VIN1,IN2);
+    syntax = ("and %f,%f,%f",VDEST,VIN1,IN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=concat(R(IN2),R(IN2),R(IN2),R(IN2));
+      
+      valu(VALU_OP_AND,  0, VR(VIN1), concat(R(IN2),R(IN2),R(IN2),R(IN2)));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      VR(VDEST) = VRES;
+    };
+  }
+
+  define (instr=and_V_VxV) {
+    """
+    Logical AND between two vector register value
+
+    VR[VDEST] = (VOP1 & VOP2)
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x7),OPCD(7),VDEST,VIN1,VIN2);
+    syntax = ("and %f,%f,%f",VDEST,VIN1,VIN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=VR(VIN2);
+
+      valu(VALU_OP_AND,  0, VR(VIN1), VR(VIN2));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      VR(VDEST) = VRES;
+    };
+  }
+
+  // or *****************************
+  define (instr=or_S_VxS) {
+    """
+    Logical OR between a register value and vector register values,
+
+    VOP1 = VR[VIN1]
+
+    VOP2 = (R[IN2], R[IN2], R[IN2], R[IN2]);
+
+    R[DEST] = or (VOP1 | VOP2),
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x4),OPCD(8),DEST,VIN1,IN2);
+    syntax = ("or %f,%f,%f",DEST,VIN1,IN2);
+    action = {
+      valu(VALU_OP_OR,  0, VR(VIN1), concat(R(IN2),R(IN2),R(IN2),R(IN2)));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      R(DEST) = SRES;
+    };
+  }
+
+  define (instr=or_S_VxV) {
+    """
+    Logical OR between two vector register value,
+
+    R[DEST] = or (VOP1 | VOP2)
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x5),OPCD(8),DEST,VIN1,VIN2);
+    syntax = ("or %f,%f,%f",DEST,VIN1,VIN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=VR(VIN2);
+      
+      valu(VALU_OP_OR,  0, VR(VIN1), VR(VIN2));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      R(DEST) = SRES;
+    };
+  }
+
+  define (instr=or_V_VxS) {
+    """
+    Logical OR between a register value and vector register values
+
+    VOP1 = VR[VIN1];
+
+    VOP2 = (R[IN2], R[IN2], R[IN2], R[IN2]);
+
+    VR[VDEST] = (VOP1 | VOP2)
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x6),OPCD(8),VDEST,VIN1,IN2);
+    syntax = ("or %f,%f,%f",VDEST,VIN1,IN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=concat(R(IN2),R(IN2),R(IN2),R(IN2));
+      
+      valu(VALU_OP_OR,  0, VR(VIN1), concat(R(IN2),R(IN2),R(IN2),R(IN2)));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      VR(VDEST) = VRES;
+    };
+  }
+
+  define (instr=or_V_VxV) {
+    """
+    Logical OR between two vector register value
+
+    VR[VDEST] = (VOP1 | VOP2)
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x7),OPCD(8),VDEST,VIN1,VIN2);
+    syntax = ("or %f,%f,%f",VDEST,VIN1,VIN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=VR(VIN2);
+
+      valu(VALU_OP_OR,  0, VR(VIN1), VR(VIN2));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      VR(VDEST) = VRES;
+    };
+  }
+
+  // xor *****************************
+  define (instr=xor_S_VxS) {
+    """
+    Logical XOR between a register value and vector register values,
+
+    VOP1 = VR[VIN1]
+
+    VOP2 = (R[IN2], R[IN2], R[IN2], R[IN2]);
+
+    R[DEST] = (VOP1 ^ VOP2),
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x4),OPCD(9),DEST,VIN1,IN2);
+    syntax = ("xor %f,%f,%f",DEST,VIN1,IN2);
+    action = {
+      valu(VALU_OP_XOR,  0, VR(VIN1), concat(R(IN2),R(IN2),R(IN2),R(IN2)));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      R(DEST) = SRES;
+    };
+  }
+
+  define (instr=xor_S_VxV) {
+    """
+    Logical XOR between two vector register value,
+
+    R[DEST] = (VOP1 ^ VOP2)
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x5),OPCD(9),DEST,VIN1,VIN2);
+    syntax = ("xor %f,%f,%f",DEST,VIN1,VIN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=VR(VIN2);
+      
+      valu(VALU_OP_XOR,  0, VR(VIN1), VR(VIN2));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      R(DEST) = SRES;
+    };
+  }
+
+  define (instr=xor_V_VxS) {
+    """
+    Logical XOR between a register value and vector register values
+
+    VOP1 = VR[VIN1];
+
+    VOP2 = (R[IN2], R[IN2], R[IN2], R[IN2]);
+
+    VR[VDEST] = (VOP1 ^ VOP2)
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x6),OPCD(9),VDEST,VIN1,IN2);
+    syntax = ("xor %f,%f,%f",VDEST,VIN1,IN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=concat(R(IN2),R(IN2),R(IN2),R(IN2));
+      
+      valu(VALU_OP_XOR,  0, VR(VIN1), concat(R(IN2),R(IN2),R(IN2),R(IN2)));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      VR(VDEST) = VRES;
+    };
+  }
+
+  define (instr=xor_V_VxV) {
+    """
+    Logical XOR between two vector register value
+
+    VR[VDEST] = (VOP1 ^ VOP2)
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x7),OPCD(9),VDEST,VIN1,VIN2);
+    syntax = ("xor %f,%f,%f",VDEST,VIN1,VIN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=VR(VIN2);
+
+      valu(VALU_OP_XOR,  0, VR(VIN1), VR(VIN2));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      VR(VDEST) = VRES;
+    };
+  }
+
+  // min *****************************
+  define (instr=min_S_VxS) {
+    """
+    Minimum of a register value and vector register values,
+
+    VOP1 = VR[VIN1]
+
+    VOP2 = (R[IN2], R[IN2], R[IN2], R[IN2]);
+
+    R[DEST] = min (VOP1 , VOP2),
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x4),OPCD(0xA),DEST,VIN1,IN2);
+    syntax = ("min %f,%f,%f",DEST,VIN1,IN2);
+    action = {
+      valu(VALU_OP_MIN,  0, VR(VIN1), concat(R(IN2),R(IN2),R(IN2),R(IN2)));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      R(DEST) = SRES;
+    };
+  }
+
+  define (instr=min_S_VxV) {
+    """
+    Logical Minimum of two vector register value,
+
+    R[DEST] = min (VOP1 , VOP2)
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x5),OPCD(0xA),DEST,VIN1,VIN2);
+    syntax = ("min %f,%f,%f",DEST,VIN1,VIN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=VR(VIN2);
+      
+      valu(VALU_OP_MIN,  0, VR(VIN1), VR(VIN2));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      R(DEST) = SRES;
+    };
+  }
+
+  define (instr=min_V_VxS) {
+    """
+    Logical Minimum of a register value and vector register values
+
+    VOP1 = VR[VIN1];
+
+    VOP2 = (R[IN2], R[IN2], R[IN2], R[IN2]);
+
+    VR[VDEST] = min (VOP1 , VOP2)
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x6),OPCD(0xA),VDEST,VIN1,IN2);
+    syntax = ("min %f,%f,%f",VDEST,VIN1,IN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=concat(R(IN2),R(IN2),R(IN2),R(IN2));
+      
+      valu(VALU_OP_MIN,  0, VR(VIN1), concat(R(IN2),R(IN2),R(IN2),R(IN2)));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      VR(VDEST) = VRES;
+    };
+  }
+
+  define (instr=min_V_VxV) {
+    """
+    Logical Minimum of two vector register value
+
+    VR[VDEST] = min (VOP1 , VOP2)
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x7),OPCD(0xA),VDEST,VIN1,VIN2);
+    syntax = ("min %f,%f,%f",VDEST,VIN1,VIN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=VR(VIN2);
+
+      valu(VALU_OP_MIN,  0, VR(VIN1), VR(VIN2));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      VR(VDEST) = VRES;
+    };
+  }
+
+  // max *****************************
+  define (instr=max_S_VxS) {
+    """
+    Maximum of a register value and vector register values,
+
+    VOP1 = VR[VIN1]
+
+    VOP2 = (R[IN2], R[IN2], R[IN2], R[IN2]);
+
+    R[DEST] = max (VOP1 , VOP2),
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x4),OPCD(0xB),DEST,VIN1,IN2);
+    syntax = ("max %f,%f,%f",DEST,VIN1,IN2);
+    action = {
+      valu(VALU_OP_MAX,  0, VR(VIN1), concat(R(IN2),R(IN2),R(IN2),R(IN2)));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      R(DEST) = SRES;
+    };
+  }
+
+  define (instr=max_S_VxV) {
+    """
+    Maximum of two vector register value,
+
+    R[DEST] = max (VOP1 , VOP2)
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x5),OPCD(0xB),DEST,VIN1,VIN2);
+    syntax = ("max %f,%f,%f",DEST,VIN1,VIN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=VR(VIN2);
+      
+      valu(VALU_OP_MAX,  0, VR(VIN1), VR(VIN2));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      R(DEST) = SRES;
+    };
+  }
+
+  define (instr=max_V_VxS) {
+    """
+    Maximum of a register value and vector register values
+
+    VOP1 = VR[VIN1];
+
+    VOP2 = (R[IN2], R[IN2], R[IN2], R[IN2]);
+
+    VR[VDEST] = max (VOP1 , VOP2)
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x6),OPCD(0xB),VDEST,VIN1,IN2);
+    syntax = ("max %f,%f,%f",VDEST,VIN1,IN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=concat(R(IN2),R(IN2),R(IN2),R(IN2));
+      
+      valu(VALU_OP_MAX,  0, VR(VIN1), concat(R(IN2),R(IN2),R(IN2),R(IN2)));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      VR(VDEST) = VRES;
+    };
+  }
+
+  define (instr=max_V_VxV) {
+    """
+    Maximum of two vector register value
+
+    VR[VDEST] = max (VOP1 , VOP2)
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x7),OPCD(0xB),VDEST,VIN1,VIN2);
+    syntax = ("max %f,%f,%f",VDEST,VIN1,VIN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=VR(VIN2);
+
+      valu(VALU_OP_MAX,  0, VR(VIN1), VR(VIN2));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      VR(VDEST) = VRES;
+    };
+  }
+
+  // asr *****************************
+  define (instr=asr_S_VxS) {
+    """
+    Shift down vector register values by a scalar register value and
+    store the sum to a scalar register
+
+    VOP1 = VR[VIN1]
+
+    VOP2 = (R[IN2], R[IN2], R[IN2], R[IN2]);
+
+    R[DEST] = sum((signed)VOP1 >> (VOP2 & 0xF))
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x4),OPCD(0xC),DEST,VIN1,IN2);
+    syntax = ("asr %f,%f,%f",DEST,VIN1,IN2);
+    action = {
+      valu(VALU_OP_ASR,  0, VR(VIN1), concat(R(IN2),R(IN2),R(IN2),R(IN2)));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      R(DEST) = SRES;
+    };
+  }
+
+  define (instr=asr_S_VxV) {
+    """
+    Shift down vector register values by vector register values and
+    store the sum to a scalar register
+
+    R[DEST] = sum((signed)VOP1 >> (VOP2 & 0xF))
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x5),OPCD(0xC),DEST,VIN1,VIN2);
+    syntax = ("asr %f,%f,%f",DEST,VIN1,VIN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=VR(VIN2);
+      
+      valu(VALU_OP_ASR,  0, VR(VIN1), VR(VIN2));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      R(DEST) = SRES;
+    };
+  }
+
+  define (instr=asr_V_VxS) {
+    """
+    Shift down vector register values by a scalar register value
+
+    VOP1 = VR[VIN1];
+
+    VOP2 = (R[IN2], R[IN2], R[IN2], R[IN2]);
+
+    VR[VDEST] = (signed)VOP1 >> (VOP2 & 0xF)
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x6),OPCD(0xC),VDEST,VIN1,IN2);
+    syntax = ("asr %f,%f,%f",VDEST,VIN1,IN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=concat(R(IN2),R(IN2),R(IN2),R(IN2));
+      
+      valu(VALU_OP_ASR,  0, VR(VIN1), concat(R(IN2),R(IN2),R(IN2),R(IN2)));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      VR(VDEST) = VRES;
+    };
+  }
+
+  define (instr=asr_V_VxV) {
+    """
+    Shift down vector register values by vector register values and
+
+    VR[VDEST] = (signed)VOP1 >> (VOP2 & 0xF)
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x7),OPCD(0xC),VDEST,VIN1,VIN2);
+    syntax = ("asr %f,%f,%f",VDEST,VIN1,VIN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=VR(VIN2);
+
+      valu(VALU_OP_ASR,  0, VR(VIN1), VR(VIN2));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      VR(VDEST) = VRES;
+    };
+  }
+
+  // lsr *****************************
+  define (instr=lsr_S_VxS) {
+    """
+    Logical shift down vector register values by a scalar register value and
+    store the sum to a scalar register
+
+    VOP1 = VR[VIN1]
+
+    VOP2 = (R[IN2], R[IN2], R[IN2], R[IN2]);
+
+    R[DEST] = sum((unsigned)VOP1 >> (VOP2 & 0xF)
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x4),OPCD(0xD),DEST,VIN1,IN2);
+    syntax = ("lsr %f,%f,%f",DEST,VIN1,IN2);
+    action = {
+      valu(VALU_OP_LSR,  0, VR(VIN1), concat(R(IN2),R(IN2),R(IN2),R(IN2)));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      R(DEST) = SRES;
+    };
+  }
+
+  define (instr=lsr_S_VxV) {
+    """
+    Logical shift down vector register values by vector register values and
+    store the sum to a scalar register
+
+    R[DEST] = sum((unsigned)VOP1 >> (VOP2 & 0xF)
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x5),OPCD(0xD),DEST,VIN1,VIN2);
+    syntax = ("lsr %f,%f,%f",DEST,VIN1,VIN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=VR(VIN2);
+      
+      valu(VALU_OP_LSR,  0, VR(VIN1), VR(VIN2));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      R(DEST) = SRES;
+    };
+  }
+
+  define (instr=lsr_V_VxS) {
+    """
+    Logical shift down vector register values by a scalar register value
+
+    VOP1 = VR[VIN1];
+
+    VOP2 = (R[IN2], R[IN2], R[IN2], R[IN2]);
+
+    VR[VDEST] = (unsigned)VOP1 >> (unsigned)VOP2
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x6),OPCD(0xD),VDEST,VIN1,IN2);
+    syntax = ("lsr %f,%f,%f",VDEST,VIN1,IN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=concat(R(IN2),R(IN2),R(IN2),R(IN2));
+      
+      valu(VALU_OP_LSR,  0, VR(VIN1), concat(R(IN2),R(IN2),R(IN2),R(IN2)));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      VR(VDEST) = VRES;
+    };
+  }
+
+  define (instr=lsr_V_VxV) {
+    """
+    Logical shift down vector register values by vector register values and
+
+    VR[VDEST] = (unsigned)VOP1 >> (unsigned)VOP2
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x7),OPCD(0xD),VDEST,VIN1,VIN2);
+    syntax = ("lsr %f,%f,%f",VDEST,VIN1,VIN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=VR(VIN2);
+
+      valu(VALU_OP_LSR,  0, VR(VIN1), VR(VIN2));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      VR(VDEST) = VRES;
+    };
+  }
+
+  // asl *****************************
+  define (instr=asl_S_VxS) {
+    """
+    Shift up vector register values by a scalar register value and
+    store the sum to a scalar register
+
+    VOP1 = VR[VIN1]
+
+    VOP2 = (R[IN2], R[IN2], R[IN2], R[IN2]);
+
+    R[DEST] = sum(VOP1 << (VOP2 & 0xF))
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x4),OPCD(0xE),DEST,VIN1,IN2);
+    syntax = ("asl %f,%f,%f",DEST,VIN1,IN2);
+    action = {
+      valu(VALU_OP_ASL,  0, VR(VIN1), concat(R(IN2),R(IN2),R(IN2),R(IN2)));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      //VFLAG_U=flag_ways(VFLAG_U,I_VFLAG_U,MASKV);
+      //VFLAG_L=flag_ways(VFLAG_L,I_VFLAG_L,MASKV);
+      R(DEST) = SSAT;
+    };
+  }
+
+  define (instr=asl_S_VxV) {
+    """
+    Shift up vector register values by vector register values and
+    store the sum to a scalar register
+
+    R[DEST] = sum(VOP1 << (VOP2 & 0xF))
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x5),OPCD(0xE),DEST,VIN1,VIN2);
+    syntax = ("asl %f,%f,%f",DEST,VIN1,VIN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=VR(VIN2);
+      
+      valu(VALU_OP_ASL,  0, VR(VIN1), VR(VIN2));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      //VFLAG_U=flag_ways(VFLAG_U,I_VFLAG_U,MASKV);
+      //VFLAG_L=flag_ways(VFLAG_L,I_VFLAG_L,MASKV);
+      R(DEST) = SSAT;
+    };
+  }
+
+  define (instr=asl_V_VxS) {
+    """
+    Shift up vector register values by a scalar register value
+
+    VOP1 = VR[VIN1];
+
+    VOP2 = (R[IN2], R[IN2], R[IN2], R[IN2]);
+
+    VR[VDEST] = VOP1 << (VOP2 & 0xF)
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x6),OPCD(0xE),VDEST,VIN1,IN2);
+    syntax = ("asl %f,%f,%f",VDEST,VIN1,IN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=concat(R(IN2),R(IN2),R(IN2),R(IN2));
+      
+      valu(VALU_OP_ASL,  0, VR(VIN1), concat(R(IN2),R(IN2),R(IN2),R(IN2)));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      //VFLAG_U=flag_ways(VFLAG_U,I_VFLAG_U,MASKV);
+      //VFLAG_L=flag_ways(VFLAG_L,I_VFLAG_L,MASKV);
+      VR(VDEST) = VSAT;
+    };
+  }
+
+  define (instr=asl_V_VxV) {
+    """
+    Shift up vector register values by vector register values and
+
+    VR[VDEST] = VOP1 << (VOP2 & 0xF)
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x7),OPCD(0xE),VDEST,VIN1,VIN2);
+    syntax = ("asl %f,%f,%f",VDEST,VIN1,VIN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=VR(VIN2);
+
+      valu(VALU_OP_ASL,  0, VR(VIN1), VR(VIN2));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      //VFLAG_U=flag_ways(VFLAG_U,I_VFLAG_U,MASKV);
+      //VFLAG_L=flag_ways(VFLAG_L,I_VFLAG_L,MASKV);
+      VR(VDEST) = VSAT;
+    };
+  }
+
+  // clz *****************************
+  define (instr=clz_S_VxS) {
+    """
+    Count leading zeros of vector register values and
+    store the minmum to a scalar register
+
+    R[DEST] = min (clz (VOP2))
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x1),OPCD(0xF),DEST,VIN1,CLZBITS(4));
+    syntax = ("clz %f,%f",DEST,VIN1);
+    action = {
+      //VOP2=VR(VIN2);
+      
+      valu(VALU_OP_CLZ,  0, VR(VIN1), VR(VIN1));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      R(DEST) = SRES;
+    };
+  }
+
+  define (instr=clz_V_VxS) {
+    """
+    Count leading zeros of vector register values
+
+    VR[VDEST] = clz (VOP2)
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x1),OPCD(0xF),VDEST,VIN1,CLZBITS(6));
+    syntax = ("clz %f,%f",VDEST,VIN1);
+    action = {
+      //VOP2=VR(VIN2);
+
+      valu(VALU_OP_CLZ,  0, VR(VIN1), VR(VIN1));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      VR(VDEST) = VRES;
+    };
+  }
+
+  // lsl *****************************
+  define (instr=lsl_S_VxS) {
+    """
+    Bit shift left vector register values by a scalar register value and
+    store the sum to a scalar register
+
+    VOP1 = VR[VIN1]
+
+    VOP2 = (R[IN2], R[IN2], R[IN2], R[IN2]);
+
+    R[DEST] = sum((VOP1 << (VOP2 & 0xF)) & 0xFFFF
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x4),OPCD(0xF),DEST,VIN1,IN2);
+    syntax = ("lsl %f,%f,%f",DEST,VIN1,IN2);
+    action = {
+      valu(VALU_OP_ASL,  1, VR(VIN1), concat(R(IN2),R(IN2),R(IN2),R(IN2)));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      R(DEST) = SSAT;
+    };
+  }
+
+  define (instr=lsl_S_VxV) {
+    """
+    Bit shift left vector register values by vector register values and
+    store the sum to a scalar register
+    Do not saturate results
+
+    R[DEST] = sum((VOP1 << (VOP2 & 0xF)) & 0xFFFF
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x5),OPCD(0xF),DEST,VIN1,VIN2);
+    syntax = ("lsl %f,%f,%f",DEST,VIN1,VIN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=VR(VIN2);
+      
+      valu(VALU_OP_ASL,  1, VR(VIN1), VR(VIN2));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      R(DEST) = SSAT;
+    };
+  }
+
+  define (instr=lsl_V_VxS) {
+    """
+    Bit shift left vector register values by a scalar register value
+
+    VOP1 = VR[VIN1];
+
+    VOP2 = (R[IN2], R[IN2], R[IN2], R[IN2]);
+
+    VR[VDEST] = (VOP1 << (VOP2 & 0xF)) & 0xFFFF
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x6),OPCD(0xF),VDEST,VIN1,IN2);
+    syntax = ("lsl %f,%f,%f",VDEST,VIN1,IN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=concat(R(IN2),R(IN2),R(IN2),R(IN2));
+      
+      valu(VALU_OP_ASL,  1, VR(VIN1), concat(R(IN2),R(IN2),R(IN2),R(IN2)));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      VR(VDEST) = VRES;
+    };
+  }
+
+  define (instr=lsl_V_VxV) {
+    """
+    Bit shift left vector register values by vector register values and
+    Do not saturate results
+
+    VR[VDEST] = (VOP1 << (VOP2 & 0xF)) & 0xFFFF
+
+    Vector condition code flags modified: negative, zero
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x7),OPCD(0xF),VDEST,VIN1,VIN2);
+    syntax = ("lsl %f,%f,%f",VDEST,VIN1,VIN2);
+    action = {
+      //VOP1=VR(VIN1);
+      //VOP2=VR(VIN2);
+
+      valu(VALU_OP_ASL, 1, VR(VIN1), VR(VIN2));
+      VFLAG_N=flag_ways(VFLAG_N,I_VFLAG_N,MASKV);
+      VFLAG_Z=flag_ways(VFLAG_Z,I_VFLAG_Z,MASKV);
+      VR(VDEST) = VRES;
+    };
+  }
+}

@@ -1,0 +1,8 @@
+/pkg/fs-adl-/3.12.4.sr2-gcc_4.7.3/x86_64-linux2.6-glibc2.5/bin/make-iss  --cpp=/pkg/gcc-/4.7.3/x86_64-linux/bin/g++ IPUV.adl --output=IPUV.cc    --jobs='0' --verbose='0' --log-usage='no' --event-bus-send --warn-redefine
+#/pkg/fs-adl-/3.12.4.sr2-gcc_4.7.3/x86_64-linux/bin/make-iss  --cpp=/pkg/gcc-/4.7.3/x86_64-linux/bin/g++ IPUV.adl --output=IPUV.cc    --jobs='0' --verbose='0' --log-usage='no' --event-bus-send --warn-redefine
+
+
+/pkg/gcc-/4.7.3/x86_64-linux/bin/g++  -Wall -g -O3 --std=c++0x -Wno-unused-but-set-variable -Wno-unused-label -I/pkg/fs-adl-/3.12.4.sr2-gcc_4.7.3/x86_64-linux/include -I/pkg/fs-rnumber-/2.1.27-gcc_4.6.3/x86_64-linux/include -I/pkg/fs-plasma-/0.9.2-gcc_4.6.3/x86_64-linux/include -I/pkg/boost-/1.53.0-gcc_4.7.3/x86_64-linux/include   -c IPUV.cc -o IPUV.o
+
+/pkg/gcc-/4.7.3/x86_64-linux/bin/g++ IPUV.o -static -L/pkg/tcltk-/8.5.5/x86_64-linux/lib -Wl,-R/pkg/tcltk-/8.5.5/x86_64-linux/lib -L/pkg/tcltk-/8.5.5/x86_64-linux/lib/tcl8.5 -Wl,-R/pkg/tcltk-/8.5.5/x86_64-linux/lib/tcl8.5 -L/pkg/fs-adl-/3.12.4.sr2-gcc_4.7.3/x86_64-linux/lib -Wl,-R/pkg/fs-adl-/3.12.4.sr2-gcc_4.7.3/x86_64-linux/lib -Wl,-R/pkg/fs-rnumber-/2.1.27-gcc_4.6.3/x86_64-linux/lib/rnumber -L/pkg/fs-rnumber-/2.1.27-gcc_4.6.3/x86_64-linux/lib/rnumber -lAdlIssMain -Wl,--whole-archive -lAdlIssExec -L/pkg/fs-plasma-/0.9.2-gcc_4.6.3/x86_64-linux/lib -Wl,-R/pkg/fs-plasma-/0.9.2-gcc_4.6.3/x86_64-linux/lib -lltdl -lAdlIssLogging -lAdlScript -ltcl8.5 -Wl,--no-whole-archive -lAdlReaders -lAdlParsing -lbz2 -lAdlSupport -lAdlIssSupport -lIntbv -lIntbvRnum -lRNumber -ldl -L/pkg/boost-/1.53.0-gcc_4.7.3/x86_64-linux/lib -Wl,-R/pkg/boost-/1.53.0-gcc_4.7.3/x86_64-linux/lib -lboost_thread -lboost_system -lboost_atomic -lrt -lpthread -o IPUV
+

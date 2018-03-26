@@ -1,0 +1,177 @@
+simload imem.elf
+traceon trace.dat
+
+
+set start_test [symbol start_test]
+set end_test   [symbol end_test]
+
+puts "IMem:"
+puts "Start $start_test"
+puts "Stop  $end_test"
+puts "Size  [expr $end_test - $start_test]"
+puts [ mem $start_test 64 4 4 ]
+puts "###############"
+
+######################
+# Setup IPUS registers
+set linelen            640
+set lines              400
+#set lines              1
+set line               0
+set xpos               0
+
+
+writereg H_INACFG      0x101
+#[10: 8]  :I_CHANNELS_INA =1
+#[ 2]     :I_NHOODA       =0
+#[ 1: 0]  :I_SHIFT_INA    =1
+
+writereg H_XCFG        [expr ($linelen<<16) + 1 ]
+#[1:0]    :I_SHIFT_X      =1
+#[31:16]  :I_XSIZE        =$linelen
+
+writereg H_OUTCFG      0x0101
+#[27:24]  :I_CHANNELS_OUT =1
+#[17:16]  :I_SHIFT_OUT    =1
+
+#writereg H_HISTCL      1
+
+######################
+# Setup StreamDMA registers
+
+#writereg S_CFG         0x01000001
+#bits[31:24] OUT channels
+#bits[23:16] INAL channels
+#bits[15: 8] INB channels
+#bits[ 7: 0] INA channels
+
+setreg S_LINELEN_INA0  $linelen
+setreg S_LINELEN_INA1  $linelen
+setreg S_LINELEN_INA2  $linelen
+
+writereg S_CHCFG_INA0  0x00150000
+#writereg S_CHCFG_INA1  0x00150000
+#writereg S_CHCFG_INA2  0x00150000
+#[15: 0] :S_REPLACEVALUE_INA = 0
+#[17:16] :S_STEP_INA         = 1
+#[19:18] :S_RPT_INA          = 1
+#[22:20] :S_REPLACEMODE_INA  = 1
+#[23:23] :S_REVERSE_INA      = 0
+#[26:24] :S_REPLACEWIDTH_INA = 2
+#[27:27] :S_TRANSFORM_INA    = 0
+#[29:28] :S_BUFFERTYPE       = 0
+
+setreg S_LINELEN_OUT0  [expr $linelen]
+writereg S_CHCFG_OUT0  0x00000000
+#[17:16] :S_SKIP_OUT         = 0
+
+######################
+# load image
+setreg S_EMUMEM 0
+simload data.elf
+
+set img00 [symbol img0]
+#set img01 $img00
+#if { $line < [expr $lines - 1] } {
+#       	set img02 [expr $img01 + ($linelen * 2) ]
+#}
+
+puts "Image0  $img00"
+puts [ mem $img00 64 2 8 ]
+
+#set img1 [symbol img1]
+#puts "Image1  $img1"
+#puts [ mem $img1 64 2 8 ]
+
+set out0 [symbol endimg0]
+set out0dump $out0
+puts "Out0    $out0"
+
+#set out1 [format 0x%x [expr $out0 + ($linelen * $lines / 2)]] # quater size
+#set out1dump $out1
+#puts "Out1    $out1"
+
+#simload lut.elf
+#set lut [symbol lut]
+#puts "LUT    $lut"
+#puts [ mem $lut 512 2 8 ]
+
+puts "###############"
+puts  "Files: "
+puts  [inputlist]
+puts "###############"
+
+#set start0 0x100000
+
+#clrfilter
+
+set sttime [ clock seconds ]
+
+while {$line < $lines} {
+### set up for line
+	writereg H_POS [expr ($xpos <<16) | $line]
+	setreg S_LINE_PTR_INA0  $img00
+        #setreg S_LINE_PTR_INA1  $img01
+	#setreg S_LINE_PTR_INA2  $img02
+	#puts "LINEPTR0: [ readreg H_INLINE_PTR0 ]"
+	setreg S_LINE_PTR_OUT0 $out0
+        #setreg S_LINE_PTR_OUT1 $out1
+	#puts "OUTLPTR0: [ readreg H_OUTLINE_PTR0 ]"
+### start engine
+#	setreg IPS0 $start_test
+	writereg H_START $start_test
+	if { $line == 0 } {
+		step 100
+	        traceoff
+	}
+	go  // trigger start
+	setactive 1
+
+### read out status	
+	#puts "Line: $line"
+	#puts "Instructions: [icount]"
+
+### prepare for next line
+        set line [expr $line + 1]
+        set img00 [expr $img00 + ($linelen * 2) ]
+        #set img00 $img01
+        #set img01 $img02
+	#if { $line < [expr $lines - 1] } {
+        #      	set img02 [expr $img02 + ($linelen * 2) ]
+	#}
+        
+	set out0 [expr $out0 + ($linelen) ]
+        #set out0 [expr $out0 + ($linelen * 2) ]
+	#set out1 [expr $out1 + ($linelen * 2) ]
+#	traceoff
+}
+set endtime [clock seconds]
+
+puts "Line: $line"
+puts "Instructions: [icount] in [ expr $endtime - $sttime ]s"
+set time [expr $endtime - $sttime]
+if { $time } {
+        puts "clycles/sec : [ expr [icount] / ($endtime - $sttime) ]"
+}
+
+#puts "Hist clear: [readreg I_HCL]"
+#puts "Peak: HIST\[[readreg H_HISTAMAX]\]=[readreg H_HISTPEAK]"
+
+##traceon trace.dat
+#set memdump [open hist.mem w]
+#set i 0
+#writereg H_HISTA $i
+#while { $i < 256 } {
+#	puts $memdump "Hist\[[readreg H_HISTA]\]:[readreg H_HISTD]"
+#	set i [expr $i + 1]
+#}
+##puts $memdump [ mem 256 0x400 4 1 ]
+#close $memdump
+
+set memdump [open out0.mem w]
+puts $memdump [ mem $out0dump 0x200 2 4 ]
+close $memdump
+
+#set memdump [open out1.mem w]
+#puts $memdump [ mem $out1dump [expr $linelen * $lines * 2] 2 8 ]
+#close $memdump

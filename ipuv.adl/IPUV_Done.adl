@@ -1,0 +1,641 @@
+/*-*- c -*-*******************************************************************
+ *
+ *  Copyright Freescale 2013, All rights reserved.
+ *  Copyright NXP 2017, All rights reserved.
+ * 
+ *  SPDX-License-Identifier: BSD-3-Clause
+ *
+ ****************************************************************************/
+/** \addtogroup IPUV_Done
+ *  @{
+ ****************************************************************************/
+/** 
+ *  
+ *  \file      IPUV_Done.adl
+ *  \author    Stephan Herrmann
+ *  \date      \$Date: 2006/09/15 10:50:49 $
+ *
+ *  \internal
+ *   language  ADL
+ *   $Id: fsl_header.el,v 1.1 2006/09/15 10:50:49 norberts Exp $
+ ****************************************************************************/
+
+define (arch = IPUV_Done) {
+
+
+#ifndef MAKEDOC
+  // Input shift
+  void InputShift() {
+
+    int shift = I_INCFG.CURRSHIFT.uint32();
+
+    switch (shift) {
+    case 0:
+    //  I_INCFG.CURRSHIFT = 4;  //correct value
+    //case 4:
+      // shift avilable values in the matrix
+      if (I_INCFG.CURRLINE4==1) {
+        IN(39)=IN(35); IN(38)=IN(34); IN(37)=IN(33); IN(36)=IN(32);
+        IN(35)=P(4);   IN(34)=P(4);   IN(33)=P(4);   IN(32)=P(4);
+      }
+      if (I_INCFG.CURRLINE3==1) {
+        IN(31)=IN(27); IN(30)=IN(26); IN(29)=IN(25); IN(28)=IN(24);
+        IN(27)=P(3);   IN(26)=P(3);   IN(25)=P(3);   IN(24)=P(3);
+      }
+      if (I_INCFG.CURRLINE2==1) {
+        IN(23)=IN(19); IN(22)=IN(18); IN(21)=IN(17); IN(20)=IN(16);
+        IN(19)=P(2);   IN(18)=P(2);   IN(17)=P(2);   IN(16)=P(2);
+      }
+      if (I_INCFG.CURRLINE1==1) {
+        IN(15)=IN(11); IN(14)=IN(10); IN(13)=IN( 9); IN(12)=IN( 8);
+        IN(11)=P(1);   IN(10)=P(1);   IN( 9)=P(1);   IN( 8)=P(1);
+      }
+      if (I_INCFG.CURRLINE0==1) {
+        IN( 7)=IN( 3); IN( 6)=IN( 2); IN( 5)=IN( 1); IN( 4)=IN( 0);
+        IN( 3)=P(0);   IN( 2)=P(0);   IN( 1)=P(0);   IN( 0)=P(0);
+      }
+      break;
+    case 3:
+      // shift avilable values in the matrix
+      if (I_INCFG.CURRLINE4==1) {
+        IN(39)=IN(36); IN(38)=IN(35); IN(37)=IN(34); IN(36)=IN(33);
+        IN(35)=IN(32); IN(34)=P(4);   IN(33)=P(4);   IN(32)=P(4);
+      }
+      if (I_INCFG.CURRLINE3==1) {
+        IN(31)=IN(28); IN(30)=IN(27); IN(29)=IN(26); IN(28)=IN(25);
+        IN(27)=IN(24); IN(26)=P(3);   IN(25)=P(3);   IN(24)=P(3);
+      }
+      if (I_INCFG.CURRLINE2==1) {
+        IN(23)=IN(20); IN(22)=IN(19); IN(21)=IN(18); IN(20)=IN(17);
+        IN(19)=IN(16); IN(18)=P(2);   IN(17)=P(2);   IN(16)=P(2);
+      }
+      if (I_INCFG.CURRLINE1==1) {
+        IN(15)=IN(12); IN(14)=IN(11); IN(13)=IN( 10); IN(12)=IN( 9);
+        IN(11)=IN(8); IN(10)=P(1);   IN( 9)=P(1);   IN( 8)=P(1);
+      }
+      if (I_INCFG.CURRLINE0==1) {
+        IN( 7)=IN( 4); IN( 6)=IN( 3); IN( 5)=IN( 2); IN( 4)=IN( 1);
+        IN( 3)=IN(0);  IN( 2)=P(0);   IN( 1)=P(0);   IN( 0)=P(0);
+      }
+      break;
+
+    case 2:
+      // shift avilable values in the matrix
+      if (I_INCFG.CURRLINE4==1) {
+        IN(39)=IN(37); IN(38)=IN(36); IN(37)=IN(35); IN(36)=IN(34);
+        IN(35)=IN(33); IN(34)=IN(32); IN(33)=P(4);   IN(32)=P(4);
+      }
+      if (I_INCFG.CURRLINE3==1) {
+        IN(31)=IN(29); IN(30)=IN(28); IN(29)=IN(27); IN(28)=IN(26);
+        IN(27)=IN(25); IN(26)=IN(24); IN(25)=P(3);   IN(24)=P(3);
+      }
+      if (I_INCFG.CURRLINE2==1) {
+        IN(23)=IN(21); IN(22)=IN(20); IN(21)=IN(19); IN(20)=IN(18);
+        IN(19)=IN(17); IN(18)=IN(16); IN(17)=P(2);   IN(16)=P(2);
+      }
+      if (I_INCFG.CURRLINE1==1) {
+        IN(15)=IN(13); IN(14)=IN(12); IN(13)=IN(11); IN(12)=IN(10);
+        IN(11)=IN( 9); IN(10)=IN( 8); IN( 9)=P(1);   IN( 8)=P(1);
+      }
+      if (I_INCFG.CURRLINE0==1) {
+        IN( 7)=IN( 5); IN( 6)=IN( 4); IN( 5)=IN( 3); IN( 4)=IN( 2);
+        IN( 3)=IN( 1); IN( 2)=IN( 0); IN( 1)=P(0);   IN( 0)=P(0);
+      }
+      break;
+    case 1:
+      // shift avilable values in the matrix
+      if (I_INCFG.CURRLINE4==1) {
+        IN(39)=IN(38); IN(38)=IN(37); IN(37)=IN(36); IN(36)=IN(35);
+        IN(35)=IN(34); IN(34)=IN(33); IN(33)=IN(32); IN(32)=P(4);
+      }
+      if (I_INCFG.CURRLINE3==1) {
+        IN(31)=IN(30); IN(30)=IN(29); IN(29)=IN(28); IN(28)=IN(27);
+        IN(27)=IN(26); IN(26)=IN(25); IN(25)=IN(24); IN(24)=P(3);
+      }
+      if (I_INCFG.CURRLINE2==1) {
+        IN(23)=IN(22); IN(22)=IN(21); IN(21)=IN(20); IN(20)=IN(19);
+        IN(19)=IN(18); IN(18)=IN(17); IN(17)=IN(16); IN(16)=P(2);
+      }
+      if (I_INCFG.CURRLINE1==1) {
+        IN(15)=IN(14); IN(14)=IN(13); IN(13)=IN(12); IN(12)=IN(11);
+        IN(11)=IN(10); IN(10)=IN( 9); IN( 9)=IN( 8); IN( 8)=P(1);
+      }
+      if (I_INCFG.CURRLINE0==1) {
+        IN( 7)=IN( 6); IN( 6)=IN( 5); IN( 5)=IN( 4); IN( 4)=IN( 3);
+        IN( 3)=IN( 2); IN( 2)=IN( 1); IN( 1)=IN( 0); IN( 0)=P(0);
+      }
+      break;
+    }
+  }
+
+  // Output shift
+  void OutputShift () {
+
+    int shift = I_OUTCFG.CURRSHIFT.uint32();
+
+    if (shift == 0) {
+      shift = 4;
+    }
+
+    if (I_OUTCFG.CURRLINE0==1) {
+      if (shift == 4) {
+        //O(0)=OUT(2);
+        O(0)=OUT(3);
+      }
+      if (shift >= 3) {
+        O(0)=OUT(2);
+      }
+      if (shift >= 2) {
+        O(0)=OUT(1);
+      }
+      if (shift >= 1) {
+        O(0)=OUT(0);
+      }
+    }
+#if (OUTPUT_STREAMS > 1)
+    if (I_OUTCFG.CURRLINE1==1) {
+      if (shift == 4) {
+        //O(1)=OUT(6);
+        O(1)=OUT(7);
+      }
+      if (shift >= 3) {
+        O(1)=OUT(6);
+      }
+      if (shift >= 2) {
+        O(1)=OUT(5);
+      }
+      if (shift >= 1) {
+        O(1)=OUT(4);
+      }
+    }
+#endif
+#if (OUTPUT_STREAMS > 2)
+    if (I_OUTCFG.CURRLINE2==1) {
+      if (shift == 4) {
+        //O(2)=OUT(10);
+        O(2)=OUT(11);
+      }
+      if (shift >= 3) {
+        O(2)=OUT(10);
+      }
+      if (shift >= 2) {
+        O(2)=OUT(9);
+      }
+      if (shift >= 1) {
+        O(2)=OUT(8);
+      }
+    }
+#endif
+  }
+
+  // XPOS shift
+  void XPOSShift () {
+    if (I_SHIFT_X==0) I_SHIFT_X=4;
+    XPOS=XPOS + I_SHIFT_X;
+#ifdef LOG_MORE
+    info(1,"YPos = ",YPOS);
+#endif
+  }
+#endif // MAKEDOC
+
+  void End_Of_Line(void) {
+    I_RUN=0;
+    I_EVENTS=1;   // increment by 1
+    // progress to next line setup
+    SIG_LINE_DONE=1;
+    if (I_BUFFERED == 0) {
+      halt();  // give back control to the simulator
+    }
+    else {
+      StartLine();
+    }
+  }
+
+  // ***********************************************************************
+  // Registersls
+  // ***********************************************************************
+
+
+  // ***********************************************************************
+  // Instruction Fields
+  // ***********************************************************************
+  define (instrfield=DONE_IN) {
+    """
+    Internal Signal:
+    Done operator register
+    """;
+    bits = (23,16);
+    display = dec;
+#include "IPUV_Registers.h"
+  }
+
+  define (instrfield=DONE_VIN) {
+    """
+    Internal Signal:
+    Done vector operator register
+    """;
+    bits = (23,16);
+    display = dec;
+#include "IPUV_VRegisters.h"
+  }
+
+  // ***********************************************************************
+  // Instructions
+  // ***********************************************************************
+
+  // done *****************************
+  define (instr=done) {
+    """
+    Close a pixel cycle and go to the next
+
+    + If I is set then the input data in IN is shifted by H_SHIFT_IN positions
+    + If X is set then the x-position counter XPOS is incremented by H_SHIFT_X
+    + If O is set then the output data in OUT is shifted out by H_SHIFT_OUT positions
+
+    The  program execution will continue at the jump target address
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x0),OPCD(2),RELADDR,IXO);
+    syntax = ("done %f,%f",RELADDR,IXO);
+    action = {
+      NIA=RELADDR;
+#ifndef MAKEDOC
+      if (IXO(2)==1) {
+        //InputShift(H_CHANNELS_IN,H_SHIFT_IN);
+        InputShift();
+      }
+      if (IXO(0)==1) {
+        //OutputShift(H_CHANNELS_OUT,H_SHIFT_OUT);
+        OutputShift();
+      }
+      if (IXO(1)==1) {
+        XPOSShift();
+      }
+#endif // MAKEDOC
+    };
+    // in RTL this might create stall conditions incase
+    // the input data is not ready or the output is still busy
+    // for the stall conditions we need to implement counter
+  }
+
+  // ldon *****************************
+  define (instr=ldon) {
+    """
+    Close a pixel cycle and go to the next
+
+    + If I is set then the input data in IN is shifted by H_SHIFT_IN positions
+    + If X is set then the x-position counter XPOS is incremented by H_SHIFT_X
+    + If O is set then the output data in OUT is shifted out by H_SHIFT_OUT positions
+
+    If the LOOPCNT is >1 the  program execution will continue at the
+    jump target address, and the LOOPCNT is decremented.
+    Otherwise the execution will continue with the next address
+    """;
+    attrs=(isp1,isp2);
+#ifdef LOOPCNT_B
+    fields=(TYPE(0x0),OPCD(0xA),RELADDR,LCNT(0),IXO);
+#else
+    fields=(TYPE(0x0),OPCD(0xA),RELADDR,IXO);
+#endif
+    syntax = ("ldon %f,%f",RELADDR,IXO);
+    action = {
+      if (LOOPCNT>1) {
+        NIA=RELADDR;
+      }
+      if (LOOPCNT!=0) {
+        LOOPCNT=LOOPCNT-1;
+      }
+#ifndef MAKEDOC
+      if (IXO(2)==1) {
+        //InputShift(H_CHANNELS_IN,H_SHIFT_IN);
+        InputShift();
+      }
+      if (IXO(0)==1) {
+        //OutputShift(H_CHANNELS_OUT,H_SHIFT_OUT);
+        OutputShift();
+      }
+      if (IXO(1)==1) {
+        XPOSShift();
+      }
+#endif // MAKEDOC
+    };
+    // in RTL this might create stall conditions incase
+    // the input data is not ready or the output is still busy
+    // for the stall conditions we need to implement counter
+  }
+
+  // dout *****************************
+  define (instr=dout) {
+    """
+    Close a pixel cycle and go to the next
+
+    OUT[0] = R[DONE_IN]
+
+    + If I is set then the input data in IN is shifted by H_SHIFT_IN positions
+    + If X is set then the x-position counter XPOS is incremented by H_SHIFT_X
+    + If O is set then the output data in OUT is shifted out by H_SHIFT_OUT positions
+
+    The program execution will continue at the jump target address
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x0),OPCD(3),DONE_IN,RELADDR,IXO);
+    syntax = ("dout %f,%f,%f",DONE_IN,RELADDR,IXO);
+    action = {
+      OP1=R(DONE_IN);
+      OUT(0)=OP1;
+      NIA=RELADDR;
+#ifndef MAKEDOC
+      if (IXO(2)==1) {
+        //InputShift(H_CHANNELS_IN,H_SHIFT_IN);
+        InputShift();
+      }
+      if (IXO(0)==1) {
+        //OutputShift(H_CHANNELS_OUT,H_SHIFT_OUT);
+        OutputShift();
+      }
+      if (IXO(1)==1) {
+        XPOSShift();
+      }
+#endif // MAKEDOC
+    };
+    // in RTL this might create stall conditions incase
+    // the input data is not ready or the output is still busy
+    // for the stall conditions we need to implement counter
+  }
+
+  // dvot *****************************
+  define (instr=dvot) {
+    """
+    Close a pixel cycle and go to the next
+
+    VOUT[0] = V[DONE_VIN]
+
+    + If I is set then the input data in IN is shifted by H_SHIFT_IN positions
+    + If X is set then the x-position counter XPOS is incremented by H_SHIFT_X
+    + If O is set then the output data in OUT is shifted out by H_SHIFT_OUT positions
+
+    The program execution will continue at the jump target address
+    """;
+    attrs=(isp1,isp2);
+    fields=(TYPE(0x0),OPCD(4),DONE_VIN,RELADDR,IXO);
+    syntax = ("dvot %f,%f,%f",DONE_VIN,RELADDR,IXO);
+    action = {
+      VOP1=VR(DONE_VIN);
+      VOUT(0)=concat((bits<4>)0xf,VR(DONE_VIN)(63,0));
+      NIA=RELADDR;
+#ifndef MAKEDOC
+      if (IXO(2)==1) {
+        //InputShift(H_CHANNELS_IN,H_SHIFT_IN);
+        InputShift();
+      }
+      if (IXO(0)==1) {
+        //OutputShift(H_CHANNELS_OUT,H_SHIFT_OUT);
+        OutputShift();
+      }
+      if (IXO(1)==1) {
+        XPOSShift();
+      }
+#endif //  MAKEDOC
+    };
+    // in RTL this might create stall conditions incase
+    // the input data is not ready or the output is still busy
+    // for the stall conditions we need to implement counter
+  }
+
+  // ldot *****************************
+  define (instr=ldot) {
+    """
+    Close a pixel cycle and go to the next
+
+    OUT[0] = R[DONE_IN]
+
+    + If I is set then the input data in IN* is shifted by H_SHIFT_IN positions
+    + If X is set then the x-position counter XPOS is incremented by H_SHIFT_X
+    + If O is set then the output data in OUT is shifted out by H_SHIFT_OUT positions
+
+    If the LOOPCNT is >1 the  program execution will continue at the
+    jump target address, and the LOOPCNT is decremented.
+    Otherwise the execution will continue with the next address
+    """;
+    attrs=(isp1,isp2);
+#ifdef LOOPCNT_B
+    fields=(TYPE(0x0),OPCD(0xB),DONE_IN,RELADDR,LCNT(0),IXO);
+#else
+    fields=(TYPE(0x0),OPCD(0xB),DONE_IN,RELADDR,IXO);
+#endif
+    syntax = ("ldot %f,%f,%f",DONE_IN,RELADDR,IXO);
+    action = {
+      OP1=R(DONE_IN);
+      OUT(0)=OP1;
+      if (LOOPCNT>1) {
+        NIA=RELADDR;
+      }
+      if (LOOPCNT!=0) {
+        LOOPCNT=LOOPCNT-1;
+      }
+#ifndef MAKEDOC
+      if (IXO(2)==1) {
+        //InputShift(H_CHANNELS_IN,H_SHIFT_IN);
+        InputShift();
+      }
+      if (IXO(0)==1) {
+        //OutputShift(H_CHANNELS_OUT,H_SHIFT_OUT);
+        OutputShift();
+      }
+      if (IXO(1)==1) {
+        XPOSShift();
+      }
+#endif // MAKEDOC
+    };
+    // in RTL this might create stall conditions incase
+    // the input data is not ready or the output is still busy
+    // for the stall conditions we need to implement counter
+  }
+
+  // ldvo *****************************
+  define (instr=ldvo) {
+    """
+      Close a pixel cycle and go to the next
+
+      VOUT[0] = V[DONE_VIN]
+
+    + If I is set then the input data in IN* is shifted by H_SHIFT_IN positions
+    + If X is set then the x-position counter XPOS is incremented by H_SHIFT_X
+    + If O is set then the output data in OUT is shifted out by H_SHIFT_OUT positions
+
+      If the LOOPCNT is >1 the  program execution will continue at the
+      jump target address, and the LOOPCNT is decremented.
+      Otherwise the execution will continue with the next address
+      """;
+    attrs=(isp1,isp2);
+#ifdef LOOPCNT_B
+    fields=(TYPE(0x0),OPCD(0xC),DONE_VIN,RELADDR,LCNT(0),IXO);
+#else
+    fields=(TYPE(0x0),OPCD(0xC),DONE_VIN,RELADDR,IXO);
+#endif
+    syntax = ("ldvo %f,%f,%f",DONE_VIN,RELADDR,IXO);
+    action = {
+      VOP1=VR(DONE_VIN);
+      VOUT(0)=concat((bits<4>)0xf,VR(DONE_VIN)(63,0));
+      if (LOOPCNT>1) {
+        NIA=RELADDR;
+      }
+      if (LOOPCNT!=0) {
+        LOOPCNT=LOOPCNT-1;
+      }
+#ifndef MAKEDOC
+      if (IXO(2)==1) {
+        //InputShift(H_CHANNELS_IN,H_SHIFT_IN);
+        InputShift();
+      }
+      if (IXO(0)==1) {
+        //OutputShift(H_CHANNELS_OUT,H_SHIFT_OUT);
+        OutputShift();
+      }
+      if (IXO(1)==1) {
+        XPOSShift();
+      }
+#endif // MAKEDOC
+    };
+    // in RTL this might create stall conditions incase
+    // the input data is not ready or the output is still busy
+    // for the stall conditions we need to implement counter
+  }
+
+#ifdef LOOPCNT_B
+  // ldon1 *****************************
+  define (instr=ldon1) {
+    """
+    Close a pixel cycle and go to the next
+
+    + If I is set then the input data in IN* is shifted by H_SHIFT_IN positions
+    + If X is set then the x-position counter XPOS is incremented by H_SHIFT_X
+    + If O is set then the output data in OUT is shifted out by H_SHIFT_OUT positions
+
+    If the LOOPCNT1 is >1 the  program execution will continue at the
+    jump target address, and the LOOPCNT1 is decremented.
+    Otherwise the execution will continue with the next address
+    """;
+    attrs=(isp2);
+    fields = (TYPE(0x0),OPCD(0xA),RELADDR,LCNT(1),IXO);
+    syntax = ("ldon1 %f,%f",RELADDR,IXO);
+    action = {
+      if (LOOPCNT1>1) {
+        NIA=RELADDR;
+      }
+      if (LOOPCNT1!=0) {
+        LOOPCNT1=LOOPCNT1-1;
+      }
+#ifndef MAKEDOC
+      if (IXO(2)==1) {
+        //InputShift(H_CHANNELS_IN,H_SHIFT_IN);
+        InputShift();
+      }
+      if (IXO(0)==1) {
+        //OutputShift(H_CHANNELS_OUT,H_SHIFT_OUT);
+        OutputShift();
+      }
+      if (IXO(1)==1) {
+        XPOSShift();
+      }
+#endif // MAKEDOC
+    };
+    // in RTL this might create stall conditions incase
+    // the input data is not ready or the output is still busy
+    // for the stall conditions we need to implement counter
+  }
+
+
+  // ldot1 *****************************
+  define (instr=ldot1) {
+    """
+    Close a pixel cycle and go to the next
+
+    OUT[0] = R[DONE_IN]
+
+    + If I is set then the input data in IN* is shifted by H_SHIFT_IN positions
+    + If X is set then the x-position counter XPOS is incremented by H_SHIFT_X
+    + If O is set then the output data in OUT is shifted out by H_SHIFT_OUT positions
+
+    If the LOOPCNT1 is >1 the  program execution will continue at the
+    jump target address, and the LOOPCNT1 is decremented.
+    Otherwise the execution will continue with the next address
+    """;
+    attrs=(isp2);
+    fields=(TYPE(0x0),OPCD(0xB),DONE_IN,RELADDR,LCNT(1),IXO);
+    syntax = ("ldot1 %f,%f,%f",DONE_IN,RELADDR,IXO);
+    action = {
+      OP1=R(DONE_IN);
+      OUT(0)=OP1;
+      if (LOOPCNT1>1) {
+        NIA=RELADDR;
+      }
+      if (LOOPCNT1!=0) {
+        LOOPCNT1=LOOPCNT1-1;
+      }
+#ifndef MAKEDOC
+      if (IXO(2)==1) {
+        //InputShift(H_CHANNELS_IN,H_SHIFT_IN);
+        InputShift();
+      }
+      if (IXO(0)==1) {
+        //OutputShift(H_CHANNELS_OUT,H_SHIFT_OUT);
+        OutputShift();
+      }
+      if (IXO(1)==1) {
+        XPOSShift();
+      }
+#endif // MAKEDOC
+    };
+    // in RTL this might create stall conditions incase
+    // the input data is not ready or the output is still busy
+    // for the stall conditions we need to implement counter
+  }
+
+  // ldvo1 *****************************
+  define (instr=ldvo1) {
+    """
+      Close a pixel cycle and go to the next
+
+      VOUT[0] = V[DONE_VIN]
+
+    + If I is set then the input data in IN* is shifted by H_SHIFT_IN positions
+    + If X is set then the x-position counter XPOS is incremented by H_SHIFT_X
+    + If O is set then the output data in OUT is shifted out by H_SHIFT_OUT positions
+
+      If the LOOPCNT1 is >1 the  program execution will continue at the
+      jump target address, and the LOOPCNT1 is decremented.
+      Otherwise the execution will continue with the next address
+      """;
+    attrs=(isp2);
+    fields=(TYPE(0x0),OPCD(0xC),DONE_VIN,RELADDR,LCNT(1),IXO);
+    syntax = ("ldvo1 %f,%f,%f",DONE_VIN,RELADDR,IXO);
+    action = {
+      VOP1=VR(DONE_VIN);
+      VOUT(0)=concat((bits<4>)0xf,VR(DONE_VIN)(63,0));
+      if (LOOPCNT1>1) {
+        NIA=RELADDR;
+      }
+      if (LOOPCNT1!=0) {
+        LOOPCNT1=LOOPCNT1-1;
+      }
+#ifndef MAKEDOC
+      if (IXO(2)==1) {
+        //InputShift(H_CHANNELS_IN,H_SHIFT_IN);
+        InputShift();
+      }
+      if (IXO(0)==1) {
+        //OutputShift(H_CHANNELS_OUT,H_SHIFT_OUT);
+        OutputShift();
+      }
+      if (IXO(1)==1) {
+        XPOSShift();
+      }
+#endif // MAKEDOC
+    };
+    // in RTL this might create stall conditions incase
+    // the input data is not ready or the output is still busy
+    // for the stall conditions we need to implement counter
+  }
+#endif //LOOPCNT_B
+}

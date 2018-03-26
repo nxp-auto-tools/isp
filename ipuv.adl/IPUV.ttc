@@ -1,0 +1,10 @@
+  define (core=IPUV) {
+    define (config) {
+      reg_callbacks = (H_IPS, \
+H_START,H_STATUS,H_POS,H_CURRPOS,H_XCFG,H_CURRXCFG,\
+H_INCFG,H_OUTCFG,H_IMEMA,H_IMEMD,H_DREGA,H_DREGD,\
+S_LINELEN_IN,S_CHCFG_IN,S_LINE_PTR_IN,\
+S_LINELEN_OUT,S_CHCFG_OUT,S_LINE_PTR_OUT,\
+SysC_StreamDMA_Channel,SIG_LINE_DONE);
+    }
+  }

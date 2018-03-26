@@ -1,0 +1,3585 @@
+#
+# Options:
+#   ../IPUS -o trace.dat -mic=0 --cli 
+#
+
+TEST id=0
+INIT
+
+CORE n=IPUS
+
+RD n=ARGMAX d=0xffff
+RD n=ARGMIN d=0xffff
+RD n=CC_ZNCO d=0x0
+RD n=CLIPPED d=0x0000
+RD n=CONFADDT d=0x0000
+RD n=CONFALU d=0x002
+RD n=CONFBEST d=0x0
+RD n=CONFHIST d=0x000
+RD n=CONFSORT d=0x0
+RD n=CONFSTAT d=0x00
+RD n=CONFTHRES d=0x0000
+RD n=CSE_SET_LOCK d=0x0
+RD n=HBINA d=0x00
+RD n=HBINADD d=0x0000
+RD n=HBININCH d=0x0000
+RD n=HBININCL d=0x00
+RD n=HD_BREAKENABLE d=0x00
+RD n=H_CURRPOS d=0x00000000
+RD n=H_CURRXCFG d=0x04000001
+RD n=H_DREGA d=0x00
+RD n=H_DREGD d=0x0000
+RD n=H_HISTA d=0x00
+RD n=H_HISTAMAX d=0x00
+RD n=H_HISTCL d=0x0
+RD n=H_HISTD d=0x00000000
+RD n=H_HISTPEAK d=0x00000000
+RD n=H_IMEMA d=0x0
+RD n=H_IMEMD d=0x00000000
+RD n=H_INACFG d=0x00010001
+RD n=H_INALCFG d=0x00010001
+RD n=H_INBCFG d=0x00010001
+RD n=H_LUTA d=0x000
+RD n=H_LUTD d=0x00000000
+RD n=H_OUTCFG d=0x00010001
+RD n=H_POS d=0x00000000
+RD n=H_START d=0x00000000
+RD n=H_STATA d=0x00
+RD n=H_STATCL d=0x0
+RD n=H_STATD d=0x00000000
+RD n=H_STATUS d=0x00000000
+RD n=H_XCFG d=0x04000001
+RD n=I_ACC_CHANGED d=0x0
+RD n=I_ADDT d=0x00000
+RD n=I_ADDT_EN d=0x0
+RD n=I_ADDT_SENSE d=0x31
+RD n=I_ALLOW_UPDATE d=0x0
+RD n=I_BUFFERED d=0x0
+RD n=I_DEBUGMODE d=0x0
+RD n=I_DELAY_UPDATE d=0x0
+RD n=I_DELAY_UPDATE_1 d=0x0
+RD n=I_DREGDACCESS d=0x0
+RD n=I_EVENTS d=0x0
+RD n=I_HCL d=0x1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+RD n=I_INACFG d=0x00010001
+RD n=I_INALCFG d=0x00010001
+RD n=I_INBCFG d=0x00010001
+RD n=I_LUTA_SET d=0x0
+RD n=I_LUT_CLEAR d=0x1
+RD n=I_LUT_DIRTY d=0x0
+RD n=I_MFLAG_C d=0x00
+RD n=I_MFLAG_N d=0x00
+RD n=I_MFLAG_O d=0x00
+RD n=I_MFLAG_Z d=0x00
+RD n=I_OUTCFG d=0x00010001
+RD n=I_PRNG d=0x0000000000000000
+RD n=I_PRNG_INC d=0x1
+RD n=I_RUN d=0x0
+RD n=I_SCL d=0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+RD n=I_SHIFT_X d=0x1
+RD n=I_SORT_EN d=0x0
+RD n=I_SORT_SENSE d=0x51
+RD n=I_START d=0x00000000
+RD n=I_STAT_DIRTY d=0x0
+RD n=I_STAT_NEW_LINE d=0x1
+RD n=I_XSIZE d=0x0400
+RD n=LOCK d=0x1fff
+RD n=LOOPCNT d=0x0000
+RD n=LUT d=0x0000
+RD n=LUTA d=0x000
+RD n=MASKOP2 d=0x0000
+RD n=MASKV d=0x1ff
+RD n=MFLAG_C d=0x00
+RD n=MFLAG_N d=0x00
+RD n=MFLAG_O d=0x00
+RD n=MFLAG_Z d=0x00
+RD n=NHOOD d=0x1ff
+RD n=NIA d=0x00
+RD n=ONE d=0xffff
+RD n=OP1 d=0x0000
+RD n=OP2 d=0x0000
+RD n=PRNG d=0x0000
+RD n=RES d=0x0000
+RD n=RES32 d=0x0000000000000000
+RD n=SAT d=0x0000
+RD n=SCALED d=0x0000
+RD n=SCNT d=0x0000
+RD n=SIG_LINE_DONE d=0x0
+RD n=SOCLEAR d=0x0
+RD n=SOIN d=0x0000
+RD n=SORTMAX d=0x0000
+RD n=SORTMEDIAN d=0x0000
+RD n=SORTMIN d=0x0000
+RD n=SREC d=0x00
+RD n=SUM d=0x0000
+RD n=S_EMUMEM d=0x0
+RD n=THRESHOLD d=0x0000
+RD n=XPOS d=0x0000
+RD n=YPOS d=0x0000
+RD n=ZERO d=0x0000
+RD n=GPR i=0 d=0x0000
+RD n=GPR i=1 d=0x0000
+RD n=GPR i=2 d=0x0000
+RD n=GPR i=3 d=0x0000
+RD n=GPR i=4 d=0x0000
+RD n=GPR i=5 d=0x0000
+RD n=GPR i=6 d=0x0000
+RD n=GPR i=7 d=0x0000
+RD n=GPR i=8 d=0x0000
+RD n=GPR i=9 d=0x0000
+RD n=GPR i=10 d=0x0000
+RD n=GPR i=11 d=0x0000
+RD n=GPR i=12 d=0x0000
+RD n=GPR i=13 d=0x0000
+RD n=GPR i=14 d=0x0000
+RD n=GPR i=15 d=0x0000
+RD n=IACC i=0 d=0x000000
+RD n=IACC i=1 d=0x000000
+RD n=IACC i=2 d=0x000000
+RD n=IACC i=3 d=0x000000
+RD n=INA i=0 d=0x0000
+RD n=INA i=1 d=0x0000
+RD n=INA i=2 d=0x0000
+RD n=INA i=3 d=0x0000
+RD n=INA i=4 d=0x0000
+RD n=INA i=5 d=0x0000
+RD n=INA i=6 d=0x0000
+RD n=INA i=7 d=0x0000
+RD n=INA i=8 d=0x0000
+RD n=INALPHA i=0 d=0x0000
+RD n=INALPHA i=1 d=0x0000
+RD n=INALPHA i=2 d=0x0000
+RD n=INALPHA i=3 d=0x0000
+RD n=INALPHA i=4 d=0x0000
+RD n=INALPHA i=5 d=0x0000
+RD n=INALPHA i=6 d=0x0000
+RD n=INALPHA i=7 d=0x0000
+RD n=INALPHA i=8 d=0x0000
+RD n=INB i=0 d=0x0000
+RD n=INB i=1 d=0x0000
+RD n=INB i=2 d=0x0000
+RD n=INB i=3 d=0x0000
+RD n=INB i=4 d=0x0000
+RD n=INB i=5 d=0x0000
+RD n=INB i=6 d=0x0000
+RD n=INB i=7 d=0x0000
+RD n=INB i=8 d=0x0000
+RD n=I_OPIXA_INC i=0 d=0x0
+RD n=I_OPIXA_INC i=1 d=0x0
+RD n=I_POS_INA i=0 d=0x0000
+RD n=I_POS_INA i=1 d=0x0000
+RD n=I_POS_INA i=2 d=0x0000
+RD n=I_POS_INAL i=0 d=0x0000
+RD n=I_POS_INAL i=1 d=0x0000
+RD n=I_POS_INAL i=2 d=0x0000
+RD n=I_POS_INB i=0 d=0x0000
+RD n=I_POS_INB i=1 d=0x0000
+RD n=I_POS_INB i=2 d=0x0000
+RD n=I_POS_OUT i=0 d=0x0000
+RD n=I_POS_OUT i=1 d=0x0000
+RD n=I_POS_OUT i=2 d=0x0000
+RD n=I_POS_OUT i=3 d=0x0000
+RD n=I_RPTCNT_INA i=0 d=0x1
+RD n=I_RPTCNT_INA i=1 d=0x1
+RD n=I_RPTCNT_INA i=2 d=0x1
+RD n=I_RPTCNT_INAL i=0 d=0x1
+RD n=I_RPTCNT_INAL i=1 d=0x1
+RD n=I_RPTCNT_INAL i=2 d=0x1
+RD n=I_RPTCNT_INB i=0 d=0x1
+RD n=I_RPTCNT_INB i=1 d=0x1
+RD n=I_RPTCNT_INB i=2 d=0x1
+RD n=I_SF i=0 d=0x00000000
+RD n=I_SF i=1 d=0x00000000
+RD n=I_SF i=2 d=0x00000000
+RD n=I_SF i=3 d=0x00000000
+RD n=I_SKIPCNT_OUT i=0 d=0x0
+RD n=I_SKIPCNT_OUT i=1 d=0x0
+RD n=I_SKIPCNT_OUT i=2 d=0x0
+RD n=I_SKIPCNT_OUT i=3 d=0x0
+RD n=I_SKIPCNT_OUT i=4 d=0x0
+RD n=MASK i=0 d=0x1
+RD n=MASK i=1 d=0x1
+RD n=MASK i=2 d=0x1
+RD n=MASK i=3 d=0x1
+RD n=MASK i=4 d=0x1
+RD n=MASK i=5 d=0x1
+RD n=MASK i=6 d=0x1
+RD n=MASK i=7 d=0x1
+RD n=MASK i=8 d=0x1
+RD n=MASKOP1 i=0 d=0x0000
+RD n=MASKOP1 i=1 d=0x0000
+RD n=MASKOP1 i=2 d=0x0000
+RD n=MASKOP1 i=3 d=0x0000
+RD n=MASKOP1 i=4 d=0x0000
+RD n=MASKOP1 i=5 d=0x0000
+RD n=MASKOP1 i=6 d=0x0000
+RD n=MASKOP1 i=7 d=0x0000
+RD n=MASKOP1 i=8 d=0x0000
+RD n=MASKRES i=0 d=0x0
+RD n=MASKRES i=1 d=0x0
+RD n=MASKRES i=2 d=0x0
+RD n=MASKRES i=3 d=0x0
+RD n=MASKRES i=4 d=0x0
+RD n=MASKRES i=5 d=0x0
+RD n=MASKRES i=6 d=0x0
+RD n=MASKRES i=7 d=0x0
+RD n=MASKRES i=8 d=0x0
+RD n=MOP1 i=0 d=0x0000
+RD n=MOP1 i=1 d=0x0000
+RD n=MOP1 i=2 d=0x0000
+RD n=MOP1 i=3 d=0x0000
+RD n=MOP1 i=4 d=0x0000
+RD n=MOP1 i=5 d=0x0000
+RD n=MOP1 i=6 d=0x0000
+RD n=MOP1 i=7 d=0x0000
+RD n=MOP1 i=8 d=0x0000
+RD n=MOP2 i=0 d=0x0000
+RD n=MOP2 i=1 d=0x0000
+RD n=MOP2 i=2 d=0x0000
+RD n=MOP2 i=3 d=0x0000
+RD n=MOP2 i=4 d=0x0000
+RD n=MOP2 i=5 d=0x0000
+RD n=MOP2 i=6 d=0x0000
+RD n=MOP2 i=7 d=0x0000
+RD n=MOP2 i=8 d=0x0000
+RD n=MRES i=0 d=0x0000
+RD n=MRES i=1 d=0x0000
+RD n=MRES i=2 d=0x0000
+RD n=MRES i=3 d=0x0000
+RD n=MRES i=4 d=0x0000
+RD n=MRES i=5 d=0x0000
+RD n=MRES i=6 d=0x0000
+RD n=MRES i=7 d=0x0000
+RD n=MRES i=8 d=0x0000
+RD n=MSAT i=0 d=0x0000
+RD n=MSAT i=1 d=0x0000
+RD n=MSAT i=2 d=0x0000
+RD n=MSAT i=3 d=0x0000
+RD n=MSAT i=4 d=0x0000
+RD n=MSAT i=5 d=0x0000
+RD n=MSAT i=6 d=0x0000
+RD n=MSAT i=7 d=0x0000
+RD n=MSAT i=8 d=0x0000
+RD n=OPIX i=0 d=0x0000
+RD n=OPIX i=1 d=0x0000
+RD n=OPIXA i=0 d=0x00
+RD n=OPIXA i=1 d=0x00
+RD n=OUT i=0 d=0x0000
+RD n=OUT i=1 d=0x0000
+RD n=OUT i=2 d=0x0000
+RD n=OUT i=3 d=0x0000
+RD n=SFH i=0 d=0x0000
+RD n=SFH i=1 d=0x0000
+RD n=SFH i=2 d=0x0000
+RD n=SFH i=3 d=0x0000
+RD n=SO i=0 d=0x10000
+RD n=SO i=1 d=0x10000
+RD n=SO i=2 d=0x10000
+RD n=SO i=3 d=0x10000
+RD n=SO i=4 d=0x10000
+RD n=SOA i=0 d=0xffff
+RD n=SOA i=1 d=0xffff
+RD n=SOA i=2 d=0xffff
+RD n=SOA i=3 d=0xffff
+RD n=SOA i=4 d=0xffff
+RD n=S_CHCFG_INA i=0 d=0x00050000
+RD n=S_CHCFG_INA i=1 d=0x00050000
+RD n=S_CHCFG_INA i=2 d=0x00050000
+RD n=S_CHCFG_INAL i=0 d=0x00050000
+RD n=S_CHCFG_INAL i=1 d=0x00050000
+RD n=S_CHCFG_INAL i=2 d=0x00050000
+RD n=S_CHCFG_INB i=0 d=0x00050000
+RD n=S_CHCFG_INB i=1 d=0x00050000
+RD n=S_CHCFG_INB i=2 d=0x00050000
+RD n=S_CHCFG_OUT i=0 d=0x00000000
+RD n=S_CHCFG_OUT i=1 d=0x00000000
+RD n=S_CHCFG_OUT i=2 d=0x00000000
+RD n=S_CHCFG_OUT i=3 d=0x00000000
+RD n=S_CURRCHCFG_INA i=0 d=0x00000000
+RD n=S_CURRCHCFG_INA i=1 d=0x00000000
+RD n=S_CURRCHCFG_INA i=2 d=0x00000000
+RD n=S_CURRCHCFG_INAL i=0 d=0x00000000
+RD n=S_CURRCHCFG_INAL i=1 d=0x00000000
+RD n=S_CURRCHCFG_INAL i=2 d=0x00000000
+RD n=S_CURRCHCFG_INB i=0 d=0x00000000
+RD n=S_CURRCHCFG_INB i=1 d=0x00000000
+RD n=S_CURRCHCFG_INB i=2 d=0x00000000
+RD n=S_CURRCHCFG_OUT i=0 d=0x00000000
+RD n=S_CURRCHCFG_OUT i=1 d=0x00000000
+RD n=S_CURRCHCFG_OUT i=2 d=0x00000000
+RD n=S_CURRCHCFG_OUT i=3 d=0x00000000
+RD n=S_CURRLINELEN_INA i=0 d=0xffff
+RD n=S_CURRLINELEN_INA i=1 d=0xffff
+RD n=S_CURRLINELEN_INA i=2 d=0xffff
+RD n=S_CURRLINELEN_INAL i=0 d=0xffff
+RD n=S_CURRLINELEN_INAL i=1 d=0xffff
+RD n=S_CURRLINELEN_INAL i=2 d=0xffff
+RD n=S_CURRLINELEN_INB i=0 d=0xffff
+RD n=S_CURRLINELEN_INB i=1 d=0xffff
+RD n=S_CURRLINELEN_INB i=2 d=0xffff
+RD n=S_CURRLINELEN_OUT i=0 d=0xffff
+RD n=S_CURRLINELEN_OUT i=1 d=0xffff
+RD n=S_CURRLINELEN_OUT i=2 d=0xffff
+RD n=S_CURRLINELEN_OUT i=3 d=0xffff
+RD n=S_CURRLINE_PTR_INA i=0 d=0x00000000
+RD n=S_CURRLINE_PTR_INA i=1 d=0x00000000
+RD n=S_CURRLINE_PTR_INA i=2 d=0x00000000
+RD n=S_CURRLINE_PTR_INAL i=0 d=0x00000000
+RD n=S_CURRLINE_PTR_INAL i=1 d=0x00000000
+RD n=S_CURRLINE_PTR_INAL i=2 d=0x00000000
+RD n=S_CURRLINE_PTR_INB i=0 d=0x00000000
+RD n=S_CURRLINE_PTR_INB i=1 d=0x00000000
+RD n=S_CURRLINE_PTR_INB i=2 d=0x00000000
+RD n=S_CURRLINE_PTR_OUT i=0 d=0x00000000
+RD n=S_CURRLINE_PTR_OUT i=1 d=0x00000000
+RD n=S_CURRLINE_PTR_OUT i=2 d=0x00000000
+RD n=S_CURRLINE_PTR_OUT i=3 d=0x00000000
+RD n=S_LINELEN_INA i=0 d=0xffff
+RD n=S_LINELEN_INA i=1 d=0xffff
+RD n=S_LINELEN_INA i=2 d=0xffff
+RD n=S_LINELEN_INAL i=0 d=0xffff
+RD n=S_LINELEN_INAL i=1 d=0xffff
+RD n=S_LINELEN_INAL i=2 d=0xffff
+RD n=S_LINELEN_INB i=0 d=0xffff
+RD n=S_LINELEN_INB i=1 d=0xffff
+RD n=S_LINELEN_INB i=2 d=0xffff
+RD n=S_LINELEN_OUT i=0 d=0xffff
+RD n=S_LINELEN_OUT i=1 d=0xffff
+RD n=S_LINELEN_OUT i=2 d=0xffff
+RD n=S_LINELEN_OUT i=3 d=0xffff
+RD n=S_LINE_PTR_INA i=0 d=0x00000000
+RD n=S_LINE_PTR_INA i=1 d=0x00000000
+RD n=S_LINE_PTR_INA i=2 d=0x00000000
+RD n=S_LINE_PTR_INAL i=0 d=0x00000000
+RD n=S_LINE_PTR_INAL i=1 d=0x00000000
+RD n=S_LINE_PTR_INAL i=2 d=0x00000000
+RD n=S_LINE_PTR_INB i=0 d=0x00000000
+RD n=S_LINE_PTR_INB i=1 d=0x00000000
+RD n=S_LINE_PTR_INB i=2 d=0x00000000
+RD n=S_LINE_PTR_OUT i=0 d=0x00000000
+RD n=S_LINE_PTR_OUT i=1 d=0x00000000
+RD n=S_LINE_PTR_OUT i=2 d=0x00000000
+RD n=S_LINE_PTR_OUT i=3 d=0x00000000
+RD n=W i=0 d=0x0000
+RD n=W i=1 d=0x0000
+RD n=W i=2 d=0x0000
+RD n=W i=3 d=0x0000
+RD n=W i=4 d=0x0000
+RD n=W i=5 d=0x0000
+RD n=W i=6 d=0x0000
+RD n=W i=7 d=0x0000
+RD n=W i=8 d=0x0000
+RD n=WW i=0 d=0x0000
+RD n=WW i=1 d=0x0000
+RD n=WW i=2 d=0x0000
+RD n=WW i=3 d=0x0000
+RD n=WW i=4 d=0x0000
+RD n=WW i=5 d=0x0000
+RD n=WW i=6 d=0x0000
+RD n=WW i=7 d=0x0000
+RD n=WW i=8 d=0x0000
+MD n=Mem ra=0x0000000000000000 d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000000004 d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000000008 d=0x00000000	#	(0)
+MD n=Mem ra=0x000000000000000c d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000000010 d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000000014 d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000000018 d=0x00000000	#	(0)
+MD n=Mem ra=0x000000000000001c d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000000020 d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000000024 d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000000028 d=0x00000000	#	(0)
+MD n=Mem ra=0x000000000000002c d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000000030 d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000000034 d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000000038 d=0x00000000	#	(0)
+MD n=Mem ra=0x000000000000003c d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000000040 d=0x00289c10	#	(2661392)
+MD n=Mem ra=0x0000000000000044 d=0x82000410	#	(2181039120)
+MD n=Mem ra=0x0000000000000048 d=0x00401110	#	(4198672)
+MD n=Mem ra=0x000000000000004c d=0xffff7110	#	(4294930704)
+MD n=Mem ra=0x0000000000000050 d=0xff010030	#	(4278255664)
+MD n=Mem ra=0x0000000000000054 d=0x04010002	#	(67174402)
+MD n=Mem ra=0x0000000000000058 d=0x07019c03	#	(117545987)
+MD n=Mem ra=0x000000000000005c d=0xff000110	#	(4278190352)
+MD n=Mem ra=0x0000000000000060 d=0x0800015d	#	(134218077)
+MD n=Mem ra=0x0000000000000064 d=0x41409821	#	(1094752289)
+MD n=Mem ra=0x0000000000000068 d=0x01987022	#	(26767394)
+MD n=Mem ra=0x000000000000006c d=0x71708027	#	(1903198247)
+MD n=Mem ra=0x0000000000000070 d=0x07fc000a	#	(133955594)
+MD n=Mem ra=0x0000000000000074 d=0x01000000	#	(16777216)
+
+CORE n=IPUS
+
+TRACE
+
+
+ERW n=H_INACFG d=0x00000101 id=1 cn=IPUS
+R n=I_INACFG d=0x00010101 cn=IPUS
+A l=1 m="INA.CURRCHANNELS = 0" cn=IPUS
+A l=1 m="INA.CURRNHOOD = 3x3" cn=IPUS
+A l=1 m="INA.CURRSHIFT = 1" cn=IPUS
+A l=1 m="INA.CHANNELS = 1" cn=IPUS
+A l=1 m="INA.NHOOD = 3x3" cn=IPUS
+A l=1 m="INA.SHIFT = 1" cn=IPUS
+
+ERW n=H_XCFG d=0x02800001 id=2 cn=IPUS
+R n=H_XCFG d=0x02800001 cn=IPUS
+
+ERW n=H_OUTCFG d=0x00000101 id=3 cn=IPUS
+R n=I_OUTCFG d=0x00010101 cn=IPUS
+A l=1 m="OUT.CURRCHANNELS = 0" cn=IPUS
+A l=1 m="OUT.CURRSHIFT = 1" cn=IPUS
+A l=1 m="OUT.CHANNELS = 1" cn=IPUS
+A l=1 m="OUT.SHIFT = 1" cn=IPUS
+
+ERW n=S_CHCFG_INA i=0 d=0x00150000 id=4 cn=IPUS
+A l=1 m="INA(0).REPEATVALUE = 0" cn=IPUS
+A l=1 m="INA(0).STEP = 1" cn=IPUS
+A l=1 m="INA(0).RPT = 1" cn=IPUS
+A l=1 m="INA(0).REPLACEMODE = 1: outside hold" cn=IPUS
+A l=1 m="INA(0).REVERSE = 0" cn=IPUS
+A l=1 m="INA(0).REPLACEWIDTH = 0" cn=IPUS
+A l=1 m="INA(0).BUFFERTYPE = 0: 16bpp" cn=IPUS
+R n=S_CHCFG_INA i=0 d=0x00150000 cn=IPUS
+
+ERW n=S_CHCFG_OUT i=0 d=0x00000000 id=5 cn=IPUS
+A l=1 m="OUT(0).SKIP = 0" cn=IPUS
+A l=1 m="OUT(0).BUFFERTYPE = 0: 16bpp" cn=IPUS
+R n=S_CHCFG_OUT i=0 d=0x00000000 cn=IPUS
+
+ERW n=H_POS d=0x00000000 id=6 cn=IPUS
+R n=H_POS d=0x00000000 cn=IPUS
+
+ERW n=H_START d=0x00000040 id=7 cn=IPUS
+R n=I_START d=0x00000040 cn=IPUS
+R n=I_BUFFERED d=0x1 cn=IPUS
+R n=I_RUN d=0x1 cn=IPUS
+R n=I_BUFFERED d=0x0 cn=IPUS
+R n=NIA d=0x40 cn=IPUS
+B taken=1 ea=0x40
+R n=I_START d=0x00400040 cn=IPUS
+R n=I_XSIZE d=0x0280 cn=IPUS
+R n=I_SHIFT_X d=0x1 cn=IPUS
+R n=I_INACFG d=0x01010101 cn=IPUS
+A l=1 m="INA.CURRCHANNELS = 1" cn=IPUS
+A l=1 m="INA.CURRNHOOD = 3x3" cn=IPUS
+A l=1 m="INA.CURRSHIFT = 1" cn=IPUS
+A l=1 m="INA.CHANNELS = 1" cn=IPUS
+A l=1 m="INA.NHOOD = 3x3" cn=IPUS
+A l=1 m="INA.SHIFT = 1" cn=IPUS
+R n=I_INBCFG d=0x00010001 cn=IPUS
+A l=1 m="INB.CURRCHANNELS = 0" cn=IPUS
+A l=1 m="INB.CURRNHOOD = 3x3" cn=IPUS
+A l=1 m="INB.CURRSHIFT = 1" cn=IPUS
+A l=1 m="INB.CHANNELS = 0" cn=IPUS
+A l=1 m="INB.NHOOD = 3x3" cn=IPUS
+A l=1 m="INB.SHIFT = 1" cn=IPUS
+R n=I_INALCFG d=0x00010001 cn=IPUS
+A l=1 m="INAL.CURRCHANNELS = 0" cn=IPUS
+A l=1 m="INAL.CURRNHOOD = 3x3" cn=IPUS
+A l=1 m="INAL.CURRSHIFT = 1" cn=IPUS
+A l=1 m="INAL.CHANNELS = 0" cn=IPUS
+A l=1 m="INAL.NHOOD = 3x3" cn=IPUS
+A l=1 m="INAL.SHIFT = 1" cn=IPUS
+R n=I_OUTCFG d=0x01010101 cn=IPUS
+A l=1 m="OUT.CURRCHANNELS = 1" cn=IPUS
+A l=1 m="OUT.CURRSHIFT = 1" cn=IPUS
+A l=1 m="OUT.CHANNELS = 1" cn=IPUS
+A l=1 m="OUT.SHIFT = 1" cn=IPUS
+R n=XPOS d=0x0000 cn=IPUS
+R n=YPOS d=0x0000 cn=IPUS
+A l=1 m="INA(0).REPEATVALUE = 0" cn=IPUS
+A l=1 m="INA(0).STEP = 1" cn=IPUS
+A l=1 m="INA(0).RPT = 1" cn=IPUS
+A l=1 m="INA(0).REPLACEMODE = 1: outside hold" cn=IPUS
+A l=1 m="INA(0).REVERSE = 0" cn=IPUS
+A l=1 m="INA(0).REPLACEWIDTH = 0" cn=IPUS
+A l=1 m="INA(0).BUFFERTYPE = 0: 16bpp" cn=IPUS
+R n=S_CURRCHCFG_INA i=0 d=0x00150000 cn=IPUS
+A l=1 m="INA(1).REPEATVALUE = 0" cn=IPUS
+A l=1 m="INA(1).STEP = 1" cn=IPUS
+A l=1 m="INA(1).RPT = 1" cn=IPUS
+A l=1 m="INA(1).REPLACEMODE = 0: outside const" cn=IPUS
+A l=1 m="INA(1).REVERSE = 0" cn=IPUS
+A l=1 m="INA(1).REPLACEWIDTH = 0" cn=IPUS
+A l=1 m="INA(1).BUFFERTYPE = 0: 16bpp" cn=IPUS
+R n=S_CURRCHCFG_INA i=1 d=0x00050000 cn=IPUS
+A l=1 m="INA(2).REPEATVALUE = 0" cn=IPUS
+A l=1 m="INA(2).STEP = 1" cn=IPUS
+A l=1 m="INA(2).RPT = 1" cn=IPUS
+A l=1 m="INA(2).REPLACEMODE = 0: outside const" cn=IPUS
+A l=1 m="INA(2).REVERSE = 0" cn=IPUS
+A l=1 m="INA(2).REPLACEWIDTH = 0" cn=IPUS
+A l=1 m="INA(2).BUFFERTYPE = 0: 16bpp" cn=IPUS
+R n=S_CURRCHCFG_INA i=2 d=0x00050000 cn=IPUS
+A l=1 m="INB(0).REPEATVALUE = 0" cn=IPUS
+A l=1 m="INB(0).STEP = 1" cn=IPUS
+A l=1 m="INB(0).RPT = 1" cn=IPUS
+A l=1 m="INB(0).REPLACEMODE = 0: outside const" cn=IPUS
+A l=1 m="INB(0).REVERSE = 0" cn=IPUS
+A l=1 m="INB(0).REPLACEWIDTH = 0" cn=IPUS
+A l=1 m="INB(0).BUFFERTYPE = 0: 16bpp" cn=IPUS
+R n=S_CURRCHCFG_INB i=0 d=0x00050000 cn=IPUS
+A l=1 m="INB(1).REPEATVALUE = 0" cn=IPUS
+A l=1 m="INB(1).STEP = 1" cn=IPUS
+A l=1 m="INB(1).RPT = 1" cn=IPUS
+A l=1 m="INB(1).REPLACEMODE = 0: outside const" cn=IPUS
+A l=1 m="INB(1).REVERSE = 0" cn=IPUS
+A l=1 m="INB(1).REPLACEWIDTH = 0" cn=IPUS
+A l=1 m="INB(1).BUFFERTYPE = 0: 16bpp" cn=IPUS
+R n=S_CURRCHCFG_INB i=1 d=0x00050000 cn=IPUS
+A l=1 m="INB(2).REPEATVALUE = 0" cn=IPUS
+A l=1 m="INB(2).STEP = 1" cn=IPUS
+A l=1 m="INB(2).RPT = 1" cn=IPUS
+A l=1 m="INB(2).REPLACEMODE = 0: outside const" cn=IPUS
+A l=1 m="INB(2).REVERSE = 0" cn=IPUS
+A l=1 m="INB(2).REPLACEWIDTH = 0" cn=IPUS
+A l=1 m="INB(2).BUFFERTYPE = 0: 16bpp" cn=IPUS
+R n=S_CURRCHCFG_INB i=2 d=0x00050000 cn=IPUS
+A l=1 m="INAL(0).REPEATVALUE = 0" cn=IPUS
+A l=1 m="INAL(0).STEP = 1" cn=IPUS
+A l=1 m="INAL(0).RPT = 1" cn=IPUS
+A l=1 m="INAL(0).REPLACEMODE = 0: outside const" cn=IPUS
+A l=1 m="INAL(0).REVERSE = 0" cn=IPUS
+A l=1 m="INAL(0).REPLACEWIDTH = 0" cn=IPUS
+A l=1 m="INAL(0).BUFFERTYPE = 0: 16bpp" cn=IPUS
+R n=S_CURRCHCFG_INAL i=0 d=0x00050000 cn=IPUS
+A l=1 m="INAL(1).REPEATVALUE = 0" cn=IPUS
+A l=1 m="INAL(1).STEP = 1" cn=IPUS
+A l=1 m="INAL(1).RPT = 1" cn=IPUS
+A l=1 m="INAL(1).REPLACEMODE = 0: outside const" cn=IPUS
+A l=1 m="INAL(1).REVERSE = 0" cn=IPUS
+A l=1 m="INAL(1).REPLACEWIDTH = 0" cn=IPUS
+A l=1 m="INAL(1).BUFFERTYPE = 0: 16bpp" cn=IPUS
+R n=S_CURRCHCFG_INAL i=1 d=0x00050000 cn=IPUS
+A l=1 m="INAL(2).REPEATVALUE = 0" cn=IPUS
+A l=1 m="INAL(2).STEP = 1" cn=IPUS
+A l=1 m="INAL(2).RPT = 1" cn=IPUS
+A l=1 m="INAL(2).REPLACEMODE = 0: outside const" cn=IPUS
+A l=1 m="INAL(2).REVERSE = 0" cn=IPUS
+A l=1 m="INAL(2).REPLACEWIDTH = 0" cn=IPUS
+A l=1 m="INAL(2).BUFFERTYPE = 0: 16bpp" cn=IPUS
+R n=S_CURRCHCFG_INAL i=2 d=0x00050000 cn=IPUS
+R n=S_CURRLINE_PTR_INA i=0 d=0x00010000 cn=IPUS
+R n=S_CURRLINE_PTR_INA i=1 d=0x00000000 cn=IPUS
+R n=S_CURRLINE_PTR_INA i=2 d=0x00000000 cn=IPUS
+R n=S_CURRLINE_PTR_INB i=0 d=0x00000000 cn=IPUS
+R n=S_CURRLINE_PTR_INB i=1 d=0x00000000 cn=IPUS
+R n=S_CURRLINE_PTR_INB i=2 d=0x00000000 cn=IPUS
+R n=S_CURRLINE_PTR_INAL i=0 d=0x00000000 cn=IPUS
+R n=S_CURRLINE_PTR_INAL i=1 d=0x00000000 cn=IPUS
+R n=S_CURRLINE_PTR_INAL i=2 d=0x00000000 cn=IPUS
+R n=S_CURRLINELEN_INA i=0 d=0x0280 cn=IPUS
+R n=S_CURRLINELEN_INA i=1 d=0x0280 cn=IPUS
+R n=S_CURRLINELEN_INA i=2 d=0x0280 cn=IPUS
+R n=S_CURRLINELEN_INB i=0 d=0xffff cn=IPUS
+R n=S_CURRLINELEN_INB i=1 d=0xffff cn=IPUS
+R n=S_CURRLINELEN_INB i=2 d=0xffff cn=IPUS
+R n=S_CURRLINELEN_INAL i=0 d=0xffff cn=IPUS
+R n=S_CURRLINELEN_INAL i=1 d=0xffff cn=IPUS
+R n=S_CURRLINELEN_INAL i=2 d=0xffff cn=IPUS
+R n=I_RPTCNT_INA i=0 d=0x1 cn=IPUS
+R n=I_RPTCNT_INA i=1 d=0x1 cn=IPUS
+R n=I_RPTCNT_INA i=2 d=0x1 cn=IPUS
+R n=I_RPTCNT_INB i=0 d=0x1 cn=IPUS
+R n=I_RPTCNT_INB i=1 d=0x1 cn=IPUS
+R n=I_RPTCNT_INB i=2 d=0x1 cn=IPUS
+R n=I_RPTCNT_INAL i=0 d=0x1 cn=IPUS
+R n=I_RPTCNT_INAL i=1 d=0x1 cn=IPUS
+R n=I_RPTCNT_INAL i=2 d=0x1 cn=IPUS
+R n=I_POS_INA i=0 d=0x0000 cn=IPUS
+R n=I_POS_INA i=1 d=0x0000 cn=IPUS
+R n=I_POS_INA i=2 d=0x0000 cn=IPUS
+R n=I_POS_INB i=0 d=0x0000 cn=IPUS
+R n=I_POS_INB i=1 d=0x0000 cn=IPUS
+R n=I_POS_INB i=2 d=0x0000 cn=IPUS
+R n=I_POS_INAL i=0 d=0x0000 cn=IPUS
+R n=I_POS_INAL i=1 d=0x0000 cn=IPUS
+R n=I_POS_INAL i=2 d=0x0000 cn=IPUS
+A l=1 m="OUT(0).SKIP = 0" cn=IPUS
+A l=1 m="OUT(0).BUFFERTYPE = 0: 16bpp" cn=IPUS
+R n=S_CURRCHCFG_OUT i=0 d=0x00000000 cn=IPUS
+A l=1 m="OUT(1).SKIP = 0" cn=IPUS
+A l=1 m="OUT(1).BUFFERTYPE = 0: 16bpp" cn=IPUS
+R n=S_CURRCHCFG_OUT i=1 d=0x00000000 cn=IPUS
+A l=1 m="OUT(2).SKIP = 0" cn=IPUS
+A l=1 m="OUT(2).BUFFERTYPE = 0: 16bpp" cn=IPUS
+R n=S_CURRCHCFG_OUT i=2 d=0x00000000 cn=IPUS
+A l=1 m="OUT(3).SKIP = 0" cn=IPUS
+A l=1 m="OUT(3).BUFFERTYPE = 0: 16bpp" cn=IPUS
+R n=S_CURRCHCFG_OUT i=3 d=0x00000000 cn=IPUS
+R n=S_CURRLINE_PTR_OUT i=0 d=0x0008d000 cn=IPUS
+R n=S_CURRLINE_PTR_OUT i=1 d=0x00000000 cn=IPUS
+R n=S_CURRLINE_PTR_OUT i=2 d=0x00000000 cn=IPUS
+R n=S_CURRLINE_PTR_OUT i=3 d=0x00000000 cn=IPUS
+R n=S_CURRLINELEN_OUT i=0 d=0x0280 cn=IPUS
+R n=S_CURRLINELEN_OUT i=1 d=0xffff cn=IPUS
+R n=S_CURRLINELEN_OUT i=2 d=0xffff cn=IPUS
+R n=S_CURRLINELEN_OUT i=3 d=0xffff cn=IPUS
+R n=I_POS_OUT i=0 d=0x0000 cn=IPUS
+R n=I_POS_OUT i=1 d=0x0000 cn=IPUS
+R n=I_POS_OUT i=2 d=0x0000 cn=IPUS
+R n=I_POS_OUT i=3 d=0x0000 cn=IPUS
+R n=I_SKIPCNT_OUT i=0 d=0x0 cn=IPUS
+R n=I_SKIPCNT_OUT i=1 d=0x0 cn=IPUS
+R n=I_SKIPCNT_OUT i=2 d=0x0 cn=IPUS
+R n=I_SKIPCNT_OUT i=3 d=0x0 cn=IPUS
+R n=LOCK d=0x1fff cn=IPUS
+R n=I_ACC_CHANGED d=0x10 cn=IPUS
+R n=MASK i=0 d=0x1 cn=IPUS
+R n=MASK i=1 d=0x1 cn=IPUS
+R n=MASK i=2 d=0x1 cn=IPUS
+R n=MASK i=3 d=0x1 cn=IPUS
+R n=MASK i=4 d=0x1 cn=IPUS
+R n=MASK i=5 d=0x1 cn=IPUS
+R n=MASK i=6 d=0x1 cn=IPUS
+R n=MASK i=7 d=0x1 cn=IPUS
+R n=MASK i=8 d=0x1 cn=IPUS
+R n=I_ADDT_EN d=0x0 cn=IPUS
+R n=I_SORT_EN d=0x0 cn=IPUS
+R n=I_ACC_CHANGED d=0x0 cn=IPUS
+R n=I_STAT_NEW_LINE d=0x1 cn=IPUS
+R n=I_LUT_CLEAR d=0x1 cn=IPUS
+
+I ea=0x40 id=8 tic=1
+M n=Mem t=ifetch ea=0x40 ra=0x40 d=0x00289c10
+INSTR op=0x109c2800					asm="mov sacc0,0x2800"
+R n=NIA d=0x44
+R n=OP1 d=0x2800
+R n=OP2 d=0x2800
+R n=RES d=0x2800
+R n=SAT d=0x2800
+R n=IACC i=0 d=0x002800
+
+I ea=0x44 id=9 tic=2
+M n=Mem t=ifetch ea=0x44 ra=0x44 d=0x82000410
+INSTR op=0x10040082					asm="mov confalu,0x0082"
+R n=NIA d=0x48
+R n=OP1 d=0x0082
+R n=OP2 d=0x0082
+R n=RES d=0x0082
+R n=SAT d=0x0082
+R n=CONFALU d=0x082
+A l=1 m="unsigned"
+A l=1 m="saturate"
+A l=1 m="mulh shift right = 8"
+A l=1 m="accumulator shift right = 0"
+
+I ea=0x48 id=10 tic=3
+M n=Mem t=ifetch ea=0x48 ra=0x48 d=0x00401110
+INSTR op=0x10114000					asm="mov ina1,0x4000"
+R n=NIA d=0x4c
+R n=OP1 d=0x4000
+R n=OP2 d=0x4000
+R n=RES d=0x4000
+R n=SAT d=0x4000
+R n=I_ACC_CHANGED d=0x2
+R n=INA i=1 d=0x4000
+A l=1 m="I_ACC_CHANGED = 2"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 0"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 0"
+R n=I_ACC_CHANGED d=0x0
+
+I ea=0x4c id=11 tic=4
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0xffff7110
+INSTR op=0x1071ffff					asm="mov gpr1,0xffff"
+R n=NIA d=0x50
+R n=OP1 d=0xffff
+R n=OP2 d=0xffff
+R n=RES d=0xffff
+R n=SAT d=0xffff
+R n=GPR i=1 d=0xffff
+
+I ea=0x50 id=12 tic=5
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0xff010030
+INSTR op=0x300001ff					asm="mset 0x01ff"
+R n=NIA d=0x54
+R n=MASKOP1 i=1 d=0x0000
+R n=MASKOP2 d=0x01ff
+R n=MASKRES i=0 d=0x1
+R n=MASKRES i=1 d=0x1
+R n=MASKRES i=2 d=0x1
+R n=MASKRES i=3 d=0x1
+R n=MASKRES i=4 d=0x1
+R n=MASKRES i=5 d=0x1
+R n=MASKRES i=6 d=0x1
+R n=MASKRES i=7 d=0x1
+R n=MASKRES i=8 d=0x1
+R n=I_ACC_CHANGED d=0x10
+R n=MASK i=0 d=0x1
+R n=MASK i=1 d=0x1
+R n=MASK i=2 d=0x1
+R n=MASK i=3 d=0x1
+R n=MASK i=4 d=0x1
+R n=MASK i=5 d=0x1
+R n=MASK i=6 d=0x1
+R n=MASK i=7 d=0x1
+R n=MASK i=8 d=0x1
+A l=1 m="I_ACC_CHANGED = 16"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 16"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 16"
+R n=I_ALLOW_UPDATE d=0x1
+R n=I_ACC_CHANGED d=0x0
+R n=I_ALLOW_UPDATE d=0x0
+
+I ea=0x54 id=13 tic=6
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x04010002
+INSTR op=0x02000104					asm="done 0x0000000000000058,i"
+R n=NIA d=0x58
+R n=NIA d=0x58
+B taken=1 ea=0x58
+R n=I_ACC_CHANGED d=0x2
+R n=INA i=2 d=0x4000
+R n=INA i=1 d=0x0000
+A l=1 m="POS_INA line0 = 0"
+D n=Mem t=read ea=0x10000 nb=2
+INIT
+MD n=Mem ra=0x0000000000010000 d=0xd5d5d4d4	#	(3587560660)
+TRACE
+M n=Mem t=read ea=0x10000 ra=0x10000 d=0xd5d5d4d4
+R n=I_POS_INA i=0 d=0x0001
+R n=I_RPTCNT_INA i=0 d=0x1
+R n=INA i=0 d=0xd5d5
+A l=1 m="I_ACC_CHANGED = 2"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 0"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 0"
+R n=I_ACC_CHANGED d=0x0
+
+I ea=0x58 id=14 tic=7
+M n=Mem t=ifetch ea=0x58 ra=0x58 d=0x07019c03
+INSTR op=0x039c0107					asm="dout sacc0,0x000000000000005c,ixo"
+R n=NIA d=0x5c
+R n=OP1 d=0x2800
+R n=OUT i=0 d=0x2800
+R n=NIA d=0x5c
+B taken=1 ea=0x5c
+R n=I_ACC_CHANGED d=0x2
+R n=INA i=2 d=0x0000
+R n=INA i=1 d=0xd5d5
+A l=1 m="POS_INA line0 = 1"
+D n=Mem t=read ea=0x10002 nb=2
+M n=Mem t=read ea=0x10000 ra=0x10000 d=0xd5d5d4d4
+R n=I_POS_INA i=0 d=0x0002
+R n=I_RPTCNT_INA i=0 d=0x1
+R n=INA i=0 d=0xd4d4
+D n=Mem t=write ea=0x8d000 nb=2
+M n=Mem t=write ea=0x8d000 ra=0x8d000 d=0x00280000
+R n=I_POS_OUT i=0 d=0x0001
+R n=XPOS d=0x0001
+A l=1 m="YPos = 0"
+A l=1 m="I_ACC_CHANGED = 2"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 0"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 0"
+R n=I_ACC_CHANGED d=0x0
+
+I ea=0x5c id=15 tic=8
+M n=Mem t=ifetch ea=0x5c ra=0x5c d=0xff000110
+INSTR op=0x100100ff					asm="mov loopcnt,0x00ff"
+R n=NIA d=0x60
+R n=OP1 d=0x00ff
+R n=OP2 d=0x00ff
+R n=RES d=0x00ff
+R n=SAT d=0x00ff
+R n=LOOPCNT d=0x00ff
+
+I ea=0x60 id=16 tic=9
+M n=Mem t=ifetch ea=0x60 ra=0x60 d=0x0800015d
+INSTR op=0x5d010008					asm="lsr w,ina,8"
+R n=NIA d=0x64
+R n=MOP1 i=0 d=0xd4d4
+R n=MOP1 i=1 d=0xd5d5
+R n=MOP1 i=2 d=0x0000
+R n=MOP1 i=3 d=0x0000
+R n=MOP1 i=4 d=0x0000
+R n=MOP1 i=5 d=0x0000
+R n=MOP1 i=6 d=0x0000
+R n=MOP1 i=7 d=0x0000
+R n=MOP1 i=8 d=0x0000
+R n=MOP2 i=0 d=0xfff8
+R n=MOP2 i=1 d=0xfff8
+R n=MOP2 i=2 d=0xfff8
+R n=MOP2 i=3 d=0xfff8
+R n=MOP2 i=4 d=0xfff8
+R n=MOP2 i=5 d=0xfff8
+R n=MOP2 i=6 d=0xfff8
+R n=MOP2 i=7 d=0xfff8
+R n=MOP2 i=8 d=0xfff8
+R n=MRES i=0 d=0x00d4
+R n=MRES i=1 d=0x00d5
+R n=MRES i=2 d=0x0000
+R n=MRES i=3 d=0x0000
+R n=MRES i=4 d=0x0000
+R n=MRES i=5 d=0x0000
+R n=MRES i=6 d=0x0000
+R n=MRES i=7 d=0x0000
+R n=MRES i=8 d=0x0000
+R n=I_MFLAG_Z d=0x1fc
+R n=I_MFLAG_N d=0x00
+R n=I_MFLAG_C d=0x00
+R n=I_MFLAG_O d=0x00
+R n=MSAT i=0 d=0x00d4
+R n=MSAT i=1 d=0x00d5
+R n=MSAT i=2 d=0x0000
+R n=MSAT i=3 d=0x0000
+R n=MSAT i=4 d=0x0000
+R n=MSAT i=5 d=0x0000
+R n=MSAT i=6 d=0x0000
+R n=MSAT i=7 d=0x0000
+R n=MSAT i=8 d=0x0000
+R n=I_ACC_CHANGED d=0x1
+R n=W i=0 d=0x00d4
+R n=W i=1 d=0x00d5
+R n=W i=2 d=0x0000
+R n=W i=3 d=0x0000
+R n=W i=4 d=0x0000
+R n=W i=5 d=0x0000
+R n=W i=6 d=0x0000
+R n=W i=7 d=0x0000
+R n=W i=8 d=0x0000
+R n=MFLAG_N d=0x00
+R n=MFLAG_Z d=0x1fc
+A l=1 m="I_ACC_CHANGED = 1"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 1"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 1"
+R n=I_ALLOW_UPDATE d=0x1
+R n=I_ACC_CHANGED d=0x0
+R n=I_ALLOW_UPDATE d=0x0
+
+I ea=0x64 id=17 tic=10
+M n=Mem t=ifetch ea=0x64 ra=0x64 d=0x41409821
+INSTR op=0x21984041					asm="add acc0,w0,w1"
+R n=NIA d=0x68
+R n=OP1 d=0x00d4
+R n=OP2 d=0x00d5
+R n=RES d=0x01a9
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x01a9
+R n=IACC i=0 d=0x0029a9
+
+I ea=0x68 id=18 tic=11
+M n=Mem t=ifetch ea=0x68 ra=0x68 d=0x01987022
+INSTR op=0x22709801					asm="sub gpr0,acc0,loopcnt"
+R n=NIA d=0x6c
+R n=OP1 d=0x29a9
+R n=OP2 d=0x00ff
+R n=RES d=0x28aa
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x28aa
+R n=GPR i=0 d=0x28aa
+
+I ea=0x6c id=19 tic=12
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x71708027
+INSTR op=0x27807071					asm="and out0,gpr0,gpr1"
+R n=NIA d=0x70
+R n=OP1 d=0x28aa
+R n=OP2 d=0xffff
+R n=RES d=0x28aa
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x28aa
+R n=OUT i=0 d=0x28aa
+
+I ea=0x70 id=20 tic=13
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x07fc000a
+INSTR op=0x0a00fc07					asm="ldon 0x0000000000000060,ixo"
+R n=NIA d=0x74
+R n=NIA d=0x60
+B taken=1 ea=0x60
+R n=LOOPCNT d=0x00fe
+R n=I_ACC_CHANGED d=0x2
+R n=INA i=2 d=0xd5d5
+R n=INA i=1 d=0xd4d4
+A l=1 m="POS_INA line0 = 2"
+D n=Mem t=read ea=0x10004 nb=2
+INIT
+MD n=Mem ra=0x0000000000010004 d=0xd4d4d5d5	#	(3570718165)
+TRACE
+M n=Mem t=read ea=0x10004 ra=0x10004 d=0xd4d4d5d5
+R n=I_POS_INA i=0 d=0x0003
+R n=I_RPTCNT_INA i=0 d=0x1
+R n=INA i=0 d=0xd4d4
+D n=Mem t=write ea=0x8d002 nb=2
+M n=Mem t=write ea=0x8d000 ra=0x8d000 d=0x0028aa28
+R n=I_POS_OUT i=0 d=0x0002
+R n=XPOS d=0x0002
+A l=1 m="YPos = 0"
+A l=1 m="I_ACC_CHANGED = 2"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 0"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 0"
+R n=I_ACC_CHANGED d=0x0
+
+I ea=0x60 id=21 tic=14
+M n=Mem t=ifetch ea=0x60 ra=0x60 d=0x0800015d
+INSTR op=0x5d010008					asm="lsr w,ina,8"
+R n=NIA d=0x64
+R n=MOP1 i=0 d=0xd4d4
+R n=MOP1 i=1 d=0xd4d4
+R n=MOP1 i=2 d=0xd5d5
+R n=MOP1 i=3 d=0x0000
+R n=MOP1 i=4 d=0x0000
+R n=MOP1 i=5 d=0x0000
+R n=MOP1 i=6 d=0x0000
+R n=MOP1 i=7 d=0x0000
+R n=MOP1 i=8 d=0x0000
+R n=MOP2 i=0 d=0xfff8
+R n=MOP2 i=1 d=0xfff8
+R n=MOP2 i=2 d=0xfff8
+R n=MOP2 i=3 d=0xfff8
+R n=MOP2 i=4 d=0xfff8
+R n=MOP2 i=5 d=0xfff8
+R n=MOP2 i=6 d=0xfff8
+R n=MOP2 i=7 d=0xfff8
+R n=MOP2 i=8 d=0xfff8
+R n=MRES i=0 d=0x00d4
+R n=MRES i=1 d=0x00d4
+R n=MRES i=2 d=0x00d5
+R n=MRES i=3 d=0x0000
+R n=MRES i=4 d=0x0000
+R n=MRES i=5 d=0x0000
+R n=MRES i=6 d=0x0000
+R n=MRES i=7 d=0x0000
+R n=MRES i=8 d=0x0000
+R n=I_MFLAG_Z d=0x1f8
+R n=I_MFLAG_N d=0x00
+R n=I_MFLAG_C d=0x00
+R n=I_MFLAG_O d=0x00
+R n=MSAT i=0 d=0x00d4
+R n=MSAT i=1 d=0x00d4
+R n=MSAT i=2 d=0x00d5
+R n=MSAT i=3 d=0x0000
+R n=MSAT i=4 d=0x0000
+R n=MSAT i=5 d=0x0000
+R n=MSAT i=6 d=0x0000
+R n=MSAT i=7 d=0x0000
+R n=MSAT i=8 d=0x0000
+R n=I_ACC_CHANGED d=0x1
+R n=W i=0 d=0x00d4
+R n=W i=1 d=0x00d4
+R n=W i=2 d=0x00d5
+R n=W i=3 d=0x0000
+R n=W i=4 d=0x0000
+R n=W i=5 d=0x0000
+R n=W i=6 d=0x0000
+R n=W i=7 d=0x0000
+R n=W i=8 d=0x0000
+R n=MFLAG_N d=0x00
+R n=MFLAG_Z d=0x1f8
+A l=1 m="I_ACC_CHANGED = 1"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 1"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 1"
+R n=I_ALLOW_UPDATE d=0x1
+R n=I_ACC_CHANGED d=0x0
+R n=I_ALLOW_UPDATE d=0x0
+
+I ea=0x64 id=22 tic=15
+M n=Mem t=ifetch ea=0x64 ra=0x64 d=0x41409821
+INSTR op=0x21984041					asm="add acc0,w0,w1"
+R n=NIA d=0x68
+R n=OP1 d=0x00d4
+R n=OP2 d=0x00d4
+R n=RES d=0x01a8
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x01a8
+R n=IACC i=0 d=0x002b51
+
+I ea=0x68 id=23 tic=16
+M n=Mem t=ifetch ea=0x68 ra=0x68 d=0x01987022
+INSTR op=0x22709801					asm="sub gpr0,acc0,loopcnt"
+R n=NIA d=0x6c
+R n=OP1 d=0x2b51
+R n=OP2 d=0x00fe
+R n=RES d=0x2a53
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x2a53
+R n=GPR i=0 d=0x2a53
+
+I ea=0x6c id=24 tic=17
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x71708027
+INSTR op=0x27807071					asm="and out0,gpr0,gpr1"
+R n=NIA d=0x70
+R n=OP1 d=0x2a53
+R n=OP2 d=0xffff
+R n=RES d=0x2a53
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x2a53
+R n=OUT i=0 d=0x2a53
+
+I ea=0x70 id=25 tic=18
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x07fc000a
+INSTR op=0x0a00fc07					asm="ldon 0x0000000000000060,ixo"
+R n=NIA d=0x74
+R n=NIA d=0x60
+B taken=1 ea=0x60
+R n=LOOPCNT d=0x00fd
+R n=I_ACC_CHANGED d=0x2
+R n=INA i=2 d=0xd4d4
+R n=INA i=1 d=0xd4d4
+A l=1 m="POS_INA line0 = 3"
+D n=Mem t=read ea=0x10006 nb=2
+M n=Mem t=read ea=0x10004 ra=0x10004 d=0xd4d4d5d5
+R n=I_POS_INA i=0 d=0x0004
+R n=I_RPTCNT_INA i=0 d=0x1
+R n=INA i=0 d=0xd5d5
+D n=Mem t=write ea=0x8d004 nb=2
+M n=Mem t=write ea=0x8d004 ra=0x8d004 d=0x532a0000
+R n=I_POS_OUT i=0 d=0x0003
+R n=XPOS d=0x0003
+A l=1 m="YPos = 0"
+A l=1 m="I_ACC_CHANGED = 2"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 0"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 0"
+R n=I_ACC_CHANGED d=0x0
+
+I ea=0x60 id=26 tic=19
+M n=Mem t=ifetch ea=0x60 ra=0x60 d=0x0800015d
+INSTR op=0x5d010008					asm="lsr w,ina,8"
+R n=NIA d=0x64
+R n=MOP1 i=0 d=0xd5d5
+R n=MOP1 i=1 d=0xd4d4
+R n=MOP1 i=2 d=0xd4d4
+R n=MOP1 i=3 d=0x0000
+R n=MOP1 i=4 d=0x0000
+R n=MOP1 i=5 d=0x0000
+R n=MOP1 i=6 d=0x0000
+R n=MOP1 i=7 d=0x0000
+R n=MOP1 i=8 d=0x0000
+R n=MOP2 i=0 d=0xfff8
+R n=MOP2 i=1 d=0xfff8
+R n=MOP2 i=2 d=0xfff8
+R n=MOP2 i=3 d=0xfff8
+R n=MOP2 i=4 d=0xfff8
+R n=MOP2 i=5 d=0xfff8
+R n=MOP2 i=6 d=0xfff8
+R n=MOP2 i=7 d=0xfff8
+R n=MOP2 i=8 d=0xfff8
+R n=MRES i=0 d=0x00d5
+R n=MRES i=1 d=0x00d4
+R n=MRES i=2 d=0x00d4
+R n=MRES i=3 d=0x0000
+R n=MRES i=4 d=0x0000
+R n=MRES i=5 d=0x0000
+R n=MRES i=6 d=0x0000
+R n=MRES i=7 d=0x0000
+R n=MRES i=8 d=0x0000
+R n=I_MFLAG_Z d=0x1f8
+R n=I_MFLAG_N d=0x00
+R n=I_MFLAG_C d=0x00
+R n=I_MFLAG_O d=0x00
+R n=MSAT i=0 d=0x00d5
+R n=MSAT i=1 d=0x00d4
+R n=MSAT i=2 d=0x00d4
+R n=MSAT i=3 d=0x0000
+R n=MSAT i=4 d=0x0000
+R n=MSAT i=5 d=0x0000
+R n=MSAT i=6 d=0x0000
+R n=MSAT i=7 d=0x0000
+R n=MSAT i=8 d=0x0000
+R n=I_ACC_CHANGED d=0x1
+R n=W i=0 d=0x00d5
+R n=W i=1 d=0x00d4
+R n=W i=2 d=0x00d4
+R n=W i=3 d=0x0000
+R n=W i=4 d=0x0000
+R n=W i=5 d=0x0000
+R n=W i=6 d=0x0000
+R n=W i=7 d=0x0000
+R n=W i=8 d=0x0000
+R n=MFLAG_N d=0x00
+R n=MFLAG_Z d=0x1f8
+A l=1 m="I_ACC_CHANGED = 1"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 1"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 1"
+R n=I_ALLOW_UPDATE d=0x1
+R n=I_ACC_CHANGED d=0x0
+R n=I_ALLOW_UPDATE d=0x0
+
+I ea=0x64 id=27 tic=20
+M n=Mem t=ifetch ea=0x64 ra=0x64 d=0x41409821
+INSTR op=0x21984041					asm="add acc0,w0,w1"
+R n=NIA d=0x68
+R n=OP1 d=0x00d5
+R n=OP2 d=0x00d4
+R n=RES d=0x01a9
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x01a9
+R n=IACC i=0 d=0x002cfa
+
+I ea=0x68 id=28 tic=21
+M n=Mem t=ifetch ea=0x68 ra=0x68 d=0x01987022
+INSTR op=0x22709801					asm="sub gpr0,acc0,loopcnt"
+R n=NIA d=0x6c
+R n=OP1 d=0x2cfa
+R n=OP2 d=0x00fd
+R n=RES d=0x2bfd
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x2bfd
+R n=GPR i=0 d=0x2bfd
+
+I ea=0x6c id=29 tic=22
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x71708027
+INSTR op=0x27807071					asm="and out0,gpr0,gpr1"
+R n=NIA d=0x70
+R n=OP1 d=0x2bfd
+R n=OP2 d=0xffff
+R n=RES d=0x2bfd
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x2bfd
+R n=OUT i=0 d=0x2bfd
+
+I ea=0x70 id=30 tic=23
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x07fc000a
+INSTR op=0x0a00fc07					asm="ldon 0x0000000000000060,ixo"
+R n=NIA d=0x74
+R n=NIA d=0x60
+B taken=1 ea=0x60
+R n=LOOPCNT d=0x00fc
+R n=I_ACC_CHANGED d=0x2
+R n=INA i=2 d=0xd4d4
+R n=INA i=1 d=0xd5d5
+A l=1 m="POS_INA line0 = 4"
+D n=Mem t=read ea=0x10008 nb=2
+INIT
+MD n=Mem ra=0x0000000000010008 d=0xd5d5d4d4	#	(3587560660)
+TRACE
+M n=Mem t=read ea=0x10008 ra=0x10008 d=0xd5d5d4d4
+R n=I_POS_INA i=0 d=0x0005
+R n=I_RPTCNT_INA i=0 d=0x1
+R n=INA i=0 d=0xd5d5
+D n=Mem t=write ea=0x8d006 nb=2
+M n=Mem t=write ea=0x8d004 ra=0x8d004 d=0x532afd2b
+R n=I_POS_OUT i=0 d=0x0004
+R n=XPOS d=0x0004
+A l=1 m="YPos = 0"
+A l=1 m="I_ACC_CHANGED = 2"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 0"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 0"
+R n=I_ACC_CHANGED d=0x0
+
+I ea=0x60 id=31 tic=24
+M n=Mem t=ifetch ea=0x60 ra=0x60 d=0x0800015d
+INSTR op=0x5d010008					asm="lsr w,ina,8"
+R n=NIA d=0x64
+R n=MOP1 i=0 d=0xd5d5
+R n=MOP1 i=1 d=0xd5d5
+R n=MOP1 i=2 d=0xd4d4
+R n=MOP1 i=3 d=0x0000
+R n=MOP1 i=4 d=0x0000
+R n=MOP1 i=5 d=0x0000
+R n=MOP1 i=6 d=0x0000
+R n=MOP1 i=7 d=0x0000
+R n=MOP1 i=8 d=0x0000
+R n=MOP2 i=0 d=0xfff8
+R n=MOP2 i=1 d=0xfff8
+R n=MOP2 i=2 d=0xfff8
+R n=MOP2 i=3 d=0xfff8
+R n=MOP2 i=4 d=0xfff8
+R n=MOP2 i=5 d=0xfff8
+R n=MOP2 i=6 d=0xfff8
+R n=MOP2 i=7 d=0xfff8
+R n=MOP2 i=8 d=0xfff8
+R n=MRES i=0 d=0x00d5
+R n=MRES i=1 d=0x00d5
+R n=MRES i=2 d=0x00d4
+R n=MRES i=3 d=0x0000
+R n=MRES i=4 d=0x0000
+R n=MRES i=5 d=0x0000
+R n=MRES i=6 d=0x0000
+R n=MRES i=7 d=0x0000
+R n=MRES i=8 d=0x0000
+R n=I_MFLAG_Z d=0x1f8
+R n=I_MFLAG_N d=0x00
+R n=I_MFLAG_C d=0x00
+R n=I_MFLAG_O d=0x00
+R n=MSAT i=0 d=0x00d5
+R n=MSAT i=1 d=0x00d5
+R n=MSAT i=2 d=0x00d4
+R n=MSAT i=3 d=0x0000
+R n=MSAT i=4 d=0x0000
+R n=MSAT i=5 d=0x0000
+R n=MSAT i=6 d=0x0000
+R n=MSAT i=7 d=0x0000
+R n=MSAT i=8 d=0x0000
+R n=I_ACC_CHANGED d=0x1
+R n=W i=0 d=0x00d5
+R n=W i=1 d=0x00d5
+R n=W i=2 d=0x00d4
+R n=W i=3 d=0x0000
+R n=W i=4 d=0x0000
+R n=W i=5 d=0x0000
+R n=W i=6 d=0x0000
+R n=W i=7 d=0x0000
+R n=W i=8 d=0x0000
+R n=MFLAG_N d=0x00
+R n=MFLAG_Z d=0x1f8
+A l=1 m="I_ACC_CHANGED = 1"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 1"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 1"
+R n=I_ALLOW_UPDATE d=0x1
+R n=I_ACC_CHANGED d=0x0
+R n=I_ALLOW_UPDATE d=0x0
+
+I ea=0x64 id=32 tic=25
+M n=Mem t=ifetch ea=0x64 ra=0x64 d=0x41409821
+INSTR op=0x21984041					asm="add acc0,w0,w1"
+R n=NIA d=0x68
+R n=OP1 d=0x00d5
+R n=OP2 d=0x00d5
+R n=RES d=0x01aa
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x01aa
+R n=IACC i=0 d=0x002ea4
+
+I ea=0x68 id=33 tic=26
+M n=Mem t=ifetch ea=0x68 ra=0x68 d=0x01987022
+INSTR op=0x22709801					asm="sub gpr0,acc0,loopcnt"
+R n=NIA d=0x6c
+R n=OP1 d=0x2ea4
+R n=OP2 d=0x00fc
+R n=RES d=0x2da8
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x2da8
+R n=GPR i=0 d=0x2da8
+
+I ea=0x6c id=34 tic=27
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x71708027
+INSTR op=0x27807071					asm="and out0,gpr0,gpr1"
+R n=NIA d=0x70
+R n=OP1 d=0x2da8
+R n=OP2 d=0xffff
+R n=RES d=0x2da8
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x2da8
+R n=OUT i=0 d=0x2da8
+
+I ea=0x70 id=35 tic=28
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x07fc000a
+INSTR op=0x0a00fc07					asm="ldon 0x0000000000000060,ixo"
+R n=NIA d=0x74
+R n=NIA d=0x60
+B taken=1 ea=0x60
+R n=LOOPCNT d=0x00fb
+R n=I_ACC_CHANGED d=0x2
+R n=INA i=2 d=0xd5d5
+R n=INA i=1 d=0xd5d5
+A l=1 m="POS_INA line0 = 5"
+D n=Mem t=read ea=0x1000a nb=2
+M n=Mem t=read ea=0x10008 ra=0x10008 d=0xd5d5d4d4
+R n=I_POS_INA i=0 d=0x0006
+R n=I_RPTCNT_INA i=0 d=0x1
+R n=INA i=0 d=0xd4d4
+D n=Mem t=write ea=0x8d008 nb=2
+M n=Mem t=write ea=0x8d008 ra=0x8d008 d=0xa82d0000
+R n=I_POS_OUT i=0 d=0x0005
+R n=XPOS d=0x0005
+A l=1 m="YPos = 0"
+A l=1 m="I_ACC_CHANGED = 2"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 0"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 0"
+R n=I_ACC_CHANGED d=0x0
+
+I ea=0x60 id=36 tic=29
+M n=Mem t=ifetch ea=0x60 ra=0x60 d=0x0800015d
+INSTR op=0x5d010008					asm="lsr w,ina,8"
+R n=NIA d=0x64
+R n=MOP1 i=0 d=0xd4d4
+R n=MOP1 i=1 d=0xd5d5
+R n=MOP1 i=2 d=0xd5d5
+R n=MOP1 i=3 d=0x0000
+R n=MOP1 i=4 d=0x0000
+R n=MOP1 i=5 d=0x0000
+R n=MOP1 i=6 d=0x0000
+R n=MOP1 i=7 d=0x0000
+R n=MOP1 i=8 d=0x0000
+R n=MOP2 i=0 d=0xfff8
+R n=MOP2 i=1 d=0xfff8
+R n=MOP2 i=2 d=0xfff8
+R n=MOP2 i=3 d=0xfff8
+R n=MOP2 i=4 d=0xfff8
+R n=MOP2 i=5 d=0xfff8
+R n=MOP2 i=6 d=0xfff8
+R n=MOP2 i=7 d=0xfff8
+R n=MOP2 i=8 d=0xfff8
+R n=MRES i=0 d=0x00d4
+R n=MRES i=1 d=0x00d5
+R n=MRES i=2 d=0x00d5
+R n=MRES i=3 d=0x0000
+R n=MRES i=4 d=0x0000
+R n=MRES i=5 d=0x0000
+R n=MRES i=6 d=0x0000
+R n=MRES i=7 d=0x0000
+R n=MRES i=8 d=0x0000
+R n=I_MFLAG_Z d=0x1f8
+R n=I_MFLAG_N d=0x00
+R n=I_MFLAG_C d=0x00
+R n=I_MFLAG_O d=0x00
+R n=MSAT i=0 d=0x00d4
+R n=MSAT i=1 d=0x00d5
+R n=MSAT i=2 d=0x00d5
+R n=MSAT i=3 d=0x0000
+R n=MSAT i=4 d=0x0000
+R n=MSAT i=5 d=0x0000
+R n=MSAT i=6 d=0x0000
+R n=MSAT i=7 d=0x0000
+R n=MSAT i=8 d=0x0000
+R n=I_ACC_CHANGED d=0x1
+R n=W i=0 d=0x00d4
+R n=W i=1 d=0x00d5
+R n=W i=2 d=0x00d5
+R n=W i=3 d=0x0000
+R n=W i=4 d=0x0000
+R n=W i=5 d=0x0000
+R n=W i=6 d=0x0000
+R n=W i=7 d=0x0000
+R n=W i=8 d=0x0000
+R n=MFLAG_N d=0x00
+R n=MFLAG_Z d=0x1f8
+A l=1 m="I_ACC_CHANGED = 1"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 1"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 1"
+R n=I_ALLOW_UPDATE d=0x1
+R n=I_ACC_CHANGED d=0x0
+R n=I_ALLOW_UPDATE d=0x0
+
+I ea=0x64 id=37 tic=30
+M n=Mem t=ifetch ea=0x64 ra=0x64 d=0x41409821
+INSTR op=0x21984041					asm="add acc0,w0,w1"
+R n=NIA d=0x68
+R n=OP1 d=0x00d4
+R n=OP2 d=0x00d5
+R n=RES d=0x01a9
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x01a9
+R n=IACC i=0 d=0x00304d
+
+I ea=0x68 id=38 tic=31
+M n=Mem t=ifetch ea=0x68 ra=0x68 d=0x01987022
+INSTR op=0x22709801					asm="sub gpr0,acc0,loopcnt"
+R n=NIA d=0x6c
+R n=OP1 d=0x304d
+R n=OP2 d=0x00fb
+R n=RES d=0x2f52
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x2f52
+R n=GPR i=0 d=0x2f52
+
+I ea=0x6c id=39 tic=32
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x71708027
+INSTR op=0x27807071					asm="and out0,gpr0,gpr1"
+R n=NIA d=0x70
+R n=OP1 d=0x2f52
+R n=OP2 d=0xffff
+R n=RES d=0x2f52
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x2f52
+R n=OUT i=0 d=0x2f52
+
+I ea=0x70 id=40 tic=33
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x07fc000a
+INSTR op=0x0a00fc07					asm="ldon 0x0000000000000060,ixo"
+R n=NIA d=0x74
+R n=NIA d=0x60
+B taken=1 ea=0x60
+R n=LOOPCNT d=0x00fa
+R n=I_ACC_CHANGED d=0x2
+R n=INA i=2 d=0xd5d5
+R n=INA i=1 d=0xd4d4
+A l=1 m="POS_INA line0 = 6"
+D n=Mem t=read ea=0x1000c nb=2
+INIT
+MD n=Mem ra=0x000000000001000c d=0xd4d4d5d5	#	(3570718165)
+TRACE
+M n=Mem t=read ea=0x1000c ra=0x1000c d=0xd4d4d5d5
+R n=I_POS_INA i=0 d=0x0007
+R n=I_RPTCNT_INA i=0 d=0x1
+R n=INA i=0 d=0xd4d4
+D n=Mem t=write ea=0x8d00a nb=2
+M n=Mem t=write ea=0x8d008 ra=0x8d008 d=0xa82d522f
+R n=I_POS_OUT i=0 d=0x0006
+R n=XPOS d=0x0006
+A l=1 m="YPos = 0"
+A l=1 m="I_ACC_CHANGED = 2"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 0"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 0"
+R n=I_ACC_CHANGED d=0x0
+
+I ea=0x60 id=41 tic=34
+M n=Mem t=ifetch ea=0x60 ra=0x60 d=0x0800015d
+INSTR op=0x5d010008					asm="lsr w,ina,8"
+R n=NIA d=0x64
+R n=MOP1 i=0 d=0xd4d4
+R n=MOP1 i=1 d=0xd4d4
+R n=MOP1 i=2 d=0xd5d5
+R n=MOP1 i=3 d=0x0000
+R n=MOP1 i=4 d=0x0000
+R n=MOP1 i=5 d=0x0000
+R n=MOP1 i=6 d=0x0000
+R n=MOP1 i=7 d=0x0000
+R n=MOP1 i=8 d=0x0000
+R n=MOP2 i=0 d=0xfff8
+R n=MOP2 i=1 d=0xfff8
+R n=MOP2 i=2 d=0xfff8
+R n=MOP2 i=3 d=0xfff8
+R n=MOP2 i=4 d=0xfff8
+R n=MOP2 i=5 d=0xfff8
+R n=MOP2 i=6 d=0xfff8
+R n=MOP2 i=7 d=0xfff8
+R n=MOP2 i=8 d=0xfff8
+R n=MRES i=0 d=0x00d4
+R n=MRES i=1 d=0x00d4
+R n=MRES i=2 d=0x00d5
+R n=MRES i=3 d=0x0000
+R n=MRES i=4 d=0x0000
+R n=MRES i=5 d=0x0000
+R n=MRES i=6 d=0x0000
+R n=MRES i=7 d=0x0000
+R n=MRES i=8 d=0x0000
+R n=I_MFLAG_Z d=0x1f8
+R n=I_MFLAG_N d=0x00
+R n=I_MFLAG_C d=0x00
+R n=I_MFLAG_O d=0x00
+R n=MSAT i=0 d=0x00d4
+R n=MSAT i=1 d=0x00d4
+R n=MSAT i=2 d=0x00d5
+R n=MSAT i=3 d=0x0000
+R n=MSAT i=4 d=0x0000
+R n=MSAT i=5 d=0x0000
+R n=MSAT i=6 d=0x0000
+R n=MSAT i=7 d=0x0000
+R n=MSAT i=8 d=0x0000
+R n=I_ACC_CHANGED d=0x1
+R n=W i=0 d=0x00d4
+R n=W i=1 d=0x00d4
+R n=W i=2 d=0x00d5
+R n=W i=3 d=0x0000
+R n=W i=4 d=0x0000
+R n=W i=5 d=0x0000
+R n=W i=6 d=0x0000
+R n=W i=7 d=0x0000
+R n=W i=8 d=0x0000
+R n=MFLAG_N d=0x00
+R n=MFLAG_Z d=0x1f8
+A l=1 m="I_ACC_CHANGED = 1"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 1"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 1"
+R n=I_ALLOW_UPDATE d=0x1
+R n=I_ACC_CHANGED d=0x0
+R n=I_ALLOW_UPDATE d=0x0
+
+I ea=0x64 id=42 tic=35
+M n=Mem t=ifetch ea=0x64 ra=0x64 d=0x41409821
+INSTR op=0x21984041					asm="add acc0,w0,w1"
+R n=NIA d=0x68
+R n=OP1 d=0x00d4
+R n=OP2 d=0x00d4
+R n=RES d=0x01a8
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x01a8
+R n=IACC i=0 d=0x0031f5
+
+I ea=0x68 id=43 tic=36
+M n=Mem t=ifetch ea=0x68 ra=0x68 d=0x01987022
+INSTR op=0x22709801					asm="sub gpr0,acc0,loopcnt"
+R n=NIA d=0x6c
+R n=OP1 d=0x31f5
+R n=OP2 d=0x00fa
+R n=RES d=0x30fb
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x30fb
+R n=GPR i=0 d=0x30fb
+
+I ea=0x6c id=44 tic=37
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x71708027
+INSTR op=0x27807071					asm="and out0,gpr0,gpr1"
+R n=NIA d=0x70
+R n=OP1 d=0x30fb
+R n=OP2 d=0xffff
+R n=RES d=0x30fb
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x30fb
+R n=OUT i=0 d=0x30fb
+
+I ea=0x70 id=45 tic=38
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x07fc000a
+INSTR op=0x0a00fc07					asm="ldon 0x0000000000000060,ixo"
+R n=NIA d=0x74
+R n=NIA d=0x60
+B taken=1 ea=0x60
+R n=LOOPCNT d=0x00f9
+R n=I_ACC_CHANGED d=0x2
+R n=INA i=2 d=0xd4d4
+R n=INA i=1 d=0xd4d4
+A l=1 m="POS_INA line0 = 7"
+D n=Mem t=read ea=0x1000e nb=2
+M n=Mem t=read ea=0x1000c ra=0x1000c d=0xd4d4d5d5
+R n=I_POS_INA i=0 d=0x0008
+R n=I_RPTCNT_INA i=0 d=0x1
+R n=INA i=0 d=0xd5d5
+D n=Mem t=write ea=0x8d00c nb=2
+M n=Mem t=write ea=0x8d00c ra=0x8d00c d=0xfb300000
+R n=I_POS_OUT i=0 d=0x0007
+R n=XPOS d=0x0007
+A l=1 m="YPos = 0"
+A l=1 m="I_ACC_CHANGED = 2"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 0"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 0"
+R n=I_ACC_CHANGED d=0x0
+
+I ea=0x60 id=46 tic=39
+M n=Mem t=ifetch ea=0x60 ra=0x60 d=0x0800015d
+INSTR op=0x5d010008					asm="lsr w,ina,8"
+R n=NIA d=0x64
+R n=MOP1 i=0 d=0xd5d5
+R n=MOP1 i=1 d=0xd4d4
+R n=MOP1 i=2 d=0xd4d4
+R n=MOP1 i=3 d=0x0000
+R n=MOP1 i=4 d=0x0000
+R n=MOP1 i=5 d=0x0000
+R n=MOP1 i=6 d=0x0000
+R n=MOP1 i=7 d=0x0000
+R n=MOP1 i=8 d=0x0000
+R n=MOP2 i=0 d=0xfff8
+R n=MOP2 i=1 d=0xfff8
+R n=MOP2 i=2 d=0xfff8
+R n=MOP2 i=3 d=0xfff8
+R n=MOP2 i=4 d=0xfff8
+R n=MOP2 i=5 d=0xfff8
+R n=MOP2 i=6 d=0xfff8
+R n=MOP2 i=7 d=0xfff8
+R n=MOP2 i=8 d=0xfff8
+R n=MRES i=0 d=0x00d5
+R n=MRES i=1 d=0x00d4
+R n=MRES i=2 d=0x00d4
+R n=MRES i=3 d=0x0000
+R n=MRES i=4 d=0x0000
+R n=MRES i=5 d=0x0000
+R n=MRES i=6 d=0x0000
+R n=MRES i=7 d=0x0000
+R n=MRES i=8 d=0x0000
+R n=I_MFLAG_Z d=0x1f8
+R n=I_MFLAG_N d=0x00
+R n=I_MFLAG_C d=0x00
+R n=I_MFLAG_O d=0x00
+R n=MSAT i=0 d=0x00d5
+R n=MSAT i=1 d=0x00d4
+R n=MSAT i=2 d=0x00d4
+R n=MSAT i=3 d=0x0000
+R n=MSAT i=4 d=0x0000
+R n=MSAT i=5 d=0x0000
+R n=MSAT i=6 d=0x0000
+R n=MSAT i=7 d=0x0000
+R n=MSAT i=8 d=0x0000
+R n=I_ACC_CHANGED d=0x1
+R n=W i=0 d=0x00d5
+R n=W i=1 d=0x00d4
+R n=W i=2 d=0x00d4
+R n=W i=3 d=0x0000
+R n=W i=4 d=0x0000
+R n=W i=5 d=0x0000
+R n=W i=6 d=0x0000
+R n=W i=7 d=0x0000
+R n=W i=8 d=0x0000
+R n=MFLAG_N d=0x00
+R n=MFLAG_Z d=0x1f8
+A l=1 m="I_ACC_CHANGED = 1"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 1"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 1"
+R n=I_ALLOW_UPDATE d=0x1
+R n=I_ACC_CHANGED d=0x0
+R n=I_ALLOW_UPDATE d=0x0
+
+I ea=0x64 id=47 tic=40
+M n=Mem t=ifetch ea=0x64 ra=0x64 d=0x41409821
+INSTR op=0x21984041					asm="add acc0,w0,w1"
+R n=NIA d=0x68
+R n=OP1 d=0x00d5
+R n=OP2 d=0x00d4
+R n=RES d=0x01a9
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x01a9
+R n=IACC i=0 d=0x00339e
+
+I ea=0x68 id=48 tic=41
+M n=Mem t=ifetch ea=0x68 ra=0x68 d=0x01987022
+INSTR op=0x22709801					asm="sub gpr0,acc0,loopcnt"
+R n=NIA d=0x6c
+R n=OP1 d=0x339e
+R n=OP2 d=0x00f9
+R n=RES d=0x32a5
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x32a5
+R n=GPR i=0 d=0x32a5
+
+I ea=0x6c id=49 tic=42
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x71708027
+INSTR op=0x27807071					asm="and out0,gpr0,gpr1"
+R n=NIA d=0x70
+R n=OP1 d=0x32a5
+R n=OP2 d=0xffff
+R n=RES d=0x32a5
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x32a5
+R n=OUT i=0 d=0x32a5
+
+I ea=0x70 id=50 tic=43
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x07fc000a
+INSTR op=0x0a00fc07					asm="ldon 0x0000000000000060,ixo"
+R n=NIA d=0x74
+R n=NIA d=0x60
+B taken=1 ea=0x60
+R n=LOOPCNT d=0x00f8
+R n=I_ACC_CHANGED d=0x2
+R n=INA i=2 d=0xd4d4
+R n=INA i=1 d=0xd5d5
+A l=1 m="POS_INA line0 = 8"
+D n=Mem t=read ea=0x10010 nb=2
+INIT
+MD n=Mem ra=0x0000000000010010 d=0xd8d8d7d7	#	(3638089687)
+TRACE
+M n=Mem t=read ea=0x10010 ra=0x10010 d=0xd8d8d7d7
+R n=I_POS_INA i=0 d=0x0009
+R n=I_RPTCNT_INA i=0 d=0x1
+R n=INA i=0 d=0xd8d8
+D n=Mem t=write ea=0x8d00e nb=2
+M n=Mem t=write ea=0x8d00c ra=0x8d00c d=0xfb30a532
+R n=I_POS_OUT i=0 d=0x0008
+R n=XPOS d=0x0008
+A l=1 m="YPos = 0"
+A l=1 m="I_ACC_CHANGED = 2"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 0"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 0"
+R n=I_ACC_CHANGED d=0x0
+
+I ea=0x60 id=51 tic=44
+M n=Mem t=ifetch ea=0x60 ra=0x60 d=0x0800015d
+INSTR op=0x5d010008					asm="lsr w,ina,8"
+R n=NIA d=0x64
+R n=MOP1 i=0 d=0xd8d8
+R n=MOP1 i=1 d=0xd5d5
+R n=MOP1 i=2 d=0xd4d4
+R n=MOP1 i=3 d=0x0000
+R n=MOP1 i=4 d=0x0000
+R n=MOP1 i=5 d=0x0000
+R n=MOP1 i=6 d=0x0000
+R n=MOP1 i=7 d=0x0000
+R n=MOP1 i=8 d=0x0000
+R n=MOP2 i=0 d=0xfff8
+R n=MOP2 i=1 d=0xfff8
+R n=MOP2 i=2 d=0xfff8
+R n=MOP2 i=3 d=0xfff8
+R n=MOP2 i=4 d=0xfff8
+R n=MOP2 i=5 d=0xfff8
+R n=MOP2 i=6 d=0xfff8
+R n=MOP2 i=7 d=0xfff8
+R n=MOP2 i=8 d=0xfff8
+R n=MRES i=0 d=0x00d8
+R n=MRES i=1 d=0x00d5
+R n=MRES i=2 d=0x00d4
+R n=MRES i=3 d=0x0000
+R n=MRES i=4 d=0x0000
+R n=MRES i=5 d=0x0000
+R n=MRES i=6 d=0x0000
+R n=MRES i=7 d=0x0000
+R n=MRES i=8 d=0x0000
+R n=I_MFLAG_Z d=0x1f8
+R n=I_MFLAG_N d=0x00
+R n=I_MFLAG_C d=0x00
+R n=I_MFLAG_O d=0x00
+R n=MSAT i=0 d=0x00d8
+R n=MSAT i=1 d=0x00d5
+R n=MSAT i=2 d=0x00d4
+R n=MSAT i=3 d=0x0000
+R n=MSAT i=4 d=0x0000
+R n=MSAT i=5 d=0x0000
+R n=MSAT i=6 d=0x0000
+R n=MSAT i=7 d=0x0000
+R n=MSAT i=8 d=0x0000
+R n=I_ACC_CHANGED d=0x1
+R n=W i=0 d=0x00d8
+R n=W i=1 d=0x00d5
+R n=W i=2 d=0x00d4
+R n=W i=3 d=0x0000
+R n=W i=4 d=0x0000
+R n=W i=5 d=0x0000
+R n=W i=6 d=0x0000
+R n=W i=7 d=0x0000
+R n=W i=8 d=0x0000
+R n=MFLAG_N d=0x00
+R n=MFLAG_Z d=0x1f8
+A l=1 m="I_ACC_CHANGED = 1"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 1"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 1"
+R n=I_ALLOW_UPDATE d=0x1
+R n=I_ACC_CHANGED d=0x0
+R n=I_ALLOW_UPDATE d=0x0
+
+I ea=0x64 id=52 tic=45
+M n=Mem t=ifetch ea=0x64 ra=0x64 d=0x41409821
+INSTR op=0x21984041					asm="add acc0,w0,w1"
+R n=NIA d=0x68
+R n=OP1 d=0x00d8
+R n=OP2 d=0x00d5
+R n=RES d=0x01ad
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x01ad
+R n=IACC i=0 d=0x00354b
+
+I ea=0x68 id=53 tic=46
+M n=Mem t=ifetch ea=0x68 ra=0x68 d=0x01987022
+INSTR op=0x22709801					asm="sub gpr0,acc0,loopcnt"
+R n=NIA d=0x6c
+R n=OP1 d=0x354b
+R n=OP2 d=0x00f8
+R n=RES d=0x3453
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x3453
+R n=GPR i=0 d=0x3453
+
+I ea=0x6c id=54 tic=47
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x71708027
+INSTR op=0x27807071					asm="and out0,gpr0,gpr1"
+R n=NIA d=0x70
+R n=OP1 d=0x3453
+R n=OP2 d=0xffff
+R n=RES d=0x3453
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x3453
+R n=OUT i=0 d=0x3453
+
+I ea=0x70 id=55 tic=48
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x07fc000a
+INSTR op=0x0a00fc07					asm="ldon 0x0000000000000060,ixo"
+R n=NIA d=0x74
+R n=NIA d=0x60
+B taken=1 ea=0x60
+R n=LOOPCNT d=0x00f7
+R n=I_ACC_CHANGED d=0x2
+R n=INA i=2 d=0xd5d5
+R n=INA i=1 d=0xd8d8
+A l=1 m="POS_INA line0 = 9"
+D n=Mem t=read ea=0x10012 nb=2
+M n=Mem t=read ea=0x10010 ra=0x10010 d=0xd8d8d7d7
+R n=I_POS_INA i=0 d=0x000a
+R n=I_RPTCNT_INA i=0 d=0x1
+R n=INA i=0 d=0xd7d7
+D n=Mem t=write ea=0x8d010 nb=2
+M n=Mem t=write ea=0x8d010 ra=0x8d010 d=0x53340000
+R n=I_POS_OUT i=0 d=0x0009
+R n=XPOS d=0x0009
+A l=1 m="YPos = 0"
+A l=1 m="I_ACC_CHANGED = 2"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 0"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 0"
+R n=I_ACC_CHANGED d=0x0
+
+I ea=0x60 id=56 tic=49
+M n=Mem t=ifetch ea=0x60 ra=0x60 d=0x0800015d
+INSTR op=0x5d010008					asm="lsr w,ina,8"
+R n=NIA d=0x64
+R n=MOP1 i=0 d=0xd7d7
+R n=MOP1 i=1 d=0xd8d8
+R n=MOP1 i=2 d=0xd5d5
+R n=MOP1 i=3 d=0x0000
+R n=MOP1 i=4 d=0x0000
+R n=MOP1 i=5 d=0x0000
+R n=MOP1 i=6 d=0x0000
+R n=MOP1 i=7 d=0x0000
+R n=MOP1 i=8 d=0x0000
+R n=MOP2 i=0 d=0xfff8
+R n=MOP2 i=1 d=0xfff8
+R n=MOP2 i=2 d=0xfff8
+R n=MOP2 i=3 d=0xfff8
+R n=MOP2 i=4 d=0xfff8
+R n=MOP2 i=5 d=0xfff8
+R n=MOP2 i=6 d=0xfff8
+R n=MOP2 i=7 d=0xfff8
+R n=MOP2 i=8 d=0xfff8
+R n=MRES i=0 d=0x00d7
+R n=MRES i=1 d=0x00d8
+R n=MRES i=2 d=0x00d5
+R n=MRES i=3 d=0x0000
+R n=MRES i=4 d=0x0000
+R n=MRES i=5 d=0x0000
+R n=MRES i=6 d=0x0000
+R n=MRES i=7 d=0x0000
+R n=MRES i=8 d=0x0000
+R n=I_MFLAG_Z d=0x1f8
+R n=I_MFLAG_N d=0x00
+R n=I_MFLAG_C d=0x00
+R n=I_MFLAG_O d=0x00
+R n=MSAT i=0 d=0x00d7
+R n=MSAT i=1 d=0x00d8
+R n=MSAT i=2 d=0x00d5
+R n=MSAT i=3 d=0x0000
+R n=MSAT i=4 d=0x0000
+R n=MSAT i=5 d=0x0000
+R n=MSAT i=6 d=0x0000
+R n=MSAT i=7 d=0x0000
+R n=MSAT i=8 d=0x0000
+R n=I_ACC_CHANGED d=0x1
+R n=W i=0 d=0x00d7
+R n=W i=1 d=0x00d8
+R n=W i=2 d=0x00d5
+R n=W i=3 d=0x0000
+R n=W i=4 d=0x0000
+R n=W i=5 d=0x0000
+R n=W i=6 d=0x0000
+R n=W i=7 d=0x0000
+R n=W i=8 d=0x0000
+R n=MFLAG_N d=0x00
+R n=MFLAG_Z d=0x1f8
+A l=1 m="I_ACC_CHANGED = 1"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 1"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 1"
+R n=I_ALLOW_UPDATE d=0x1
+R n=I_ACC_CHANGED d=0x0
+R n=I_ALLOW_UPDATE d=0x0
+
+I ea=0x64 id=57 tic=50
+M n=Mem t=ifetch ea=0x64 ra=0x64 d=0x41409821
+INSTR op=0x21984041					asm="add acc0,w0,w1"
+R n=NIA d=0x68
+R n=OP1 d=0x00d7
+R n=OP2 d=0x00d8
+R n=RES d=0x01af
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x01af
+R n=IACC i=0 d=0x0036fa
+
+I ea=0x68 id=58 tic=51
+M n=Mem t=ifetch ea=0x68 ra=0x68 d=0x01987022
+INSTR op=0x22709801					asm="sub gpr0,acc0,loopcnt"
+R n=NIA d=0x6c
+R n=OP1 d=0x36fa
+R n=OP2 d=0x00f7
+R n=RES d=0x3603
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x3603
+R n=GPR i=0 d=0x3603
+
+I ea=0x6c id=59 tic=52
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x71708027
+INSTR op=0x27807071					asm="and out0,gpr0,gpr1"
+R n=NIA d=0x70
+R n=OP1 d=0x3603
+R n=OP2 d=0xffff
+R n=RES d=0x3603
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x3603
+R n=OUT i=0 d=0x3603
+
+I ea=0x70 id=60 tic=53
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x07fc000a
+INSTR op=0x0a00fc07					asm="ldon 0x0000000000000060,ixo"
+R n=NIA d=0x74
+R n=NIA d=0x60
+B taken=1 ea=0x60
+R n=LOOPCNT d=0x00f6
+R n=I_ACC_CHANGED d=0x2
+R n=INA i=2 d=0xd8d8
+R n=INA i=1 d=0xd7d7
+A l=1 m="POS_INA line0 = 10"
+D n=Mem t=read ea=0x10014 nb=2
+INIT
+MD n=Mem ra=0x0000000000010014 d=0xd7d7d8d8	#	(3621247192)
+TRACE
+M n=Mem t=read ea=0x10014 ra=0x10014 d=0xd7d7d8d8
+R n=I_POS_INA i=0 d=0x000b
+R n=I_RPTCNT_INA i=0 d=0x1
+R n=INA i=0 d=0xd7d7
+D n=Mem t=write ea=0x8d012 nb=2
+M n=Mem t=write ea=0x8d010 ra=0x8d010 d=0x53340336
+R n=I_POS_OUT i=0 d=0x000a
+R n=XPOS d=0x000a
+A l=1 m="YPos = 0"
+A l=1 m="I_ACC_CHANGED = 2"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 0"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 0"
+R n=I_ACC_CHANGED d=0x0
+
+I ea=0x60 id=61 tic=54
+M n=Mem t=ifetch ea=0x60 ra=0x60 d=0x0800015d
+INSTR op=0x5d010008					asm="lsr w,ina,8"
+R n=NIA d=0x64
+R n=MOP1 i=0 d=0xd7d7
+R n=MOP1 i=1 d=0xd7d7
+R n=MOP1 i=2 d=0xd8d8
+R n=MOP1 i=3 d=0x0000
+R n=MOP1 i=4 d=0x0000
+R n=MOP1 i=5 d=0x0000
+R n=MOP1 i=6 d=0x0000
+R n=MOP1 i=7 d=0x0000
+R n=MOP1 i=8 d=0x0000
+R n=MOP2 i=0 d=0xfff8
+R n=MOP2 i=1 d=0xfff8
+R n=MOP2 i=2 d=0xfff8
+R n=MOP2 i=3 d=0xfff8
+R n=MOP2 i=4 d=0xfff8
+R n=MOP2 i=5 d=0xfff8
+R n=MOP2 i=6 d=0xfff8
+R n=MOP2 i=7 d=0xfff8
+R n=MOP2 i=8 d=0xfff8
+R n=MRES i=0 d=0x00d7
+R n=MRES i=1 d=0x00d7
+R n=MRES i=2 d=0x00d8
+R n=MRES i=3 d=0x0000
+R n=MRES i=4 d=0x0000
+R n=MRES i=5 d=0x0000
+R n=MRES i=6 d=0x0000
+R n=MRES i=7 d=0x0000
+R n=MRES i=8 d=0x0000
+R n=I_MFLAG_Z d=0x1f8
+R n=I_MFLAG_N d=0x00
+R n=I_MFLAG_C d=0x00
+R n=I_MFLAG_O d=0x00
+R n=MSAT i=0 d=0x00d7
+R n=MSAT i=1 d=0x00d7
+R n=MSAT i=2 d=0x00d8
+R n=MSAT i=3 d=0x0000
+R n=MSAT i=4 d=0x0000
+R n=MSAT i=5 d=0x0000
+R n=MSAT i=6 d=0x0000
+R n=MSAT i=7 d=0x0000
+R n=MSAT i=8 d=0x0000
+R n=I_ACC_CHANGED d=0x1
+R n=W i=0 d=0x00d7
+R n=W i=1 d=0x00d7
+R n=W i=2 d=0x00d8
+R n=W i=3 d=0x0000
+R n=W i=4 d=0x0000
+R n=W i=5 d=0x0000
+R n=W i=6 d=0x0000
+R n=W i=7 d=0x0000
+R n=W i=8 d=0x0000
+R n=MFLAG_N d=0x00
+R n=MFLAG_Z d=0x1f8
+A l=1 m="I_ACC_CHANGED = 1"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 1"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 1"
+R n=I_ALLOW_UPDATE d=0x1
+R n=I_ACC_CHANGED d=0x0
+R n=I_ALLOW_UPDATE d=0x0
+
+I ea=0x64 id=62 tic=55
+M n=Mem t=ifetch ea=0x64 ra=0x64 d=0x41409821
+INSTR op=0x21984041					asm="add acc0,w0,w1"
+R n=NIA d=0x68
+R n=OP1 d=0x00d7
+R n=OP2 d=0x00d7
+R n=RES d=0x01ae
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x01ae
+R n=IACC i=0 d=0x0038a8
+
+I ea=0x68 id=63 tic=56
+M n=Mem t=ifetch ea=0x68 ra=0x68 d=0x01987022
+INSTR op=0x22709801					asm="sub gpr0,acc0,loopcnt"
+R n=NIA d=0x6c
+R n=OP1 d=0x38a8
+R n=OP2 d=0x00f6
+R n=RES d=0x37b2
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x37b2
+R n=GPR i=0 d=0x37b2
+
+I ea=0x6c id=64 tic=57
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x71708027
+INSTR op=0x27807071					asm="and out0,gpr0,gpr1"
+R n=NIA d=0x70
+R n=OP1 d=0x37b2
+R n=OP2 d=0xffff
+R n=RES d=0x37b2
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x37b2
+R n=OUT i=0 d=0x37b2
+
+I ea=0x70 id=65 tic=58
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x07fc000a
+INSTR op=0x0a00fc07					asm="ldon 0x0000000000000060,ixo"
+R n=NIA d=0x74
+R n=NIA d=0x60
+B taken=1 ea=0x60
+R n=LOOPCNT d=0x00f5
+R n=I_ACC_CHANGED d=0x2
+R n=INA i=2 d=0xd7d7
+R n=INA i=1 d=0xd7d7
+A l=1 m="POS_INA line0 = 11"
+D n=Mem t=read ea=0x10016 nb=2
+M n=Mem t=read ea=0x10014 ra=0x10014 d=0xd7d7d8d8
+R n=I_POS_INA i=0 d=0x000c
+R n=I_RPTCNT_INA i=0 d=0x1
+R n=INA i=0 d=0xd8d8
+D n=Mem t=write ea=0x8d014 nb=2
+M n=Mem t=write ea=0x8d014 ra=0x8d014 d=0xb2370000
+R n=I_POS_OUT i=0 d=0x000b
+R n=XPOS d=0x000b
+A l=1 m="YPos = 0"
+A l=1 m="I_ACC_CHANGED = 2"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 0"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 0"
+R n=I_ACC_CHANGED d=0x0
+
+I ea=0x60 id=66 tic=59
+M n=Mem t=ifetch ea=0x60 ra=0x60 d=0x0800015d
+INSTR op=0x5d010008					asm="lsr w,ina,8"
+R n=NIA d=0x64
+R n=MOP1 i=0 d=0xd8d8
+R n=MOP1 i=1 d=0xd7d7
+R n=MOP1 i=2 d=0xd7d7
+R n=MOP1 i=3 d=0x0000
+R n=MOP1 i=4 d=0x0000
+R n=MOP1 i=5 d=0x0000
+R n=MOP1 i=6 d=0x0000
+R n=MOP1 i=7 d=0x0000
+R n=MOP1 i=8 d=0x0000
+R n=MOP2 i=0 d=0xfff8
+R n=MOP2 i=1 d=0xfff8
+R n=MOP2 i=2 d=0xfff8
+R n=MOP2 i=3 d=0xfff8
+R n=MOP2 i=4 d=0xfff8
+R n=MOP2 i=5 d=0xfff8
+R n=MOP2 i=6 d=0xfff8
+R n=MOP2 i=7 d=0xfff8
+R n=MOP2 i=8 d=0xfff8
+R n=MRES i=0 d=0x00d8
+R n=MRES i=1 d=0x00d7
+R n=MRES i=2 d=0x00d7
+R n=MRES i=3 d=0x0000
+R n=MRES i=4 d=0x0000
+R n=MRES i=5 d=0x0000
+R n=MRES i=6 d=0x0000
+R n=MRES i=7 d=0x0000
+R n=MRES i=8 d=0x0000
+R n=I_MFLAG_Z d=0x1f8
+R n=I_MFLAG_N d=0x00
+R n=I_MFLAG_C d=0x00
+R n=I_MFLAG_O d=0x00
+R n=MSAT i=0 d=0x00d8
+R n=MSAT i=1 d=0x00d7
+R n=MSAT i=2 d=0x00d7
+R n=MSAT i=3 d=0x0000
+R n=MSAT i=4 d=0x0000
+R n=MSAT i=5 d=0x0000
+R n=MSAT i=6 d=0x0000
+R n=MSAT i=7 d=0x0000
+R n=MSAT i=8 d=0x0000
+R n=I_ACC_CHANGED d=0x1
+R n=W i=0 d=0x00d8
+R n=W i=1 d=0x00d7
+R n=W i=2 d=0x00d7
+R n=W i=3 d=0x0000
+R n=W i=4 d=0x0000
+R n=W i=5 d=0x0000
+R n=W i=6 d=0x0000
+R n=W i=7 d=0x0000
+R n=W i=8 d=0x0000
+R n=MFLAG_N d=0x00
+R n=MFLAG_Z d=0x1f8
+A l=1 m="I_ACC_CHANGED = 1"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 1"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 1"
+R n=I_ALLOW_UPDATE d=0x1
+R n=I_ACC_CHANGED d=0x0
+R n=I_ALLOW_UPDATE d=0x0
+
+I ea=0x64 id=67 tic=60
+M n=Mem t=ifetch ea=0x64 ra=0x64 d=0x41409821
+INSTR op=0x21984041					asm="add acc0,w0,w1"
+R n=NIA d=0x68
+R n=OP1 d=0x00d8
+R n=OP2 d=0x00d7
+R n=RES d=0x01af
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x01af
+R n=IACC i=0 d=0x003a57
+
+I ea=0x68 id=68 tic=61
+M n=Mem t=ifetch ea=0x68 ra=0x68 d=0x01987022
+INSTR op=0x22709801					asm="sub gpr0,acc0,loopcnt"
+R n=NIA d=0x6c
+R n=OP1 d=0x3a57
+R n=OP2 d=0x00f5
+R n=RES d=0x3962
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x3962
+R n=GPR i=0 d=0x3962
+
+I ea=0x6c id=69 tic=62
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x71708027
+INSTR op=0x27807071					asm="and out0,gpr0,gpr1"
+R n=NIA d=0x70
+R n=OP1 d=0x3962
+R n=OP2 d=0xffff
+R n=RES d=0x3962
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x3962
+R n=OUT i=0 d=0x3962
+
+I ea=0x70 id=70 tic=63
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x07fc000a
+INSTR op=0x0a00fc07					asm="ldon 0x0000000000000060,ixo"
+R n=NIA d=0x74
+R n=NIA d=0x60
+B taken=1 ea=0x60
+R n=LOOPCNT d=0x00f4
+R n=I_ACC_CHANGED d=0x2
+R n=INA i=2 d=0xd7d7
+R n=INA i=1 d=0xd8d8
+A l=1 m="POS_INA line0 = 12"
+D n=Mem t=read ea=0x10018 nb=2
+INIT
+MD n=Mem ra=0x0000000000010018 d=0xd8d8d7d7	#	(3638089687)
+TRACE
+M n=Mem t=read ea=0x10018 ra=0x10018 d=0xd8d8d7d7
+R n=I_POS_INA i=0 d=0x000d
+R n=I_RPTCNT_INA i=0 d=0x1
+R n=INA i=0 d=0xd8d8
+D n=Mem t=write ea=0x8d016 nb=2
+M n=Mem t=write ea=0x8d014 ra=0x8d014 d=0xb2376239
+R n=I_POS_OUT i=0 d=0x000c
+R n=XPOS d=0x000c
+A l=1 m="YPos = 0"
+A l=1 m="I_ACC_CHANGED = 2"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 0"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 0"
+R n=I_ACC_CHANGED d=0x0
+
+I ea=0x60 id=71 tic=64
+M n=Mem t=ifetch ea=0x60 ra=0x60 d=0x0800015d
+INSTR op=0x5d010008					asm="lsr w,ina,8"
+R n=NIA d=0x64
+R n=MOP1 i=0 d=0xd8d8
+R n=MOP1 i=1 d=0xd8d8
+R n=MOP1 i=2 d=0xd7d7
+R n=MOP1 i=3 d=0x0000
+R n=MOP1 i=4 d=0x0000
+R n=MOP1 i=5 d=0x0000
+R n=MOP1 i=6 d=0x0000
+R n=MOP1 i=7 d=0x0000
+R n=MOP1 i=8 d=0x0000
+R n=MOP2 i=0 d=0xfff8
+R n=MOP2 i=1 d=0xfff8
+R n=MOP2 i=2 d=0xfff8
+R n=MOP2 i=3 d=0xfff8
+R n=MOP2 i=4 d=0xfff8
+R n=MOP2 i=5 d=0xfff8
+R n=MOP2 i=6 d=0xfff8
+R n=MOP2 i=7 d=0xfff8
+R n=MOP2 i=8 d=0xfff8
+R n=MRES i=0 d=0x00d8
+R n=MRES i=1 d=0x00d8
+R n=MRES i=2 d=0x00d7
+R n=MRES i=3 d=0x0000
+R n=MRES i=4 d=0x0000
+R n=MRES i=5 d=0x0000
+R n=MRES i=6 d=0x0000
+R n=MRES i=7 d=0x0000
+R n=MRES i=8 d=0x0000
+R n=I_MFLAG_Z d=0x1f8
+R n=I_MFLAG_N d=0x00
+R n=I_MFLAG_C d=0x00
+R n=I_MFLAG_O d=0x00
+R n=MSAT i=0 d=0x00d8
+R n=MSAT i=1 d=0x00d8
+R n=MSAT i=2 d=0x00d7
+R n=MSAT i=3 d=0x0000
+R n=MSAT i=4 d=0x0000
+R n=MSAT i=5 d=0x0000
+R n=MSAT i=6 d=0x0000
+R n=MSAT i=7 d=0x0000
+R n=MSAT i=8 d=0x0000
+R n=I_ACC_CHANGED d=0x1
+R n=W i=0 d=0x00d8
+R n=W i=1 d=0x00d8
+R n=W i=2 d=0x00d7
+R n=W i=3 d=0x0000
+R n=W i=4 d=0x0000
+R n=W i=5 d=0x0000
+R n=W i=6 d=0x0000
+R n=W i=7 d=0x0000
+R n=W i=8 d=0x0000
+R n=MFLAG_N d=0x00
+R n=MFLAG_Z d=0x1f8
+A l=1 m="I_ACC_CHANGED = 1"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 1"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 1"
+R n=I_ALLOW_UPDATE d=0x1
+R n=I_ACC_CHANGED d=0x0
+R n=I_ALLOW_UPDATE d=0x0
+
+I ea=0x64 id=72 tic=65
+M n=Mem t=ifetch ea=0x64 ra=0x64 d=0x41409821
+INSTR op=0x21984041					asm="add acc0,w0,w1"
+R n=NIA d=0x68
+R n=OP1 d=0x00d8
+R n=OP2 d=0x00d8
+R n=RES d=0x01b0
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x01b0
+R n=IACC i=0 d=0x003c07
+
+I ea=0x68 id=73 tic=66
+M n=Mem t=ifetch ea=0x68 ra=0x68 d=0x01987022
+INSTR op=0x22709801					asm="sub gpr0,acc0,loopcnt"
+R n=NIA d=0x6c
+R n=OP1 d=0x3c07
+R n=OP2 d=0x00f4
+R n=RES d=0x3b13
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x3b13
+R n=GPR i=0 d=0x3b13
+
+I ea=0x6c id=74 tic=67
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x71708027
+INSTR op=0x27807071					asm="and out0,gpr0,gpr1"
+R n=NIA d=0x70
+R n=OP1 d=0x3b13
+R n=OP2 d=0xffff
+R n=RES d=0x3b13
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x3b13
+R n=OUT i=0 d=0x3b13
+
+I ea=0x70 id=75 tic=68
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x07fc000a
+INSTR op=0x0a00fc07					asm="ldon 0x0000000000000060,ixo"
+R n=NIA d=0x74
+R n=NIA d=0x60
+B taken=1 ea=0x60
+R n=LOOPCNT d=0x00f3
+R n=I_ACC_CHANGED d=0x2
+R n=INA i=2 d=0xd8d8
+R n=INA i=1 d=0xd8d8
+A l=1 m="POS_INA line0 = 13"
+D n=Mem t=read ea=0x1001a nb=2
+M n=Mem t=read ea=0x10018 ra=0x10018 d=0xd8d8d7d7
+R n=I_POS_INA i=0 d=0x000e
+R n=I_RPTCNT_INA i=0 d=0x1
+R n=INA i=0 d=0xd7d7
+D n=Mem t=write ea=0x8d018 nb=2
+M n=Mem t=write ea=0x8d018 ra=0x8d018 d=0x133b0000
+R n=I_POS_OUT i=0 d=0x000d
+R n=XPOS d=0x000d
+A l=1 m="YPos = 0"
+A l=1 m="I_ACC_CHANGED = 2"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 0"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 0"
+R n=I_ACC_CHANGED d=0x0
+
+I ea=0x60 id=76 tic=69
+M n=Mem t=ifetch ea=0x60 ra=0x60 d=0x0800015d
+INSTR op=0x5d010008					asm="lsr w,ina,8"
+R n=NIA d=0x64
+R n=MOP1 i=0 d=0xd7d7
+R n=MOP1 i=1 d=0xd8d8
+R n=MOP1 i=2 d=0xd8d8
+R n=MOP1 i=3 d=0x0000
+R n=MOP1 i=4 d=0x0000
+R n=MOP1 i=5 d=0x0000
+R n=MOP1 i=6 d=0x0000
+R n=MOP1 i=7 d=0x0000
+R n=MOP1 i=8 d=0x0000
+R n=MOP2 i=0 d=0xfff8
+R n=MOP2 i=1 d=0xfff8
+R n=MOP2 i=2 d=0xfff8
+R n=MOP2 i=3 d=0xfff8
+R n=MOP2 i=4 d=0xfff8
+R n=MOP2 i=5 d=0xfff8
+R n=MOP2 i=6 d=0xfff8
+R n=MOP2 i=7 d=0xfff8
+R n=MOP2 i=8 d=0xfff8
+R n=MRES i=0 d=0x00d7
+R n=MRES i=1 d=0x00d8
+R n=MRES i=2 d=0x00d8
+R n=MRES i=3 d=0x0000
+R n=MRES i=4 d=0x0000
+R n=MRES i=5 d=0x0000
+R n=MRES i=6 d=0x0000
+R n=MRES i=7 d=0x0000
+R n=MRES i=8 d=0x0000
+R n=I_MFLAG_Z d=0x1f8
+R n=I_MFLAG_N d=0x00
+R n=I_MFLAG_C d=0x00
+R n=I_MFLAG_O d=0x00
+R n=MSAT i=0 d=0x00d7
+R n=MSAT i=1 d=0x00d8
+R n=MSAT i=2 d=0x00d8
+R n=MSAT i=3 d=0x0000
+R n=MSAT i=4 d=0x0000
+R n=MSAT i=5 d=0x0000
+R n=MSAT i=6 d=0x0000
+R n=MSAT i=7 d=0x0000
+R n=MSAT i=8 d=0x0000
+R n=I_ACC_CHANGED d=0x1
+R n=W i=0 d=0x00d7
+R n=W i=1 d=0x00d8
+R n=W i=2 d=0x00d8
+R n=W i=3 d=0x0000
+R n=W i=4 d=0x0000
+R n=W i=5 d=0x0000
+R n=W i=6 d=0x0000
+R n=W i=7 d=0x0000
+R n=W i=8 d=0x0000
+R n=MFLAG_N d=0x00
+R n=MFLAG_Z d=0x1f8
+A l=1 m="I_ACC_CHANGED = 1"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 1"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 1"
+R n=I_ALLOW_UPDATE d=0x1
+R n=I_ACC_CHANGED d=0x0
+R n=I_ALLOW_UPDATE d=0x0
+
+I ea=0x64 id=77 tic=70
+M n=Mem t=ifetch ea=0x64 ra=0x64 d=0x41409821
+INSTR op=0x21984041					asm="add acc0,w0,w1"
+R n=NIA d=0x68
+R n=OP1 d=0x00d7
+R n=OP2 d=0x00d8
+R n=RES d=0x01af
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x01af
+R n=IACC i=0 d=0x003db6
+
+I ea=0x68 id=78 tic=71
+M n=Mem t=ifetch ea=0x68 ra=0x68 d=0x01987022
+INSTR op=0x22709801					asm="sub gpr0,acc0,loopcnt"
+R n=NIA d=0x6c
+R n=OP1 d=0x3db6
+R n=OP2 d=0x00f3
+R n=RES d=0x3cc3
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x3cc3
+R n=GPR i=0 d=0x3cc3
+
+I ea=0x6c id=79 tic=72
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x71708027
+INSTR op=0x27807071					asm="and out0,gpr0,gpr1"
+R n=NIA d=0x70
+R n=OP1 d=0x3cc3
+R n=OP2 d=0xffff
+R n=RES d=0x3cc3
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x3cc3
+R n=OUT i=0 d=0x3cc3
+
+I ea=0x70 id=80 tic=73
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x07fc000a
+INSTR op=0x0a00fc07					asm="ldon 0x0000000000000060,ixo"
+R n=NIA d=0x74
+R n=NIA d=0x60
+B taken=1 ea=0x60
+R n=LOOPCNT d=0x00f2
+R n=I_ACC_CHANGED d=0x2
+R n=INA i=2 d=0xd8d8
+R n=INA i=1 d=0xd7d7
+A l=1 m="POS_INA line0 = 14"
+D n=Mem t=read ea=0x1001c nb=2
+INIT
+MD n=Mem ra=0x000000000001001c d=0xd7d7d7d7	#	(3621246935)
+TRACE
+M n=Mem t=read ea=0x1001c ra=0x1001c d=0xd7d7d7d7
+R n=I_POS_INA i=0 d=0x000f
+R n=I_RPTCNT_INA i=0 d=0x1
+R n=INA i=0 d=0xd7d7
+D n=Mem t=write ea=0x8d01a nb=2
+M n=Mem t=write ea=0x8d018 ra=0x8d018 d=0x133bc33c
+R n=I_POS_OUT i=0 d=0x000e
+R n=XPOS d=0x000e
+A l=1 m="YPos = 0"
+A l=1 m="I_ACC_CHANGED = 2"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 0"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 0"
+R n=I_ACC_CHANGED d=0x0
+
+I ea=0x60 id=81 tic=74
+M n=Mem t=ifetch ea=0x60 ra=0x60 d=0x0800015d
+INSTR op=0x5d010008					asm="lsr w,ina,8"
+R n=NIA d=0x64
+R n=MOP1 i=0 d=0xd7d7
+R n=MOP1 i=1 d=0xd7d7
+R n=MOP1 i=2 d=0xd8d8
+R n=MOP1 i=3 d=0x0000
+R n=MOP1 i=4 d=0x0000
+R n=MOP1 i=5 d=0x0000
+R n=MOP1 i=6 d=0x0000
+R n=MOP1 i=7 d=0x0000
+R n=MOP1 i=8 d=0x0000
+R n=MOP2 i=0 d=0xfff8
+R n=MOP2 i=1 d=0xfff8
+R n=MOP2 i=2 d=0xfff8
+R n=MOP2 i=3 d=0xfff8
+R n=MOP2 i=4 d=0xfff8
+R n=MOP2 i=5 d=0xfff8
+R n=MOP2 i=6 d=0xfff8
+R n=MOP2 i=7 d=0xfff8
+R n=MOP2 i=8 d=0xfff8
+R n=MRES i=0 d=0x00d7
+R n=MRES i=1 d=0x00d7
+R n=MRES i=2 d=0x00d8
+R n=MRES i=3 d=0x0000
+R n=MRES i=4 d=0x0000
+R n=MRES i=5 d=0x0000
+R n=MRES i=6 d=0x0000
+R n=MRES i=7 d=0x0000
+R n=MRES i=8 d=0x0000
+R n=I_MFLAG_Z d=0x1f8
+R n=I_MFLAG_N d=0x00
+R n=I_MFLAG_C d=0x00
+R n=I_MFLAG_O d=0x00
+R n=MSAT i=0 d=0x00d7
+R n=MSAT i=1 d=0x00d7
+R n=MSAT i=2 d=0x00d8
+R n=MSAT i=3 d=0x0000
+R n=MSAT i=4 d=0x0000
+R n=MSAT i=5 d=0x0000
+R n=MSAT i=6 d=0x0000
+R n=MSAT i=7 d=0x0000
+R n=MSAT i=8 d=0x0000
+R n=I_ACC_CHANGED d=0x1
+R n=W i=0 d=0x00d7
+R n=W i=1 d=0x00d7
+R n=W i=2 d=0x00d8
+R n=W i=3 d=0x0000
+R n=W i=4 d=0x0000
+R n=W i=5 d=0x0000
+R n=W i=6 d=0x0000
+R n=W i=7 d=0x0000
+R n=W i=8 d=0x0000
+R n=MFLAG_N d=0x00
+R n=MFLAG_Z d=0x1f8
+A l=1 m="I_ACC_CHANGED = 1"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 1"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 1"
+R n=I_ALLOW_UPDATE d=0x1
+R n=I_ACC_CHANGED d=0x0
+R n=I_ALLOW_UPDATE d=0x0
+
+I ea=0x64 id=82 tic=75
+M n=Mem t=ifetch ea=0x64 ra=0x64 d=0x41409821
+INSTR op=0x21984041					asm="add acc0,w0,w1"
+R n=NIA d=0x68
+R n=OP1 d=0x00d7
+R n=OP2 d=0x00d7
+R n=RES d=0x01ae
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x01ae
+R n=IACC i=0 d=0x003f64
+
+I ea=0x68 id=83 tic=76
+M n=Mem t=ifetch ea=0x68 ra=0x68 d=0x01987022
+INSTR op=0x22709801					asm="sub gpr0,acc0,loopcnt"
+R n=NIA d=0x6c
+R n=OP1 d=0x3f64
+R n=OP2 d=0x00f2
+R n=RES d=0x3e72
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x3e72
+R n=GPR i=0 d=0x3e72
+
+I ea=0x6c id=84 tic=77
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x71708027
+INSTR op=0x27807071					asm="and out0,gpr0,gpr1"
+R n=NIA d=0x70
+R n=OP1 d=0x3e72
+R n=OP2 d=0xffff
+R n=RES d=0x3e72
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x3e72
+R n=OUT i=0 d=0x3e72
+
+I ea=0x70 id=85 tic=78
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x07fc000a
+INSTR op=0x0a00fc07					asm="ldon 0x0000000000000060,ixo"
+R n=NIA d=0x74
+R n=NIA d=0x60
+B taken=1 ea=0x60
+R n=LOOPCNT d=0x00f1
+R n=I_ACC_CHANGED d=0x2
+R n=INA i=2 d=0xd7d7
+R n=INA i=1 d=0xd7d7
+A l=1 m="POS_INA line0 = 15"
+D n=Mem t=read ea=0x1001e nb=2
+M n=Mem t=read ea=0x1001c ra=0x1001c d=0xd7d7d7d7
+R n=I_POS_INA i=0 d=0x0010
+R n=I_RPTCNT_INA i=0 d=0x1
+R n=INA i=0 d=0xd7d7
+D n=Mem t=write ea=0x8d01c nb=2
+M n=Mem t=write ea=0x8d01c ra=0x8d01c d=0x723e0000
+R n=I_POS_OUT i=0 d=0x000f
+R n=XPOS d=0x000f
+A l=1 m="YPos = 0"
+A l=1 m="I_ACC_CHANGED = 2"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 0"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 0"
+R n=I_ACC_CHANGED d=0x0
+
+I ea=0x60 id=86 tic=79
+M n=Mem t=ifetch ea=0x60 ra=0x60 d=0x0800015d
+INSTR op=0x5d010008					asm="lsr w,ina,8"
+R n=NIA d=0x64
+R n=MOP1 i=0 d=0xd7d7
+R n=MOP1 i=1 d=0xd7d7
+R n=MOP1 i=2 d=0xd7d7
+R n=MOP1 i=3 d=0x0000
+R n=MOP1 i=4 d=0x0000
+R n=MOP1 i=5 d=0x0000
+R n=MOP1 i=6 d=0x0000
+R n=MOP1 i=7 d=0x0000
+R n=MOP1 i=8 d=0x0000
+R n=MOP2 i=0 d=0xfff8
+R n=MOP2 i=1 d=0xfff8
+R n=MOP2 i=2 d=0xfff8
+R n=MOP2 i=3 d=0xfff8
+R n=MOP2 i=4 d=0xfff8
+R n=MOP2 i=5 d=0xfff8
+R n=MOP2 i=6 d=0xfff8
+R n=MOP2 i=7 d=0xfff8
+R n=MOP2 i=8 d=0xfff8
+R n=MRES i=0 d=0x00d7
+R n=MRES i=1 d=0x00d7
+R n=MRES i=2 d=0x00d7
+R n=MRES i=3 d=0x0000
+R n=MRES i=4 d=0x0000
+R n=MRES i=5 d=0x0000
+R n=MRES i=6 d=0x0000
+R n=MRES i=7 d=0x0000
+R n=MRES i=8 d=0x0000
+R n=I_MFLAG_Z d=0x1f8
+R n=I_MFLAG_N d=0x00
+R n=I_MFLAG_C d=0x00
+R n=I_MFLAG_O d=0x00
+R n=MSAT i=0 d=0x00d7
+R n=MSAT i=1 d=0x00d7
+R n=MSAT i=2 d=0x00d7
+R n=MSAT i=3 d=0x0000
+R n=MSAT i=4 d=0x0000
+R n=MSAT i=5 d=0x0000
+R n=MSAT i=6 d=0x0000
+R n=MSAT i=7 d=0x0000
+R n=MSAT i=8 d=0x0000
+R n=I_ACC_CHANGED d=0x1
+R n=W i=0 d=0x00d7
+R n=W i=1 d=0x00d7
+R n=W i=2 d=0x00d7
+R n=W i=3 d=0x0000
+R n=W i=4 d=0x0000
+R n=W i=5 d=0x0000
+R n=W i=6 d=0x0000
+R n=W i=7 d=0x0000
+R n=W i=8 d=0x0000
+R n=MFLAG_N d=0x00
+R n=MFLAG_Z d=0x1f8
+A l=1 m="I_ACC_CHANGED = 1"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 1"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 1"
+R n=I_ALLOW_UPDATE d=0x1
+R n=I_ACC_CHANGED d=0x0
+R n=I_ALLOW_UPDATE d=0x0
+
+I ea=0x64 id=87 tic=80
+M n=Mem t=ifetch ea=0x64 ra=0x64 d=0x41409821
+INSTR op=0x21984041					asm="add acc0,w0,w1"
+R n=NIA d=0x68
+R n=OP1 d=0x00d7
+R n=OP2 d=0x00d7
+R n=RES d=0x01ae
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x01ae
+R n=IACC i=0 d=0x004112
+
+I ea=0x68 id=88 tic=81
+M n=Mem t=ifetch ea=0x68 ra=0x68 d=0x01987022
+INSTR op=0x22709801					asm="sub gpr0,acc0,loopcnt"
+R n=NIA d=0x6c
+R n=OP1 d=0x4112
+R n=OP2 d=0x00f1
+R n=RES d=0x4021
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x4021
+R n=GPR i=0 d=0x4021
+
+I ea=0x6c id=89 tic=82
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x71708027
+INSTR op=0x27807071					asm="and out0,gpr0,gpr1"
+R n=NIA d=0x70
+R n=OP1 d=0x4021
+R n=OP2 d=0xffff
+R n=RES d=0x4021
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x4021
+R n=OUT i=0 d=0x4021
+
+I ea=0x70 id=90 tic=83
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x07fc000a
+INSTR op=0x0a00fc07					asm="ldon 0x0000000000000060,ixo"
+R n=NIA d=0x74
+R n=NIA d=0x60
+B taken=1 ea=0x60
+R n=LOOPCNT d=0x00f0
+R n=I_ACC_CHANGED d=0x2
+R n=INA i=2 d=0xd7d7
+R n=INA i=1 d=0xd7d7
+A l=1 m="POS_INA line0 = 16"
+D n=Mem t=read ea=0x10020 nb=2
+INIT
+MD n=Mem ra=0x0000000000010020 d=0xd8d8d8d8	#	(3638089944)
+TRACE
+M n=Mem t=read ea=0x10020 ra=0x10020 d=0xd8d8d8d8
+R n=I_POS_INA i=0 d=0x0011
+R n=I_RPTCNT_INA i=0 d=0x1
+R n=INA i=0 d=0xd8d8
+D n=Mem t=write ea=0x8d01e nb=2
+M n=Mem t=write ea=0x8d01c ra=0x8d01c d=0x723e2140
+R n=I_POS_OUT i=0 d=0x0010
+R n=XPOS d=0x0010
+A l=1 m="YPos = 0"
+A l=1 m="I_ACC_CHANGED = 2"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 0"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 0"
+R n=I_ACC_CHANGED d=0x0
+
+I ea=0x60 id=91 tic=84
+M n=Mem t=ifetch ea=0x60 ra=0x60 d=0x0800015d
+INSTR op=0x5d010008					asm="lsr w,ina,8"
+R n=NIA d=0x64
+R n=MOP1 i=0 d=0xd8d8
+R n=MOP1 i=1 d=0xd7d7
+R n=MOP1 i=2 d=0xd7d7
+R n=MOP1 i=3 d=0x0000
+R n=MOP1 i=4 d=0x0000
+R n=MOP1 i=5 d=0x0000
+R n=MOP1 i=6 d=0x0000
+R n=MOP1 i=7 d=0x0000
+R n=MOP1 i=8 d=0x0000
+R n=MOP2 i=0 d=0xfff8
+R n=MOP2 i=1 d=0xfff8
+R n=MOP2 i=2 d=0xfff8
+R n=MOP2 i=3 d=0xfff8
+R n=MOP2 i=4 d=0xfff8
+R n=MOP2 i=5 d=0xfff8
+R n=MOP2 i=6 d=0xfff8
+R n=MOP2 i=7 d=0xfff8
+R n=MOP2 i=8 d=0xfff8
+R n=MRES i=0 d=0x00d8
+R n=MRES i=1 d=0x00d7
+R n=MRES i=2 d=0x00d7
+R n=MRES i=3 d=0x0000
+R n=MRES i=4 d=0x0000
+R n=MRES i=5 d=0x0000
+R n=MRES i=6 d=0x0000
+R n=MRES i=7 d=0x0000
+R n=MRES i=8 d=0x0000
+R n=I_MFLAG_Z d=0x1f8
+R n=I_MFLAG_N d=0x00
+R n=I_MFLAG_C d=0x00
+R n=I_MFLAG_O d=0x00
+R n=MSAT i=0 d=0x00d8
+R n=MSAT i=1 d=0x00d7
+R n=MSAT i=2 d=0x00d7
+R n=MSAT i=3 d=0x0000
+R n=MSAT i=4 d=0x0000
+R n=MSAT i=5 d=0x0000
+R n=MSAT i=6 d=0x0000
+R n=MSAT i=7 d=0x0000
+R n=MSAT i=8 d=0x0000
+R n=I_ACC_CHANGED d=0x1
+R n=W i=0 d=0x00d8
+R n=W i=1 d=0x00d7
+R n=W i=2 d=0x00d7
+R n=W i=3 d=0x0000
+R n=W i=4 d=0x0000
+R n=W i=5 d=0x0000
+R n=W i=6 d=0x0000
+R n=W i=7 d=0x0000
+R n=W i=8 d=0x0000
+R n=MFLAG_N d=0x00
+R n=MFLAG_Z d=0x1f8
+A l=1 m="I_ACC_CHANGED = 1"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 1"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 1"
+R n=I_ALLOW_UPDATE d=0x1
+R n=I_ACC_CHANGED d=0x0
+R n=I_ALLOW_UPDATE d=0x0
+
+I ea=0x64 id=92 tic=85
+M n=Mem t=ifetch ea=0x64 ra=0x64 d=0x41409821
+INSTR op=0x21984041					asm="add acc0,w0,w1"
+R n=NIA d=0x68
+R n=OP1 d=0x00d8
+R n=OP2 d=0x00d7
+R n=RES d=0x01af
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x01af
+R n=IACC i=0 d=0x0042c1
+
+I ea=0x68 id=93 tic=86
+M n=Mem t=ifetch ea=0x68 ra=0x68 d=0x01987022
+INSTR op=0x22709801					asm="sub gpr0,acc0,loopcnt"
+R n=NIA d=0x6c
+R n=OP1 d=0x42c1
+R n=OP2 d=0x00f0
+R n=RES d=0x41d1
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x41d1
+R n=GPR i=0 d=0x41d1
+
+I ea=0x6c id=94 tic=87
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x71708027
+INSTR op=0x27807071					asm="and out0,gpr0,gpr1"
+R n=NIA d=0x70
+R n=OP1 d=0x41d1
+R n=OP2 d=0xffff
+R n=RES d=0x41d1
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x41d1
+R n=OUT i=0 d=0x41d1
+
+I ea=0x70 id=95 tic=88
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x07fc000a
+INSTR op=0x0a00fc07					asm="ldon 0x0000000000000060,ixo"
+R n=NIA d=0x74
+R n=NIA d=0x60
+B taken=1 ea=0x60
+R n=LOOPCNT d=0x00ef
+R n=I_ACC_CHANGED d=0x2
+R n=INA i=2 d=0xd7d7
+R n=INA i=1 d=0xd8d8
+A l=1 m="POS_INA line0 = 17"
+D n=Mem t=read ea=0x10022 nb=2
+M n=Mem t=read ea=0x10020 ra=0x10020 d=0xd8d8d8d8
+R n=I_POS_INA i=0 d=0x0012
+R n=I_RPTCNT_INA i=0 d=0x1
+R n=INA i=0 d=0xd8d8
+D n=Mem t=write ea=0x8d020 nb=2
+M n=Mem t=write ea=0x8d020 ra=0x8d020 d=0xd1410000
+R n=I_POS_OUT i=0 d=0x0011
+R n=XPOS d=0x0011
+A l=1 m="YPos = 0"
+A l=1 m="I_ACC_CHANGED = 2"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 0"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 0"
+R n=I_ACC_CHANGED d=0x0
+
+I ea=0x60 id=96 tic=89
+M n=Mem t=ifetch ea=0x60 ra=0x60 d=0x0800015d
+INSTR op=0x5d010008					asm="lsr w,ina,8"
+R n=NIA d=0x64
+R n=MOP1 i=0 d=0xd8d8
+R n=MOP1 i=1 d=0xd8d8
+R n=MOP1 i=2 d=0xd7d7
+R n=MOP1 i=3 d=0x0000
+R n=MOP1 i=4 d=0x0000
+R n=MOP1 i=5 d=0x0000
+R n=MOP1 i=6 d=0x0000
+R n=MOP1 i=7 d=0x0000
+R n=MOP1 i=8 d=0x0000
+R n=MOP2 i=0 d=0xfff8
+R n=MOP2 i=1 d=0xfff8
+R n=MOP2 i=2 d=0xfff8
+R n=MOP2 i=3 d=0xfff8
+R n=MOP2 i=4 d=0xfff8
+R n=MOP2 i=5 d=0xfff8
+R n=MOP2 i=6 d=0xfff8
+R n=MOP2 i=7 d=0xfff8
+R n=MOP2 i=8 d=0xfff8
+R n=MRES i=0 d=0x00d8
+R n=MRES i=1 d=0x00d8
+R n=MRES i=2 d=0x00d7
+R n=MRES i=3 d=0x0000
+R n=MRES i=4 d=0x0000
+R n=MRES i=5 d=0x0000
+R n=MRES i=6 d=0x0000
+R n=MRES i=7 d=0x0000
+R n=MRES i=8 d=0x0000
+R n=I_MFLAG_Z d=0x1f8
+R n=I_MFLAG_N d=0x00
+R n=I_MFLAG_C d=0x00
+R n=I_MFLAG_O d=0x00
+R n=MSAT i=0 d=0x00d8
+R n=MSAT i=1 d=0x00d8
+R n=MSAT i=2 d=0x00d7
+R n=MSAT i=3 d=0x0000
+R n=MSAT i=4 d=0x0000
+R n=MSAT i=5 d=0x0000
+R n=MSAT i=6 d=0x0000
+R n=MSAT i=7 d=0x0000
+R n=MSAT i=8 d=0x0000
+R n=I_ACC_CHANGED d=0x1
+R n=W i=0 d=0x00d8
+R n=W i=1 d=0x00d8
+R n=W i=2 d=0x00d7
+R n=W i=3 d=0x0000
+R n=W i=4 d=0x0000
+R n=W i=5 d=0x0000
+R n=W i=6 d=0x0000
+R n=W i=7 d=0x0000
+R n=W i=8 d=0x0000
+R n=MFLAG_N d=0x00
+R n=MFLAG_Z d=0x1f8
+A l=1 m="I_ACC_CHANGED = 1"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 1"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 1"
+R n=I_ALLOW_UPDATE d=0x1
+R n=I_ACC_CHANGED d=0x0
+R n=I_ALLOW_UPDATE d=0x0
+
+I ea=0x64 id=97 tic=90
+M n=Mem t=ifetch ea=0x64 ra=0x64 d=0x41409821
+INSTR op=0x21984041					asm="add acc0,w0,w1"
+R n=NIA d=0x68
+R n=OP1 d=0x00d8
+R n=OP2 d=0x00d8
+R n=RES d=0x01b0
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x01b0
+R n=IACC i=0 d=0x004471
+
+I ea=0x68 id=98 tic=91
+M n=Mem t=ifetch ea=0x68 ra=0x68 d=0x01987022
+INSTR op=0x22709801					asm="sub gpr0,acc0,loopcnt"
+R n=NIA d=0x6c
+R n=OP1 d=0x4471
+R n=OP2 d=0x00ef
+R n=RES d=0x4382
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x4382
+R n=GPR i=0 d=0x4382
+
+I ea=0x6c id=99 tic=92
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x71708027
+INSTR op=0x27807071					asm="and out0,gpr0,gpr1"
+R n=NIA d=0x70
+R n=OP1 d=0x4382
+R n=OP2 d=0xffff
+R n=RES d=0x4382
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x4382
+R n=OUT i=0 d=0x4382
+
+I ea=0x70 id=100 tic=93
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x07fc000a
+INSTR op=0x0a00fc07					asm="ldon 0x0000000000000060,ixo"
+R n=NIA d=0x74
+R n=NIA d=0x60
+B taken=1 ea=0x60
+R n=LOOPCNT d=0x00ee
+R n=I_ACC_CHANGED d=0x2
+R n=INA i=2 d=0xd8d8
+R n=INA i=1 d=0xd8d8
+A l=1 m="POS_INA line0 = 18"
+D n=Mem t=read ea=0x10024 nb=2
+INIT
+MD n=Mem ra=0x0000000000010024 d=0xd7d7d8d8	#	(3621247192)
+TRACE
+M n=Mem t=read ea=0x10024 ra=0x10024 d=0xd7d7d8d8
+R n=I_POS_INA i=0 d=0x0013
+R n=I_RPTCNT_INA i=0 d=0x1
+R n=INA i=0 d=0xd7d7
+D n=Mem t=write ea=0x8d022 nb=2
+M n=Mem t=write ea=0x8d020 ra=0x8d020 d=0xd1418243
+R n=I_POS_OUT i=0 d=0x0012
+R n=XPOS d=0x0012
+A l=1 m="YPos = 0"
+A l=1 m="I_ACC_CHANGED = 2"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 0"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 0"
+R n=I_ACC_CHANGED d=0x0
+
+I ea=0x60 id=101 tic=94
+M n=Mem t=ifetch ea=0x60 ra=0x60 d=0x0800015d
+INSTR op=0x5d010008					asm="lsr w,ina,8"
+R n=NIA d=0x64
+R n=MOP1 i=0 d=0xd7d7
+R n=MOP1 i=1 d=0xd8d8
+R n=MOP1 i=2 d=0xd8d8
+R n=MOP1 i=3 d=0x0000
+R n=MOP1 i=4 d=0x0000
+R n=MOP1 i=5 d=0x0000
+R n=MOP1 i=6 d=0x0000
+R n=MOP1 i=7 d=0x0000
+R n=MOP1 i=8 d=0x0000
+R n=MOP2 i=0 d=0xfff8
+R n=MOP2 i=1 d=0xfff8
+R n=MOP2 i=2 d=0xfff8
+R n=MOP2 i=3 d=0xfff8
+R n=MOP2 i=4 d=0xfff8
+R n=MOP2 i=5 d=0xfff8
+R n=MOP2 i=6 d=0xfff8
+R n=MOP2 i=7 d=0xfff8
+R n=MOP2 i=8 d=0xfff8
+R n=MRES i=0 d=0x00d7
+R n=MRES i=1 d=0x00d8
+R n=MRES i=2 d=0x00d8
+R n=MRES i=3 d=0x0000
+R n=MRES i=4 d=0x0000
+R n=MRES i=5 d=0x0000
+R n=MRES i=6 d=0x0000
+R n=MRES i=7 d=0x0000
+R n=MRES i=8 d=0x0000
+R n=I_MFLAG_Z d=0x1f8
+R n=I_MFLAG_N d=0x00
+R n=I_MFLAG_C d=0x00
+R n=I_MFLAG_O d=0x00
+R n=MSAT i=0 d=0x00d7
+R n=MSAT i=1 d=0x00d8
+R n=MSAT i=2 d=0x00d8
+R n=MSAT i=3 d=0x0000
+R n=MSAT i=4 d=0x0000
+R n=MSAT i=5 d=0x0000
+R n=MSAT i=6 d=0x0000
+R n=MSAT i=7 d=0x0000
+R n=MSAT i=8 d=0x0000
+R n=I_ACC_CHANGED d=0x1
+R n=W i=0 d=0x00d7
+R n=W i=1 d=0x00d8
+R n=W i=2 d=0x00d8
+R n=W i=3 d=0x0000
+R n=W i=4 d=0x0000
+R n=W i=5 d=0x0000
+R n=W i=6 d=0x0000
+R n=W i=7 d=0x0000
+R n=W i=8 d=0x0000
+R n=MFLAG_N d=0x00
+R n=MFLAG_Z d=0x1f8
+A l=1 m="I_ACC_CHANGED = 1"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 1"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 1"
+R n=I_ALLOW_UPDATE d=0x1
+R n=I_ACC_CHANGED d=0x0
+R n=I_ALLOW_UPDATE d=0x0
+
+I ea=0x64 id=102 tic=95
+M n=Mem t=ifetch ea=0x64 ra=0x64 d=0x41409821
+INSTR op=0x21984041					asm="add acc0,w0,w1"
+R n=NIA d=0x68
+R n=OP1 d=0x00d7
+R n=OP2 d=0x00d8
+R n=RES d=0x01af
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x01af
+R n=IACC i=0 d=0x004620
+
+I ea=0x68 id=103 tic=96
+M n=Mem t=ifetch ea=0x68 ra=0x68 d=0x01987022
+INSTR op=0x22709801					asm="sub gpr0,acc0,loopcnt"
+R n=NIA d=0x6c
+R n=OP1 d=0x4620
+R n=OP2 d=0x00ee
+R n=RES d=0x4532
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x4532
+R n=GPR i=0 d=0x4532
+
+I ea=0x6c id=104 tic=97
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x71708027
+INSTR op=0x27807071					asm="and out0,gpr0,gpr1"
+R n=NIA d=0x70
+R n=OP1 d=0x4532
+R n=OP2 d=0xffff
+R n=RES d=0x4532
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x4532
+R n=OUT i=0 d=0x4532
+
+I ea=0x70 id=105 tic=98
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x07fc000a
+INSTR op=0x0a00fc07					asm="ldon 0x0000000000000060,ixo"
+R n=NIA d=0x74
+R n=NIA d=0x60
+B taken=1 ea=0x60
+R n=LOOPCNT d=0x00ed
+R n=I_ACC_CHANGED d=0x2
+R n=INA i=2 d=0xd8d8
+R n=INA i=1 d=0xd7d7
+A l=1 m="POS_INA line0 = 19"
+D n=Mem t=read ea=0x10026 nb=2
+M n=Mem t=read ea=0x10024 ra=0x10024 d=0xd7d7d8d8
+R n=I_POS_INA i=0 d=0x0014
+R n=I_RPTCNT_INA i=0 d=0x1
+R n=INA i=0 d=0xd8d8
+D n=Mem t=write ea=0x8d024 nb=2
+M n=Mem t=write ea=0x8d024 ra=0x8d024 d=0x32450000
+R n=I_POS_OUT i=0 d=0x0013
+R n=XPOS d=0x0013
+A l=1 m="YPos = 0"
+A l=1 m="I_ACC_CHANGED = 2"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 0"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 0"
+R n=I_ACC_CHANGED d=0x0
+
+I ea=0x60 id=106 tic=99
+M n=Mem t=ifetch ea=0x60 ra=0x60 d=0x0800015d
+INSTR op=0x5d010008					asm="lsr w,ina,8"
+R n=NIA d=0x64
+R n=MOP1 i=0 d=0xd8d8
+R n=MOP1 i=1 d=0xd7d7
+R n=MOP1 i=2 d=0xd8d8
+R n=MOP1 i=3 d=0x0000
+R n=MOP1 i=4 d=0x0000
+R n=MOP1 i=5 d=0x0000
+R n=MOP1 i=6 d=0x0000
+R n=MOP1 i=7 d=0x0000
+R n=MOP1 i=8 d=0x0000
+R n=MOP2 i=0 d=0xfff8
+R n=MOP2 i=1 d=0xfff8
+R n=MOP2 i=2 d=0xfff8
+R n=MOP2 i=3 d=0xfff8
+R n=MOP2 i=4 d=0xfff8
+R n=MOP2 i=5 d=0xfff8
+R n=MOP2 i=6 d=0xfff8
+R n=MOP2 i=7 d=0xfff8
+R n=MOP2 i=8 d=0xfff8
+R n=MRES i=0 d=0x00d8
+R n=MRES i=1 d=0x00d7
+R n=MRES i=2 d=0x00d8
+R n=MRES i=3 d=0x0000
+R n=MRES i=4 d=0x0000
+R n=MRES i=5 d=0x0000
+R n=MRES i=6 d=0x0000
+R n=MRES i=7 d=0x0000
+R n=MRES i=8 d=0x0000
+R n=I_MFLAG_Z d=0x1f8
+R n=I_MFLAG_N d=0x00
+R n=I_MFLAG_C d=0x00
+R n=I_MFLAG_O d=0x00
+R n=MSAT i=0 d=0x00d8
+R n=MSAT i=1 d=0x00d7
+R n=MSAT i=2 d=0x00d8
+R n=MSAT i=3 d=0x0000
+R n=MSAT i=4 d=0x0000
+R n=MSAT i=5 d=0x0000
+R n=MSAT i=6 d=0x0000
+R n=MSAT i=7 d=0x0000
+R n=MSAT i=8 d=0x0000
+R n=I_ACC_CHANGED d=0x1
+R n=W i=0 d=0x00d8
+R n=W i=1 d=0x00d7
+R n=W i=2 d=0x00d8
+R n=W i=3 d=0x0000
+R n=W i=4 d=0x0000
+R n=W i=5 d=0x0000
+R n=W i=6 d=0x0000
+R n=W i=7 d=0x0000
+R n=W i=8 d=0x0000
+R n=MFLAG_N d=0x00
+R n=MFLAG_Z d=0x1f8
+A l=1 m="I_ACC_CHANGED = 1"
+A l=1 m="I_ADDT_SENSE = 49"
+A l=1 m="ADDT Valid = 1"
+A l=1 m="I_SORT_SENSE = 81"
+A l=1 m="SORT Valid = 1"
+R n=I_ALLOW_UPDATE d=0x1
+R n=I_ACC_CHANGED d=0x0
+R n=I_ALLOW_UPDATE d=0x0
+
+I ea=0x64 id=107 tic=100
+M n=Mem t=ifetch ea=0x64 ra=0x64 d=0x41409821
+INSTR op=0x21984041					asm="add acc0,w0,w1"
+R n=NIA d=0x68
+R n=OP1 d=0x00d8
+R n=OP2 d=0x00d7
+R n=RES d=0x01af
+R n=CC_ZNCO d=0x0
+R n=SAT d=0x01af
+R n=IACC i=0 d=0x0047cf
+
+RESULTS
+RD n=ARGMAX d=0xffff
+RD n=ARGMIN d=0xffff
+RD n=CC_ZNCO d=0x0
+RD n=CLIPPED d=0x0000
+RD n=CONFADDT d=0x0000
+RD n=CONFALU d=0x082
+RD n=CONFBEST d=0x0
+RD n=CONFHIST d=0x000
+RD n=CONFSORT d=0x0
+RD n=CONFSTAT d=0x00
+RD n=CONFTHRES d=0x0000
+RD n=CSE_SET_LOCK d=0x0
+RD n=HBINA d=0x00
+RD n=HBINADD d=0x0000
+RD n=HBININCH d=0x0000
+RD n=HBININCL d=0x00
+RD n=HD_BREAKENABLE d=0x00
+RD n=H_CURRPOS d=0x00000000
+RD n=H_CURRXCFG d=0x04000001
+RD n=H_DREGA d=0x00
+RD n=H_DREGD d=0x0000
+RD n=H_HISTA d=0x00
+RD n=H_HISTAMAX d=0x00
+RD n=H_HISTCL d=0x0
+RD n=H_HISTD d=0x00000000
+RD n=H_HISTPEAK d=0x00000000
+RD n=H_IMEMA d=0x0
+RD n=H_IMEMD d=0x00000000
+RD n=H_INACFG d=0x00010001
+RD n=H_INALCFG d=0x00010001
+RD n=H_INBCFG d=0x00010001
+RD n=H_LUTA d=0x000
+RD n=H_LUTD d=0x00000000
+RD n=H_OUTCFG d=0x00010001
+RD n=H_POS d=0x00000000
+RD n=H_START d=0x00000000
+RD n=H_STATA d=0x00
+RD n=H_STATCL d=0x0
+RD n=H_STATD d=0x00000000
+RD n=H_STATUS d=0x00000000
+RD n=H_XCFG d=0x02800001
+RD n=I_ACC_CHANGED d=0x0
+RD n=I_ADDT d=0x00000
+RD n=I_ADDT_EN d=0x0
+RD n=I_ADDT_SENSE d=0x31
+RD n=I_ALLOW_UPDATE d=0x0
+RD n=I_BUFFERED d=0x0
+RD n=I_DEBUGMODE d=0x0
+RD n=I_DELAY_UPDATE d=0x0
+RD n=I_DELAY_UPDATE_1 d=0x0
+RD n=I_DREGDACCESS d=0x0
+RD n=I_EVENTS d=0x0
+RD n=I_HCL d=0x1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+RD n=I_INACFG d=0x01010101
+RD n=I_INALCFG d=0x00010001
+RD n=I_INBCFG d=0x00010001
+RD n=I_LUTA_SET d=0x0
+RD n=I_LUT_CLEAR d=0x1
+RD n=I_LUT_DIRTY d=0x0
+RD n=I_MFLAG_C d=0x00
+RD n=I_MFLAG_N d=0x00
+RD n=I_MFLAG_O d=0x00
+RD n=I_MFLAG_Z d=0x1f8
+RD n=I_OUTCFG d=0x01010101
+RD n=I_PRNG d=0x0000000000000000
+RD n=I_PRNG_INC d=0x1
+RD n=I_RUN d=0x1
+RD n=I_SCL d=0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+RD n=I_SHIFT_X d=0x1
+RD n=I_SORT_EN d=0x0
+RD n=I_SORT_SENSE d=0x51
+RD n=I_START d=0x00400040
+RD n=I_STAT_DIRTY d=0x0
+RD n=I_STAT_NEW_LINE d=0x1
+RD n=I_XSIZE d=0x0280
+RD n=LOCK d=0x1fff
+RD n=LOOPCNT d=0x00ed
+RD n=LUT d=0x0000
+RD n=LUTA d=0x000
+RD n=MASKOP2 d=0x01ff
+RD n=MASKV d=0x1ff
+RD n=MFLAG_C d=0x00
+RD n=MFLAG_N d=0x00
+RD n=MFLAG_O d=0x00
+RD n=MFLAG_Z d=0x1f8
+RD n=NHOOD d=0x1ff
+RD n=NIA d=0x68
+RD n=ONE d=0xffff
+RD n=OP1 d=0x00d8
+RD n=OP2 d=0x00d7
+RD n=PRNG d=0x0000
+RD n=RES d=0x01af
+RD n=RES32 d=0x0000000000000000
+RD n=SAT d=0x01af
+RD n=SCALED d=0x0000
+RD n=SCNT d=0x0000
+RD n=SIG_LINE_DONE d=0x0
+RD n=SOCLEAR d=0x0
+RD n=SOIN d=0x0000
+RD n=SORTMAX d=0x0000
+RD n=SORTMEDIAN d=0x0000
+RD n=SORTMIN d=0x0000
+RD n=SREC d=0x00
+RD n=SUM d=0x0000
+RD n=S_EMUMEM d=0x0
+RD n=THRESHOLD d=0x0000
+RD n=XPOS d=0x0013
+RD n=YPOS d=0x0000
+RD n=ZERO d=0x0000
+RD n=GPR i=0 d=0x4532
+RD n=GPR i=1 d=0xffff
+RD n=GPR i=2 d=0x0000
+RD n=GPR i=3 d=0x0000
+RD n=GPR i=4 d=0x0000
+RD n=GPR i=5 d=0x0000
+RD n=GPR i=6 d=0x0000
+RD n=GPR i=7 d=0x0000
+RD n=GPR i=8 d=0x0000
+RD n=GPR i=9 d=0x0000
+RD n=GPR i=10 d=0x0000
+RD n=GPR i=11 d=0x0000
+RD n=GPR i=12 d=0x0000
+RD n=GPR i=13 d=0x0000
+RD n=GPR i=14 d=0x0000
+RD n=GPR i=15 d=0x0000
+RD n=IACC i=0 d=0x0047cf
+RD n=IACC i=1 d=0x000000
+RD n=IACC i=2 d=0x000000
+RD n=IACC i=3 d=0x000000
+RD n=INA i=0 d=0xd8d8
+RD n=INA i=1 d=0xd7d7
+RD n=INA i=2 d=0xd8d8
+RD n=INA i=3 d=0x0000
+RD n=INA i=4 d=0x0000
+RD n=INA i=5 d=0x0000
+RD n=INA i=6 d=0x0000
+RD n=INA i=7 d=0x0000
+RD n=INA i=8 d=0x0000
+RD n=INALPHA i=0 d=0x0000
+RD n=INALPHA i=1 d=0x0000
+RD n=INALPHA i=2 d=0x0000
+RD n=INALPHA i=3 d=0x0000
+RD n=INALPHA i=4 d=0x0000
+RD n=INALPHA i=5 d=0x0000
+RD n=INALPHA i=6 d=0x0000
+RD n=INALPHA i=7 d=0x0000
+RD n=INALPHA i=8 d=0x0000
+RD n=INB i=0 d=0x0000
+RD n=INB i=1 d=0x0000
+RD n=INB i=2 d=0x0000
+RD n=INB i=3 d=0x0000
+RD n=INB i=4 d=0x0000
+RD n=INB i=5 d=0x0000
+RD n=INB i=6 d=0x0000
+RD n=INB i=7 d=0x0000
+RD n=INB i=8 d=0x0000
+RD n=I_OPIXA_INC i=0 d=0x0
+RD n=I_OPIXA_INC i=1 d=0x0
+RD n=I_POS_INA i=0 d=0x0014
+RD n=I_POS_INA i=1 d=0x0000
+RD n=I_POS_INA i=2 d=0x0000
+RD n=I_POS_INAL i=0 d=0x0000
+RD n=I_POS_INAL i=1 d=0x0000
+RD n=I_POS_INAL i=2 d=0x0000
+RD n=I_POS_INB i=0 d=0x0000
+RD n=I_POS_INB i=1 d=0x0000
+RD n=I_POS_INB i=2 d=0x0000
+RD n=I_POS_OUT i=0 d=0x0013
+RD n=I_POS_OUT i=1 d=0x0000
+RD n=I_POS_OUT i=2 d=0x0000
+RD n=I_POS_OUT i=3 d=0x0000
+RD n=I_RPTCNT_INA i=0 d=0x1
+RD n=I_RPTCNT_INA i=1 d=0x1
+RD n=I_RPTCNT_INA i=2 d=0x1
+RD n=I_RPTCNT_INAL i=0 d=0x1
+RD n=I_RPTCNT_INAL i=1 d=0x1
+RD n=I_RPTCNT_INAL i=2 d=0x1
+RD n=I_RPTCNT_INB i=0 d=0x1
+RD n=I_RPTCNT_INB i=1 d=0x1
+RD n=I_RPTCNT_INB i=2 d=0x1
+RD n=I_SF i=0 d=0x00000000
+RD n=I_SF i=1 d=0x00000000
+RD n=I_SF i=2 d=0x00000000
+RD n=I_SF i=3 d=0x00000000
+RD n=I_SKIPCNT_OUT i=0 d=0x0
+RD n=I_SKIPCNT_OUT i=1 d=0x0
+RD n=I_SKIPCNT_OUT i=2 d=0x0
+RD n=I_SKIPCNT_OUT i=3 d=0x0
+RD n=I_SKIPCNT_OUT i=4 d=0x0
+RD n=MASK i=0 d=0x1
+RD n=MASK i=1 d=0x1
+RD n=MASK i=2 d=0x1
+RD n=MASK i=3 d=0x1
+RD n=MASK i=4 d=0x1
+RD n=MASK i=5 d=0x1
+RD n=MASK i=6 d=0x1
+RD n=MASK i=7 d=0x1
+RD n=MASK i=8 d=0x1
+RD n=MASKOP1 i=0 d=0x0000
+RD n=MASKOP1 i=1 d=0x0000
+RD n=MASKOP1 i=2 d=0x0000
+RD n=MASKOP1 i=3 d=0x0000
+RD n=MASKOP1 i=4 d=0x0000
+RD n=MASKOP1 i=5 d=0x0000
+RD n=MASKOP1 i=6 d=0x0000
+RD n=MASKOP1 i=7 d=0x0000
+RD n=MASKOP1 i=8 d=0x0000
+RD n=MASKRES i=0 d=0x1
+RD n=MASKRES i=1 d=0x1
+RD n=MASKRES i=2 d=0x1
+RD n=MASKRES i=3 d=0x1
+RD n=MASKRES i=4 d=0x1
+RD n=MASKRES i=5 d=0x1
+RD n=MASKRES i=6 d=0x1
+RD n=MASKRES i=7 d=0x1
+RD n=MASKRES i=8 d=0x1
+RD n=MOP1 i=0 d=0xd8d8
+RD n=MOP1 i=1 d=0xd7d7
+RD n=MOP1 i=2 d=0xd8d8
+RD n=MOP1 i=3 d=0x0000
+RD n=MOP1 i=4 d=0x0000
+RD n=MOP1 i=5 d=0x0000
+RD n=MOP1 i=6 d=0x0000
+RD n=MOP1 i=7 d=0x0000
+RD n=MOP1 i=8 d=0x0000
+RD n=MOP2 i=0 d=0xfff8
+RD n=MOP2 i=1 d=0xfff8
+RD n=MOP2 i=2 d=0xfff8
+RD n=MOP2 i=3 d=0xfff8
+RD n=MOP2 i=4 d=0xfff8
+RD n=MOP2 i=5 d=0xfff8
+RD n=MOP2 i=6 d=0xfff8
+RD n=MOP2 i=7 d=0xfff8
+RD n=MOP2 i=8 d=0xfff8
+RD n=MRES i=0 d=0x00d8
+RD n=MRES i=1 d=0x00d7
+RD n=MRES i=2 d=0x00d8
+RD n=MRES i=3 d=0x0000
+RD n=MRES i=4 d=0x0000
+RD n=MRES i=5 d=0x0000
+RD n=MRES i=6 d=0x0000
+RD n=MRES i=7 d=0x0000
+RD n=MRES i=8 d=0x0000
+RD n=MSAT i=0 d=0x00d8
+RD n=MSAT i=1 d=0x00d7
+RD n=MSAT i=2 d=0x00d8
+RD n=MSAT i=3 d=0x0000
+RD n=MSAT i=4 d=0x0000
+RD n=MSAT i=5 d=0x0000
+RD n=MSAT i=6 d=0x0000
+RD n=MSAT i=7 d=0x0000
+RD n=MSAT i=8 d=0x0000
+RD n=OPIX i=0 d=0x0000
+RD n=OPIX i=1 d=0x0000
+RD n=OPIXA i=0 d=0x00
+RD n=OPIXA i=1 d=0x00
+RD n=OUT i=0 d=0x4532
+RD n=OUT i=1 d=0x0000
+RD n=OUT i=2 d=0x0000
+RD n=OUT i=3 d=0x0000
+RD n=SFH i=0 d=0x0000
+RD n=SFH i=1 d=0x0000
+RD n=SFH i=2 d=0x0000
+RD n=SFH i=3 d=0x0000
+RD n=SO i=0 d=0x10000
+RD n=SO i=1 d=0x10000
+RD n=SO i=2 d=0x10000
+RD n=SO i=3 d=0x10000
+RD n=SO i=4 d=0x10000
+RD n=SOA i=0 d=0xffff
+RD n=SOA i=1 d=0xffff
+RD n=SOA i=2 d=0xffff
+RD n=SOA i=3 d=0xffff
+RD n=SOA i=4 d=0xffff
+RD n=S_CHCFG_INA i=0 d=0x00150000
+RD n=S_CHCFG_INA i=1 d=0x00050000
+RD n=S_CHCFG_INA i=2 d=0x00050000
+RD n=S_CHCFG_INAL i=0 d=0x00050000
+RD n=S_CHCFG_INAL i=1 d=0x00050000
+RD n=S_CHCFG_INAL i=2 d=0x00050000
+RD n=S_CHCFG_INB i=0 d=0x00050000
+RD n=S_CHCFG_INB i=1 d=0x00050000
+RD n=S_CHCFG_INB i=2 d=0x00050000
+RD n=S_CHCFG_OUT i=0 d=0x00000000
+RD n=S_CHCFG_OUT i=1 d=0x00000000
+RD n=S_CHCFG_OUT i=2 d=0x00000000
+RD n=S_CHCFG_OUT i=3 d=0x00000000
+RD n=S_CURRCHCFG_INA i=0 d=0x00150000
+RD n=S_CURRCHCFG_INA i=1 d=0x00050000
+RD n=S_CURRCHCFG_INA i=2 d=0x00050000
+RD n=S_CURRCHCFG_INAL i=0 d=0x00050000
+RD n=S_CURRCHCFG_INAL i=1 d=0x00050000
+RD n=S_CURRCHCFG_INAL i=2 d=0x00050000
+RD n=S_CURRCHCFG_INB i=0 d=0x00050000
+RD n=S_CURRCHCFG_INB i=1 d=0x00050000
+RD n=S_CURRCHCFG_INB i=2 d=0x00050000
+RD n=S_CURRCHCFG_OUT i=0 d=0x00000000
+RD n=S_CURRCHCFG_OUT i=1 d=0x00000000
+RD n=S_CURRCHCFG_OUT i=2 d=0x00000000
+RD n=S_CURRCHCFG_OUT i=3 d=0x00000000
+RD n=S_CURRLINELEN_INA i=0 d=0x0280
+RD n=S_CURRLINELEN_INA i=1 d=0x0280
+RD n=S_CURRLINELEN_INA i=2 d=0x0280
+RD n=S_CURRLINELEN_INAL i=0 d=0xffff
+RD n=S_CURRLINELEN_INAL i=1 d=0xffff
+RD n=S_CURRLINELEN_INAL i=2 d=0xffff
+RD n=S_CURRLINELEN_INB i=0 d=0xffff
+RD n=S_CURRLINELEN_INB i=1 d=0xffff
+RD n=S_CURRLINELEN_INB i=2 d=0xffff
+RD n=S_CURRLINELEN_OUT i=0 d=0x0280
+RD n=S_CURRLINELEN_OUT i=1 d=0xffff
+RD n=S_CURRLINELEN_OUT i=2 d=0xffff
+RD n=S_CURRLINELEN_OUT i=3 d=0xffff
+RD n=S_CURRLINE_PTR_INA i=0 d=0x00010000
+RD n=S_CURRLINE_PTR_INA i=1 d=0x00000000
+RD n=S_CURRLINE_PTR_INA i=2 d=0x00000000
+RD n=S_CURRLINE_PTR_INAL i=0 d=0x00000000
+RD n=S_CURRLINE_PTR_INAL i=1 d=0x00000000
+RD n=S_CURRLINE_PTR_INAL i=2 d=0x00000000
+RD n=S_CURRLINE_PTR_INB i=0 d=0x00000000
+RD n=S_CURRLINE_PTR_INB i=1 d=0x00000000
+RD n=S_CURRLINE_PTR_INB i=2 d=0x00000000
+RD n=S_CURRLINE_PTR_OUT i=0 d=0x0008d000
+RD n=S_CURRLINE_PTR_OUT i=1 d=0x00000000
+RD n=S_CURRLINE_PTR_OUT i=2 d=0x00000000
+RD n=S_CURRLINE_PTR_OUT i=3 d=0x00000000
+RD n=S_LINELEN_INA i=0 d=0x0280
+RD n=S_LINELEN_INA i=1 d=0x0280
+RD n=S_LINELEN_INA i=2 d=0x0280
+RD n=S_LINELEN_INAL i=0 d=0xffff
+RD n=S_LINELEN_INAL i=1 d=0xffff
+RD n=S_LINELEN_INAL i=2 d=0xffff
+RD n=S_LINELEN_INB i=0 d=0xffff
+RD n=S_LINELEN_INB i=1 d=0xffff
+RD n=S_LINELEN_INB i=2 d=0xffff
+RD n=S_LINELEN_OUT i=0 d=0x0280
+RD n=S_LINELEN_OUT i=1 d=0xffff
+RD n=S_LINELEN_OUT i=2 d=0xffff
+RD n=S_LINELEN_OUT i=3 d=0xffff
+RD n=S_LINE_PTR_INA i=0 d=0x00010000
+RD n=S_LINE_PTR_INA i=1 d=0x00000000
+RD n=S_LINE_PTR_INA i=2 d=0x00000000
+RD n=S_LINE_PTR_INAL i=0 d=0x00000000
+RD n=S_LINE_PTR_INAL i=1 d=0x00000000
+RD n=S_LINE_PTR_INAL i=2 d=0x00000000
+RD n=S_LINE_PTR_INB i=0 d=0x00000000
+RD n=S_LINE_PTR_INB i=1 d=0x00000000
+RD n=S_LINE_PTR_INB i=2 d=0x00000000
+RD n=S_LINE_PTR_OUT i=0 d=0x0008d000
+RD n=S_LINE_PTR_OUT i=1 d=0x00000000
+RD n=S_LINE_PTR_OUT i=2 d=0x00000000
+RD n=S_LINE_PTR_OUT i=3 d=0x00000000
+RD n=W i=0 d=0x00d8
+RD n=W i=1 d=0x00d7
+RD n=W i=2 d=0x00d8
+RD n=W i=3 d=0x0000
+RD n=W i=4 d=0x0000
+RD n=W i=5 d=0x0000
+RD n=W i=6 d=0x0000
+RD n=W i=7 d=0x0000
+RD n=W i=8 d=0x0000
+RD n=WW i=0 d=0x0000
+RD n=WW i=1 d=0x0000
+RD n=WW i=2 d=0x0000
+RD n=WW i=3 d=0x0000
+RD n=WW i=4 d=0x0000
+RD n=WW i=5 d=0x0000
+RD n=WW i=6 d=0x0000
+RD n=WW i=7 d=0x0000
+RD n=WW i=8 d=0x0000
+MD n=Mem ra=0x0000000000000000 d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000000004 d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000000008 d=0x00000000	#	(0)
+MD n=Mem ra=0x000000000000000c d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000000010 d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000000014 d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000000018 d=0x00000000	#	(0)
+MD n=Mem ra=0x000000000000001c d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000000020 d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000000024 d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000000028 d=0x00000000	#	(0)
+MD n=Mem ra=0x000000000000002c d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000000030 d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000000034 d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000000038 d=0x00000000	#	(0)
+MD n=Mem ra=0x000000000000003c d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000000040 d=0x00289c10	#	(2661392)
+MD n=Mem ra=0x0000000000000044 d=0x82000410	#	(2181039120)
+MD n=Mem ra=0x0000000000000048 d=0x00401110	#	(4198672)
+MD n=Mem ra=0x000000000000004c d=0xffff7110	#	(4294930704)
+MD n=Mem ra=0x0000000000000050 d=0xff010030	#	(4278255664)
+MD n=Mem ra=0x0000000000000054 d=0x04010002	#	(67174402)
+MD n=Mem ra=0x0000000000000058 d=0x07019c03	#	(117545987)
+MD n=Mem ra=0x000000000000005c d=0xff000110	#	(4278190352)
+MD n=Mem ra=0x0000000000000060 d=0x0800015d	#	(134218077)
+MD n=Mem ra=0x0000000000000064 d=0x41409821	#	(1094752289)
+MD n=Mem ra=0x0000000000000068 d=0x01987022	#	(26767394)
+MD n=Mem ra=0x000000000000006c d=0x71708027	#	(1903198247)
+MD n=Mem ra=0x0000000000000070 d=0x07fc000a	#	(133955594)
+MD n=Mem ra=0x0000000000000074 d=0x01000000	#	(16777216)
+MD n=Mem ra=0x0000000000010000 d=0xd5d5d4d4	#	(3587560660)
+MD n=Mem ra=0x0000000000010004 d=0xd4d4d5d5	#	(3570718165)
+MD n=Mem ra=0x0000000000010008 d=0xd5d5d4d4	#	(3587560660)
+MD n=Mem ra=0x000000000001000c d=0xd4d4d5d5	#	(3570718165)
+MD n=Mem ra=0x0000000000010010 d=0xd8d8d7d7	#	(3638089687)
+MD n=Mem ra=0x0000000000010014 d=0xd7d7d8d8	#	(3621247192)
+MD n=Mem ra=0x0000000000010018 d=0xd8d8d7d7	#	(3638089687)
+MD n=Mem ra=0x000000000001001c d=0xd7d7d7d7	#	(3621246935)
+MD n=Mem ra=0x0000000000010020 d=0xd8d8d8d8	#	(3638089944)
+MD n=Mem ra=0x0000000000010024 d=0xd7d7d8d8	#	(3621247192)
+MD n=Mem ra=0x000000000008d000 d=0x0028aa28	#	(2665000)
+MD n=Mem ra=0x000000000008d004 d=0x532afd2b	#	(1395326251)
+MD n=Mem ra=0x000000000008d008 d=0xa82d522f	#	(2821542447)
+MD n=Mem ra=0x000000000008d00c d=0xfb30a532	#	(4214269234)
+MD n=Mem ra=0x000000000008d010 d=0x53340336	#	(1395917622)
+MD n=Mem ra=0x000000000008d014 d=0xb2376239	#	(2989974073)
+MD n=Mem ra=0x000000000008d018 d=0x133bc33c	#	(322683708)
+MD n=Mem ra=0x000000000008d01c d=0x723e2140	#	(1916674368)
+MD n=Mem ra=0x000000000008d020 d=0xd1418243	#	(3510731331)
+MD n=Mem ra=0x000000000008d024 d=0x32450000	#	(843382784)
